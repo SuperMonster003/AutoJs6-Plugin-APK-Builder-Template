@@ -1,0 +1,79 @@
+name: Build APK Builder Plugin from Runtime Kit
+
+on:
+  repository_dispatch:
+    types:
+      - autojs6_runtime_kit_released
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: AutoJs6 release tag, for example v6.7.1
+        required: true
+      source_repo:
+        description: AutoJs6 source repository
+        required: false
+        default: SuperMonster003/AutoJs6
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout plugin repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Resolve build inputs
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "tag=${{ github.event.client_payload.tag }}" >> "$GITHUB_OUTPUT"
+            echo "source_repo=${{ github.event.client_payload.source_repo }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "source_repo=${{ inputs.source_repo }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download Runtime Kit
+        env:
+          GH_TOKEN: ${{ secrets.AUTOJS6_MAIN_REPO_TOKEN || github.token }}
+        run: |
+          rm -rf runtime-kit
+          mkdir -p runtime-kit
+          gh release download "${{ steps.vars.outputs.tag }}" \
+            --repo "${{ steps.vars.outputs.source_repo }}" \
+            --pattern "autojs6-runtime-kit-*.zip" \
+            --dir runtime-kit
+          unzip runtime-kit/autojs6-runtime-kit-*.zip -d runtime-kit
+
+      - name: Verify Runtime Kit
+        run: python3 scripts/verify_runtime_kit.py runtime-kit
+
+      - name: Sync plugin version
+        run: python3 scripts/sync_version_from_runtime_kit.py runtime-kit
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build plugin APK
+        run: ./gradlew :app:assembleRelease -Pautojs.apkBuilder.templatePlugin.runtimeKitDir=runtime-kit
+
+      - name: Verify plugin APK assets
+        run: python3 scripts/check_apk_assets.py --plugin-apk app/build/outputs/apk/release/*.apk
+
+      - name: Publish plugin release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ steps.vars.outputs.tag }}"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "APK Builder Plugin $tag" --notes "Built from AutoJs6 Runtime Kit $tag"
+          gh release upload "$tag" app/build/outputs/apk/release/*.apk --clobber
