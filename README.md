@@ -84,13 +84,27 @@ SIGNING_KEY_BASE64
 SIGNING_KEY_STORE_PASSWORD
 SIGNING_KEY_ALIAS
 SIGNING_KEY_PASSWORD
+SIGNING_CERT_SHA256
 ```
 
 Create `SIGNING_KEY_BASE64` from the release keystore without line wrapping, for example:
 
 ```bash
-openssl base64 -A -in sm003.jks -out keystore_base64.txt
+openssl base64 -A -in xxx.jks -out keystore_base64.txt
 ```
+
+SIGNING_CERT_SHA256: SHA-256 fingerprint of the trusted release certificate.
+
+Generate with:
+
+```bash
+keytool -list -v \
+-keystore xxx.jks \
+-alias <alias>
+```
+
+Do not store the certificate file itself.
+Only store the normalized SHA-256 fingerprint.
 
 The `Build APK Builder Template Plugin from Runtime Kit` workflow performs the following release-signing sequence:
 
