@@ -67,6 +67,7 @@ jobs:
           SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_CERT_SHA256: ${{ secrets.SIGNING_CERT_SHA256 }}
         run: |
           set -euo pipefail
 
@@ -75,6 +76,7 @@ jobs:
             SIGNING_KEY_STORE_PASSWORD
             SIGNING_KEY_ALIAS
             SIGNING_KEY_PASSWORD
+            SIGNING_CERT_SHA256
           )
           missing=()
           for name in "${required[@]}"; do
@@ -118,6 +120,7 @@ jobs:
         env:
           SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_CERT_SHA256: ${{ secrets.SIGNING_CERT_SHA256 }}
         run: |
           set -euo pipefail
           shopt -s nullglob
@@ -146,7 +149,9 @@ jobs:
             -alias "$SIGNING_KEY_ALIAS" \
             -file "$certificate" \
             >/dev/null
-          expected_sha256="$(sha256sum "$certificate" | awk '{print tolower($1)}')"
+          expected_sha256="$(printf '%s' "$SIGNING_CERT_SHA256" \
+            | tr '[:upper:]' '[:lower:]' \
+            | tr -d ':[:space:]')"
 
           verification="$($apksigner verify --verbose --print-certs "$apk")"
           printf '%s\n' "$verification"
@@ -155,11 +160,11 @@ jobs:
               | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' \
               | head -n 1 \
               | tr '[:upper:]' '[:lower:]' \
-              | tr -d '[:space:]'
+              | tr -d ':[:space:]'
           )"
 
-          if [ -z "$actual_sha256" ] || [ "$actual_sha256" != "$expected_sha256" ]; then
-            echo 'The APK signer certificate does not match the configured release keystore.' >&2
+          if [ "$actual_sha256" != "$expected_sha256" ]; then
+            echo "APK signer certificate does not match SIGNING_CERT_SHA256."
             exit 1
           fi
 
