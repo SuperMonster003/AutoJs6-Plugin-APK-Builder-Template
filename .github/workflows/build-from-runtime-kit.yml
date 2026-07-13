@@ -61,14 +61,119 @@ jobs:
       - name: Sync plugin version
         run: python3 scripts/sync_version_from_runtime_kit.py runtime-kit
 
+      - name: Prepare release signing keystore
+        env:
+          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
+          SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          required=(
+            SIGNING_KEY_BASE64
+            SIGNING_KEY_STORE_PASSWORD
+            SIGNING_KEY_ALIAS
+            SIGNING_KEY_PASSWORD
+          )
+          missing=()
+          for name in "${required[@]}"; do
+            if [ -z "${!name-}" ]; then
+              missing+=("$name")
+            fi
+          done
+          if [ "${#missing[@]}" -ne 0 ]; then
+            printf 'Missing required Actions secrets: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
+          umask 077
+          keystore="$RUNNER_TEMP/autojs6-release-signing.jks"
+          printf '%s' "$SIGNING_KEY_BASE64" | tr -d '\r\n' | base64 --decode > "$keystore"
+          test -s "$keystore"
+
+          keytool -list \
+            -keystore "$keystore" \
+            -storepass:env SIGNING_KEY_STORE_PASSWORD \
+            -alias "$SIGNING_KEY_ALIAS" \
+            >/dev/null
+
+          echo "SIGNING_KEY_STORE_FILE=$keystore" >> "$GITHUB_ENV"
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build plugin APK
-        run: ./gradlew :app:assembleRelease -Pautojs.apkBuilder.templatePlugin.runtimeKitDir=runtime-kit
+      - name: Build signed plugin APK
+        env:
+          SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          ./gradlew :app:assembleRelease \
+            -Pautojs.apkBuilder.templatePlugin.runtimeKitDir=runtime-kit \
+            --no-daemon
+
+      - name: Verify release APK signature
+        id: apk
+        env:
+          SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          apks=(app/build/outputs/apk/release/*.apk)
+          if [ "${#apks[@]}" -ne 1 ]; then
+            printf 'Expected exactly one release APK, found %d.\n' "${#apks[@]}" >&2
+            printf '  %s\n' "${apks[@]-}" >&2
+            exit 1
+          fi
+          apk="${apks[0]}"
+
+          apksigner="$(command -v apksigner || true)"
+          if [ -z "$apksigner" ]; then
+            apksigner="$(find "${ANDROID_HOME:?}/build-tools" -mindepth 2 -maxdepth 2 -type f -name apksigner -print | sort -V | tail -n 1)"
+          fi
+          if [ ! -x "$apksigner" ]; then
+            echo 'Unable to locate Android apksigner.' >&2
+            exit 1
+          fi
+
+          certificate="$RUNNER_TEMP/autojs6-release-signing.cer"
+          keytool -exportcert \
+            -keystore "$SIGNING_KEY_STORE_FILE" \
+            -storepass:env SIGNING_KEY_STORE_PASSWORD \
+            -alias "$SIGNING_KEY_ALIAS" \
+            -file "$certificate" \
+            >/dev/null
+          expected_sha256="$(sha256sum "$certificate" | awk '{print tolower($1)}')"
+
+          verification="$($apksigner verify --verbose --print-certs "$apk")"
+          printf '%s\n' "$verification"
+          actual_sha256="$(
+            printf '%s\n' "$verification" \
+              | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' \
+              | head -n 1 \
+              | tr '[:upper:]' '[:lower:]' \
+              | tr -d '[:space:]'
+          )"
+
+          if [ -z "$actual_sha256" ] || [ "$actual_sha256" != "$expected_sha256" ]; then
+            echo 'The APK signer certificate does not match the configured release keystore.' >&2
+            exit 1
+          fi
+
+          echo "path=$apk" >> "$GITHUB_OUTPUT"
 
       - name: Verify plugin APK assets
-        run: python3 scripts/check_apk_assets.py --plugin-apk app/build/outputs/apk/release/*.apk
+        run: python3 scripts/check_apk_assets.py --plugin-apk "${{ steps.apk.outputs.path }}"
+
+      - name: Remove release signing material
+        if: always()
+        run: |
+          rm -f \
+            "$RUNNER_TEMP/autojs6-release-signing.jks" \
+            "$RUNNER_TEMP/autojs6-release-signing.cer"
 
       - name: Publish plugin release
         env:
@@ -76,4 +181,4 @@ jobs:
         run: |
           tag="${{ steps.vars.outputs.tag }}"
           gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "APK Builder Plugin $tag" --notes "Built from AutoJs6 Runtime Kit $tag"
-          gh release upload "$tag" app/build/outputs/apk/release/*.apk --clobber
+          gh release upload "$tag" "${{ steps.apk.outputs.path }}" --clobber

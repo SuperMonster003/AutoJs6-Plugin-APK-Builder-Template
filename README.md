@@ -77,4 +77,40 @@ Use it only when the AutoJs6 main repository or Release assets are private.
 
 ## Signing
 
-For production, sign this plugin with the trusted AutoJs6 plugin signing key. Local unsigned or debug builds are only suitable for development and will not satisfy signature-trust policies on production hosts.
+Production plugin releases must be signed with the trusted AutoJs6 plugin signing key. Configure these repository-level Actions secrets in this repository:
+
+```text
+SIGNING_KEY_BASE64
+SIGNING_KEY_STORE_PASSWORD
+SIGNING_KEY_ALIAS
+SIGNING_KEY_PASSWORD
+```
+
+Create `SIGNING_KEY_BASE64` from the release keystore without line wrapping, for example:
+
+```bash
+openssl base64 -A -in sm003.jks -out keystore_base64.txt
+```
+
+The `Build APK Builder Plugin from Runtime Kit` workflow performs the following release-signing sequence:
+
+1. verifies that all four signing secrets are present;
+2. decodes the keystore into the runner's temporary directory with restricted permissions;
+3. validates the keystore password and alias with `keytool`;
+4. builds `assembleRelease` with signing values supplied through environment variables;
+5. verifies the generated APK with Android `apksigner`;
+6. confirms that the APK certificate SHA-256 digest matches the configured keystore certificate;
+7. removes temporary keystore and certificate files before publishing the release asset.
+
+The workflow fails instead of publishing an unsigned APK when signing configuration is absent, incomplete, invalid, or does not match the APK signer.
+
+Local builds continue to support the ignored root-level `sign.properties` file:
+
+```properties
+storeFile=/absolute/path/to/release.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+
+Unsigned or debug builds are suitable only for development and do not satisfy production signature-trust policies.
