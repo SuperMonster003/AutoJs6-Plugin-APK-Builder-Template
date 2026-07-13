@@ -24,9 +24,6 @@ desktop.ini
 !.run
 
 .idea/*
-!.idea/codeStyles/
-!.idea/inspectionProfiles/
-!.idea/shared-intellij-idea-settings.zip
 
 /build/
 /app/build/

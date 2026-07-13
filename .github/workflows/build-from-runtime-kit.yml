@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: AutoJs6 release tag, for example v6.7.1
+        description: AutoJs6 release tag, for example v6.8.0
         required: true
       source_repo:
         description: AutoJs6 source repository

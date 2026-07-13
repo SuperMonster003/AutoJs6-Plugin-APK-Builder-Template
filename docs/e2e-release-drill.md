@@ -8,14 +8,14 @@ Use a temporary test tag before the first production tag.
 2. Confirm the main repository Release contains `autojs6-runtime-kit-*.zip`.
 3. Confirm `repository_dispatch` triggers this repository's `build-from-runtime-kit.yml`.
 4. Confirm this repository Release contains `autojs6-apk-builder-template-v*-universal.apk`.
-5. Confirm AutoJs6 Plugin Center points to `SuperMonster003/AutoJs6-Plugin-APK-Builder`.
+5. Confirm AutoJs6 Plugin Center points to `SuperMonster003/AutoJs6-Plugin-APK-Builder-Template`.
 
 ## Local APK Checks
 
 ```powershell
 python scripts\check_apk_assets.py `
-  --main-apk D:\idea-projects\AutoJs6\app\build\outputs\apk\app\release\autojs6-v6.7.1-alpha4-universal.apk `
-  --plugin-apk app\build\outputs\apk\release\autojs6-apk-builder-template-v6.7.1-alpha4-universal.apk
+  --main-apk D:\idea-projects\AutoJs6\app\build\outputs\apk\app\release\autojs6-v6.8.0-universal.apk `
+  --plugin-apk app\build\outputs\apk\release\autojs6-apk-builder-template-v6.8.0-universal.apk
 ```
 
 Expected:

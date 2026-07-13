@@ -1,4 +1,4 @@
-# AutoJs6 Plugin APK Builder
+# AutoJs6 Plugin APK Builder Template
 
 Standalone APK Builder Template plugin for AutoJs6.
 
@@ -35,7 +35,7 @@ Then build this repository with the generated kit:
 
 ```powershell
 .\gradlew.bat --console=plain :app:assembleRelease `
-  -Pautojs.apkBuilder.templatePlugin.runtimeKitDir=D:\idea-projects\AutoJs6\app\build\runtime-kit\autojs6-runtime-kit-v6.7.1-alpha4+3923
+  -Pautojs.apkBuilder.templatePlugin.runtimeKitDir=D:\idea-projects\AutoJs6\app\build\runtime-kit\autojs6-runtime-kit-v6.8.0+3924
 ```
 
 Or unpack a released `autojs6-runtime-kit-*.zip` to `runtime-kit/` and run:
@@ -52,7 +52,7 @@ The expected production flow is:
 AutoJs6 tag
 -> main repository generates autojs6-runtime-kit-*.zip
 -> main repository uploads the Runtime Kit to its GitHub Release
--> main repository dispatches SuperMonster003/AutoJs6-Plugin-APK-Builder
+-> main repository dispatches SuperMonster003/AutoJs6-Plugin-APK-Builder-Template
 -> this repository downloads and verifies the Runtime Kit
 -> this repository builds the plugin APK
 -> this repository uploads the plugin APK to the same tag Release
@@ -65,7 +65,7 @@ Required main repository secret:
 AUTOJS6_PLUGIN_REPO_TOKEN
 ```
 
-It must have `Contents: write` permission on `SuperMonster003/AutoJs6-Plugin-APK-Builder` so the main repository can create `repository_dispatch` events.
+It must have `Contents: write` permission on `SuperMonster003/AutoJs6-Plugin-APK-Builder-Template` so the main repository can create `repository_dispatch` events.
 
 Optional plugin repository secret:
 
