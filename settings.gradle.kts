@@ -2,7 +2,7 @@
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "AutoJs6-Plugin-APK-Builder"
+rootProject.name = "AutoJs6-Plugin-APK-Builder-Template"
 
 includeBuild("build-logic")
 
