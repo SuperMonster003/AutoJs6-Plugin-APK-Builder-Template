@@ -92,7 +92,7 @@ Create `SIGNING_KEY_BASE64` from the release keystore without line wrapping, for
 openssl base64 -A -in sm003.jks -out keystore_base64.txt
 ```
 
-The `Build APK Builder Plugin from Runtime Kit` workflow performs the following release-signing sequence:
+The `Build APK Builder Template Plugin from Runtime Kit` workflow performs the following release-signing sequence:
 
 1. verifies that all four signing secrets are present;
 2. decodes the keystore into the runner's temporary directory with restricted permissions;

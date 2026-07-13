@@ -1,4 +1,4 @@
-name: Build APK Builder Plugin from Runtime Kit
+name: Build APK Builder Template Plugin from Runtime Kit
 
 on:
   repository_dispatch:
