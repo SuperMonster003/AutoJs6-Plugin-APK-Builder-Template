@@ -1,0 +1,92 @@
+name: Validate Signing Configuration
+
+on:
+  pull_request:
+    paths:
+      - app/build.gradle.kts
+      - build-logic/convention/src/main/kotlin/org/autojs/build/Signs.kt
+      - .github/workflows/build-from-runtime-kit.yml
+      - .github/workflows/validate-signing-config.yml
+  push:
+    branches:
+      - master
+    paths:
+      - app/build.gradle.kts
+      - build-logic/convention/src/main/kotlin/org/autojs/build/Signs.kt
+      - .github/workflows/build-from-runtime-kit.yml
+      - .github/workflows/validate-signing-config.yml
+
+permissions:
+  contents: read
+
+jobs:
+  signing-config:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Create temporary test keystore
+        run: |
+          set -euo pipefail
+          keystore="$RUNNER_TEMP/test-release-signing.jks"
+          keytool -genkeypair \
+            -noprompt \
+            -keystore "$keystore" \
+            -storetype JKS \
+            -storepass test-store-password \
+            -keypass test-key-password \
+            -alias test-release-key \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 3650 \
+            -dname "CN=AutoJs6 Signing CI, OU=CI, O=AutoJs6, L=Test, ST=Test, C=US"
+          echo "SIGNING_KEY_STORE_FILE=$keystore" >> "$GITHUB_ENV"
+
+      - name: Validate complete signing environment
+        env:
+          SIGNING_KEY_STORE_PASSWORD: test-store-password
+          SIGNING_KEY_ALIAS: test-release-key
+          SIGNING_KEY_PASSWORD: test-key-password
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew :app:signingReport --no-daemon --console=plain | tee signing-report.log
+          grep -F 'Variant: release' signing-report.log
+          grep -F 'Config: release' signing-report.log
+          grep -F "Store: $SIGNING_KEY_STORE_FILE" signing-report.log
+
+      - name: Reject an incomplete signing environment
+        run: |
+          set -euo pipefail
+          set +e
+          output="$(
+            env \
+              SIGNING_KEY_STORE_FILE="$SIGNING_KEY_STORE_FILE" \
+              SIGNING_KEY_STORE_PASSWORD=test-store-password \
+              ./gradlew :app:signingReport --no-daemon --console=plain 2>&1
+          )"
+          status=$?
+          set -e
+
+          printf '%s\n' "$output"
+          if [ "$status" -eq 0 ]; then
+            echo 'An incomplete signing environment unexpectedly succeeded.' >&2
+            exit 1
+          fi
+          grep -F 'Incomplete signing environment. Missing variables:' <<< "$output"
+          grep -F 'SIGNING_KEY_ALIAS' <<< "$output"
+          grep -F 'SIGNING_KEY_PASSWORD' <<< "$output"
+
+      - name: Remove temporary signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/test-release-signing.jks"
