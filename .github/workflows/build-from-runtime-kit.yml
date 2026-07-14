@@ -49,13 +49,27 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.AUTOJS6_MAIN_REPO_TOKEN || github.token }}
         run: |
-          rm -rf runtime-kit
-          mkdir -p runtime-kit
+          set -euo pipefail
+          shopt -s nullglob
+
+          archive_dir="$RUNNER_TEMP/autojs6-runtime-kit-download"
+          rm -rf runtime-kit "$archive_dir"
+          mkdir -p runtime-kit "$archive_dir"
+
           gh release download "${{ steps.vars.outputs.tag }}" \
             --repo "${{ steps.vars.outputs.source_repo }}" \
             --pattern "autojs6-runtime-kit-*.zip" \
-            --dir runtime-kit
-          unzip runtime-kit/autojs6-runtime-kit-*.zip -d runtime-kit
+            --dir "$archive_dir"
+
+          archives=("$archive_dir"/autojs6-runtime-kit-*.zip)
+          if [ "${#archives[@]}" -ne 1 ]; then
+            printf 'Expected exactly one Runtime Kit archive, found %d.\n' "${#archives[@]}" >&2
+            printf '  %s\n' "${archives[@]-}" >&2
+            exit 1
+          fi
+
+          unzip "${archives[0]}" -d runtime-kit
+          rm -rf "$archive_dir"
 
       - name: Verify Runtime Kit
         run: python3 scripts/verify_runtime_kit.py runtime-kit
@@ -125,7 +139,22 @@ jobs:
           echo "path=$apk" >> "$GITHUB_OUTPUT"
 
       - name: Verify plugin APK assets
-        run: python3 scripts/check_apk_assets.py --plugin-apk "${{ steps.apk.outputs.path }}"
+        env:
+          PLUGIN_APK: ${{ steps.apk.outputs.path }}
+        run: |
+          set -euo pipefail
+          python3 scripts/check_apk_assets.py --plugin-apk "$PLUGIN_APK"
+
+          embedded_archives="$(
+            unzip -Z1 "$PLUGIN_APK" \
+              | grep -E '^assets/runtime-kit/(.*/)?autojs6-runtime-kit-.*\.zip$' \
+              || true
+          )"
+          if [ -n "$embedded_archives" ]; then
+            echo "Plugin APK contains an unexpected embedded Runtime Kit archive:" >&2
+            printf '  %s\n' "$embedded_archives" >&2
+            exit 1
+          fi
 
       - name: Remove release signing material
         if: always()
