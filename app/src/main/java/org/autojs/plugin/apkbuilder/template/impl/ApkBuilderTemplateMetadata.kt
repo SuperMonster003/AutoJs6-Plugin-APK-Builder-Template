@@ -31,7 +31,7 @@ object ApkBuilderTemplateMetadata {
             id = ApkBuilderTemplatePluginIds.ID,
             engine = ApkBuilderTemplatePluginIds.ENGINE,
             variant = ApkBuilderTemplatePluginIds.VARIANT_INRT_UNIVERSAL,
-            supportedAbis = null,
+            supportedAbis = emptyArray(),
             capabilities = templateInfo.capabilities,
         )
     }
