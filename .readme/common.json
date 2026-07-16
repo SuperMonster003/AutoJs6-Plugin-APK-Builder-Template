@@ -1,0 +1,7 @@
+{
+  "repo_url": "https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template",
+  "autojs6_repo_url": "https://github.com/SuperMonster003/AutoJs6",
+  "autojs6_docs_url": "https://docs.autojs6.com",
+  "runtime_kit_files": "template.apk\ntemplate.apk.sha256\ndefault_key_store.bks\ndefault_key_store.bks.sha256\nruntime-kit.json\nbuild-contract.json\npublic-api.txt\nassets-manifest.json\nnative-libs.json\nprovenance.json",
+  "release_flow": "AutoJs6 tag\n-> main repository generates autojs6-runtime-kit-*.zip\n-> main repository uploads the Runtime Kit to its GitHub Release\n-> main repository dispatches SuperMonster003/AutoJs6-Plugin-APK-Builder-Template\n-> this repository downloads and verifies the Runtime Kit\n-> this repository builds the plugin APK\n-> this repository uploads the plugin APK to the same tag Release\n-> AutoJs6 Plugin Center installs this plugin"
+}

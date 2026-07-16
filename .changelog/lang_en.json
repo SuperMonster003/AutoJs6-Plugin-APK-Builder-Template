@@ -1,0 +1,22 @@
+{
+  "changelog_label_hint": "Hint",
+  "changelog_label_feature": "Feature",
+  "changelog_label_fix": "Fix",
+  "changelog_label_improvement": "Improvement",
+  "changelog_label_dependency": "Dependency",
+  "$data": {
+    "v6.8.0 Alpha5": {
+      "released_date": "2026/07/16",
+      "feature": [
+        "Added the APK Builder Template plugin service with plugin ID `autojs6-apk-builder-template`, engine `apk-builder-template`, and variant `inrt-universal`",
+        "Exposed plugin metadata through `org.autojs.plugin.INFO` and served the template APK through `org.autojs.plugin.APK_BUILDER`",
+        "Packaged the AutoJs6 Runtime Kit under `assets/runtime-kit/`, including `template.apk`, the default keystore, metadata, and contract files",
+        "Added build-time validation for Runtime Kit metadata, SHA-256 digests, and required `template.apk` entries",
+        "Reported host version, protocol version, template package name, template SHA-256, Runtime API digests, and remote build capability",
+        "Added optional experimental remote build protocol support through `autojs.apkBuilder.templatePlugin.enableRemoteBuild`",
+        "Added release flow support for downloading the Runtime Kit, validating assets, signing with the trusted key, and uploading the universal APK",
+        "Added localized plugin metadata, usage instructions, README, and CHANGELOG resources for Spanish, French, Russian, Arabic, Japanese, Korean, English, Simplified Chinese, Hong Kong Traditional Chinese, and Taiwan Traditional Chinese"
+      ]
+    }
+  }
+}

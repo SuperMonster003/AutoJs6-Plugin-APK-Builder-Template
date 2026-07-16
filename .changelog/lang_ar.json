@@ -1,0 +1,22 @@
+{
+  "changelog_label_hint": "تلميح",
+  "changelog_label_feature": "إضافة",
+  "changelog_label_fix": "إصلاح",
+  "changelog_label_improvement": "تحسين",
+  "changelog_label_dependency": "اعتماد",
+  "$data": {
+    "v6.8.0 Alpha5": {
+      "released_date": "2026/07/16",
+      "feature": [
+        "تمت إضافة خدمة مكون APK Builder Template مع معرف المكون `autojs6-apk-builder-template`, والمحرك `apk-builder-template`, والمتغير `inrt-universal`",
+        "تم عرض بيانات المكون عبر `org.autojs.plugin.INFO` وتقديم APK القالب عبر `org.autojs.plugin.APK_BUILDER`",
+        "تم تغليف Runtime Kit الخاص ب AutoJs6 داخل `assets/runtime-kit/`, بما في ذلك `template.apk`, ومخزن المفاتيح الافتراضي, والبيانات, وملفات العقد",
+        "تمت إضافة تحقق وقت البناء من بيانات Runtime Kit, وملخصات SHA-256, ومدخلات `template.apk` المطلوبة",
+        "تم إرسال إصدار المضيف, وإصدار البروتوكول, واسم حزمة القالب, و SHA-256 للقالب, وملخصات Runtime API, وقدرة البناء عن بعد",
+        "تمت إضافة دعم اختياري لبروتوكول البناء عن بعد التجريبي عبر `autojs.apkBuilder.templatePlugin.enableRemoteBuild`",
+        "تمت إضافة دعم مسار الإصدار لتنزيل Runtime Kit, والتحقق من assets, والتوقيع بالمفتاح الموثوق, ورفع APK العام",
+        "تمت إضافة موارد مترجمة لبيانات المكون, وتعليمات الاستخدام, و README, و CHANGELOG للإسبانية/الفرنسية/الروسية/العربية/اليابانية/الكورية/الإنجليزية/الصينية المبسطة/الصينية التقليدية لهونغ كونغ/الصينية التقليدية لتايوان"
+      ]
+    }
+  }
+}

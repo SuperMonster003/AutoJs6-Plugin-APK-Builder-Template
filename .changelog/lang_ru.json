@@ -1,0 +1,22 @@
+{
+  "changelog_label_hint": "Подсказка",
+  "changelog_label_feature": "Добавлено",
+  "changelog_label_fix": "Исправлено",
+  "changelog_label_improvement": "Улучшено",
+  "changelog_label_dependency": "Зависимость",
+  "$data": {
+    "v6.8.0 Alpha5": {
+      "released_date": "2026/07/16",
+      "feature": [
+        "Добавлен сервис плагина APK Builder Template с ID `autojs6-apk-builder-template`, движком `apk-builder-template` и вариантом `inrt-universal`",
+        "Метаданные плагина открыты через `org.autojs.plugin.INFO`, а шаблонный APK выдается через `org.autojs.plugin.APK_BUILDER`",
+        "Runtime Kit AutoJs6 упакован в `assets/runtime-kit/`, включая `template.apk`, хранилище ключей по умолчанию, метаданные и контрактные файлы",
+        "Добавлена проверка метаданных Runtime Kit, SHA-256 дайджестов и обязательных записей `template.apk` во время сборки",
+        "Добавлена передача версии хоста, версии протокола, имени пакета шаблона, SHA-256 шаблона, дайджестов Runtime API и возможности удаленной сборки",
+        "Добавлена необязательная поддержка экспериментального протокола удаленной сборки через `autojs.apkBuilder.templatePlugin.enableRemoteBuild`",
+        "Добавлена поддержка процесса выпуска для загрузки Runtime Kit, проверки assets, подписи доверенным ключом и загрузки universal APK",
+        "Добавлены локализованные ресурсы метаданных плагина, инструкций, README и CHANGELOG для испанского, французского, русского, арабского, японского, корейского, английского, упрощенного китайского, традиционного китайского Гонконга и традиционного китайского Тайваня"
+      ]
+    }
+  }
+}

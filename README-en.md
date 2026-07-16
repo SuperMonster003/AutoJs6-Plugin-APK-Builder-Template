@@ -5,7 +5,7 @@
     <img src="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/app/src/main/res/mipmap/ic_launcher.png?raw=true" alt="autojs6-plugin-apk-builder-template-ic-launcher" border="0" width="128" />
   </p>
 
-  <p>为 AutoJs6 提供独立应用打包模板 APK 的插件</p>
+  <p>Template APK plugin for AutoJs6 standalone application packaging</p>
 
   <p>
     <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template?label=Release"/></a>
@@ -20,16 +20,16 @@
 
 ******
 
-### 语言 (Languages)
+### Languages
 
 ******
 
-当前 README.md 支持以下语言:
+The current README.md supports the following languages:
 
-- 简体中文 [zh-Hans] # 当前
+- [简体中文 [zh-Hans]](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/.readme/README-zh-Hans.md)
 - [繁體中文 (香港) [zh-Hant-HK]](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/.readme/README-zh-Hant-HK.md)
 - [繁體中文 (台灣) [zh-Hant-TW]](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/.readme/README-zh-Hant-TW.md)
-- [English [en]](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/.readme/README-en.md)
+- English [en] # current
 - [Français [fr]](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/.readme/README-fr.md)
 - [Español [es]](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/.readme/README-es.md)
 - [日本語 [ja]](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/.readme/README-ja.md)
@@ -39,24 +39,24 @@
 
 ******
 
-### 简介
+### Introduction
 
 ******
 
-AutoJs6 APK Builder Template 插件为 AutoJs6 的独立应用打包流程提供外部模板 APK 和 Runtime Kit. 宿主通过插件服务读取模板 APK, 并用版本和协议元数据确认兼容性.
+The AutoJs6 APK Builder Template Plugin supplies the external template APK and Runtime Kit used by AutoJs6 when packaging standalone applications. The host reads the template APK from the plugin service and checks version and protocol metadata for compatibility.
 
 ******
 
-### 功能
+### Features
 
 ******
 
-- 提供 `autojs6-apk-builder-template` 插件服务, 插件 ID 为 `autojs6-apk-builder-template`, 引擎为 `apk-builder-template`.
-- 通过 `org.autojs.plugin.INFO` 暴露通用插件信息, 通过 `org.autojs.plugin.APK_BUILDER` 提供模板 APK.
-- 构建时校验 Runtime Kit 的 SHA-256 摘要和 `template.apk` 必需条目.
-- 在 `assets/runtime-kit/` 内打包 `template.apk`, 默认签名库, 运行时元数据和契约文件.
-- 上报宿主版本, 协议版本, 模板包名, 模板摘要和远程构建能力.
-- 插件信息, 使用说明, README 与 CHANGELOG 覆盖西班牙语/法语/俄语/阿拉伯语/日语/韩语/英语/简体中文/香港繁体/台湾繁体.
+- Provides the `autojs6-apk-builder-template` plugin service with plugin ID `autojs6-apk-builder-template` and engine `apk-builder-template`.
+- Exposes common plugin metadata through `org.autojs.plugin.INFO` and serves the template APK through `org.autojs.plugin.APK_BUILDER`.
+- Validates Runtime Kit SHA-256 digests and required `template.apk` entries during the build.
+- Packages `template.apk`, the default keystore, runtime metadata, and contract files under `assets/runtime-kit/`.
+- Reports host version, protocol version, template package name, template digest, and remote build capability metadata.
+- Plugin metadata, usage instructions, README, and CHANGELOG cover Spanish, French, Russian, Arabic, Japanese, Korean, English, Simplified Chinese, Hong Kong Traditional Chinese, and Taiwan Traditional Chinese.
 
 ******
 
@@ -64,7 +64,7 @@ AutoJs6 APK Builder Template 插件为 AutoJs6 的独立应用打包流程提供
 
 ******
 
-Runtime Kit 来自 AutoJs6 主仓库, 是独立应用模板的唯一来源. 本插件只验证和打包该产物, 不生成 `template.apk`. 一个完整 Runtime Kit 通常包含以下文件
+The Runtime Kit comes from the AutoJs6 main repository and is the only source of truth for the standalone application template. This plugin only verifies and packages that artifact. It does not generate `template.apk`. A complete Runtime Kit usually contains these files
 
 ```text
 template.apk
@@ -81,24 +81,24 @@ provenance.json
 
 ******
 
-### 本地构建
+### Local Build
 
 ******
 
-先在 AutoJs6 主仓库生成 Runtime Kit:
+Generate a Runtime Kit from the AutoJs6 main repository first:
 
 ```powershell
 .\gradlew.bat --console=plain :app:generateRuntimeKit
 ```
 
-再在本仓库指定 Runtime Kit 目录构建插件:
+Then build this repository with the generated Runtime Kit directory:
 
 ```powershell
 .\gradlew.bat --console=plain :app:assembleRelease `
   -Pautojs.apkBuilder.templatePlugin.runtimeKitDir=<runtime-kit-dir>
 ```
 
-也可以把发布的 `autojs6-runtime-kit-*.zip` 解压到 `runtime-kit/`, 然后直接构建:
+You can also unpack a released `autojs6-runtime-kit-*.zip` to `runtime-kit/` and build directly:
 
 ```powershell
 .\gradlew.bat --console=plain :app:assembleRelease
@@ -106,11 +106,11 @@ provenance.json
 
 ******
 
-### 发布流程
+### Release Flow
 
 ******
 
-生产发布流程如下:
+The expected production release flow is:
 
 ```text
 AutoJs6 tag
@@ -125,11 +125,11 @@ AutoJs6 tag
 
 ******
 
-### 签名
+### Signing
 
 ******
 
-生产插件必须使用受信任的 AutoJs6 插件签名密钥. GitHub Actions 发布需要以下仓库密钥:
+Production plugin releases must be signed with the trusted AutoJs6 plugin signing key. GitHub Actions releases require these repository secrets:
 
 ```text
 SIGNING_KEY_BASE64
@@ -139,7 +139,7 @@ SIGNING_KEY_PASSWORD
 SIGNING_CERT_SHA256
 ```
 
-本地发布构建仍支持被忽略的根目录 `sign.properties`:
+Local release builds still support the ignored root-level `sign.properties` file:
 
 ```properties
 storeFile=/absolute/path/to/release.jks
@@ -150,7 +150,7 @@ keyPassword=...
 
 ******
 
-### 发行历史
+### Release History
 
 ******
 
@@ -158,22 +158,22 @@ keyPassword=...
 
 ###### 2026/07/16
 
-* `新增` APK Builder Template 插件服务, 插件 ID 为 `autojs6-apk-builder-template`, 引擎为 `apk-builder-template`, 变体为 `inrt-universal`
-* `新增` 通过 `org.autojs.plugin.INFO` 暴露插件信息, 通过 `org.autojs.plugin.APK_BUILDER` 提供模板 APK
-* `新增` 将 AutoJs6 Runtime Kit 打包到 `assets/runtime-kit/`, 包含 `template.apk`, 默认签名库, 元数据和契约文件
-* `新增` 构建时校验 Runtime Kit 元数据, SHA-256 摘要和 `template.apk` 必需条目
-* `新增` 上报宿主版本, 协议版本, 模板包名, 模板 SHA-256, Runtime API 摘要和远程构建能力
-* `新增` 支持通过 `autojs.apkBuilder.templatePlugin.enableRemoteBuild` 启用实验性远程构建协议
-* `新增` 发布流程支持下载 Runtime Kit, 验证资产, 使用受信任密钥签名并上传通用 APK
-* `新增` 插件信息, 使用说明, README 与 CHANGELOG 增加西班牙语/法语/俄语/阿拉伯语/日语/韩语/英语/简体中文/香港繁体/台湾繁体多语言资源
+* `Feature` Added the APK Builder Template plugin service with plugin ID `autojs6-apk-builder-template`, engine `apk-builder-template`, and variant `inrt-universal`
+* `Feature` Exposed plugin metadata through `org.autojs.plugin.INFO` and served the template APK through `org.autojs.plugin.APK_BUILDER`
+* `Feature` Packaged the AutoJs6 Runtime Kit under `assets/runtime-kit/`, including `template.apk`, the default keystore, metadata, and contract files
+* `Feature` Added build-time validation for Runtime Kit metadata, SHA-256 digests, and required `template.apk` entries
+* `Feature` Reported host version, protocol version, template package name, template SHA-256, Runtime API digests, and remote build capability
+* `Feature` Added optional experimental remote build protocol support through `autojs.apkBuilder.templatePlugin.enableRemoteBuild`
+* `Feature` Added release flow support for downloading the Runtime Kit, validating assets, signing with the trusted key, and uploading the universal APK
+* `Feature` Added localized plugin metadata, usage instructions, README, and CHANGELOG resources for Spanish, French, Russian, Arabic, Japanese, Korean, English, Simplified Chinese, Hong Kong Traditional Chinese, and Taiwan Traditional Chinese
 
-##### 更多发行历史可参阅
+##### For more release history
 
-* [CHANGELOG](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/.changelog/CHANGELOG-zh-Hans.md)
+* [CHANGELOG](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/.changelog/CHANGELOG-en.md)
 
 ******
 
-### 资源结构
+### Resource Layout
 
 ******
 
@@ -186,13 +186,13 @@ app/src/main/res/raw-*/plugin_instruction.md
 app/src/main/assets/doc/CHANGELOG-*.md
 ```
 
-`strings.xml` 提供插件名称, 描述和兜底说明的本地化; `plugin_instruction.md` 提供宿主侧展示的插件使用说明. README 与 CHANGELOG 由 `.python/generate_markdown.py` 根据 JSON 源文件生成.
+`strings.xml` contains localized plugin names, descriptions, and fallback instructions; `plugin_instruction.md` contains usage instructions displayed by the host. README and CHANGELOG files are generated from JSON sources by `.python/generate_markdown.py`.
 
 ******
 
-### 相关链接
+### Links
 
 ******
 
-- AutoJs6 主项目: https://github.com/SuperMonster003/AutoJs6
-- AutoJs6 文档: https://docs.autojs6.com
+- AutoJs6 main project: https://github.com/SuperMonster003/AutoJs6
+- AutoJs6 documentation: https://docs.autojs6.com
