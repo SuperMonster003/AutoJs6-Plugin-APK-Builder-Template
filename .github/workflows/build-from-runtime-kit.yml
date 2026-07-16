@@ -136,7 +136,26 @@ jobs:
           echo "Expected signer certificate SHA-256: $expected_sha256"
           echo "Actual signer certificate SHA-256:   $actual_sha256"
           test "$actual_sha256" = "$expected_sha256"
-          echo "path=$apk" >> "$GITHUB_OUTPUT"
+
+          crc32="$(
+            python3 - "$apk" <<'PY'
+          import sys
+          import zlib
+          from pathlib import Path
+
+          digest = 0
+          with Path(sys.argv[1]).open("rb") as stream:
+              while chunk := stream.read(4096):
+                  digest = zlib.crc32(chunk, digest)
+          print(f"{digest & 0xffffffff:08x}")
+          PY
+          )"
+          apk_with_crc="${apk%.apk}-$crc32.apk"
+          mv "$apk" "$apk_with_crc"
+          echo "APK CRC32: $crc32"
+          echo "path=$apk_with_crc" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$apk_with_crc")" >> "$GITHUB_OUTPUT"
+          echo "legacy_name=$(basename "$apk")" >> "$GITHUB_OUTPUT"
 
       - name: Verify plugin APK assets
         env:
@@ -175,6 +194,10 @@ jobs:
             gh release edit "$tag" --title "$release_title"
           else
             gh release create "$tag" --title "$release_title" --notes "Built from AutoJs6 Runtime Kit $tag"
+          fi
+          legacy_asset_name="${{ steps.apk.outputs.legacy_name }}"
+          if [ -n "$legacy_asset_name" ]; then
+            gh release delete-asset "$tag" "$legacy_asset_name" --yes >/dev/null 2>&1 || true
           fi
           gh release upload "$tag" "${{ steps.apk.outputs.path }}" --clobber
 
