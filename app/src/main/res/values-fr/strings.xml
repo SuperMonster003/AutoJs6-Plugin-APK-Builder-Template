@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">APK Builder Template</string>
+    <string name="plugin_name">APK Builder Template</string>
+    <string name="plugin_description">Fournit le fichier APK de modele utilise par AutoJs6 pour empaqueter des applications autonomes</string>
+    <string name="plugin_instruction">Installez la version du plugin correspondant a AutoJs6 afin que APK Builder puisse utiliser le fichier APK de modele externe</string>
+</resources>

@@ -22,7 +22,8 @@ object ApkBuilderTemplateMetadata {
         return PluginInfo(
             name = context.getString(R.string.plugin_name),
             description = context.getString(R.string.plugin_description),
-            instruction = context.getString(R.string.plugin_instruction),
+            instruction = context.readTextRawResourceOrNull(R.raw.plugin_instruction)
+                ?: context.getString(R.string.plugin_instruction),
             author = "SuperMonster003",
             collaborators = null,
             versionName = templateInfo.versionName,
@@ -121,6 +122,14 @@ object ApkBuilderTemplateMetadata {
             context.assets.open(assetPath).use { input ->
                 input.readBytes().toString(Charsets.UTF_8)
             }
+        }.getOrNull()
+    }
+
+    private fun Context.readTextRawResourceOrNull(resourceId: Int): String? {
+        return runCatching {
+            resources.openRawResource(resourceId).use { input ->
+                input.readBytes().toString(Charsets.UTF_8).trim()
+            }.takeIf { it.isNotEmpty() }
         }.getOrNull()
     }
 

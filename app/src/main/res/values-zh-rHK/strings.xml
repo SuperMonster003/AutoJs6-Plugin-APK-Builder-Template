@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">APK Builder Template</string>
+    <string name="plugin_name">APK Builder Template</string>
+    <string name="plugin_description">提供 AutoJs6 打包獨立應用程式時使用的模板 APK</string>
+    <string name="plugin_instruction">安裝與 AutoJs6 匹配的插件版本, 讓 APK 構建器使用外部模板 APK</string>
+</resources>
