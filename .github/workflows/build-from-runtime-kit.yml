@@ -164,8 +164,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           tag="${{ steps.vars.outputs.tag }}"
-          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "APK Builder Plugin $tag" --notes "Built from AutoJs6 Runtime Kit $tag"
+          release_version="${tag#v}"
+          release_version="${release_version#V}"
+          release_date="$(TZ=Asia/Shanghai date '+%Y/%m/%d')"
+          release_title="$release_version @ $release_date"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --title "$release_title"
+          else
+            gh release create "$tag" --title "$release_title" --notes "Built from AutoJs6 Runtime Kit $tag"
+          fi
           gh release upload "$tag" "${{ steps.apk.outputs.path }}" --clobber
 
       - name: Persist released plugin version
