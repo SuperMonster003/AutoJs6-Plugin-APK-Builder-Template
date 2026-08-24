@@ -32,7 +32,15 @@ class RemoteScriptEncryptor(
 
     fun encryptFile(source: File, target: File) {
         val bytes = source.readBytes()
-        val flags = parseExecutionMode(source.name, bytes).toShort()
+        try {
+            encryptBytes(source.name, bytes, target)
+        } finally {
+            bytes.fill(0)
+        }
+    }
+
+    fun encryptBytes(fileName: String, bytes: ByteArray, target: File) {
+        val flags = parseExecutionMode(fileName, bytes).toShort()
         target.parentFile?.let { parent ->
             if (!parent.exists() && !parent.mkdirs()) {
                 throw IllegalStateException("Failed to create parent directory: ${parent.path}")
@@ -40,7 +48,12 @@ class RemoteScriptEncryptor(
         }
         FileOutputStream(target, false).use { output ->
             writeHeader(output, flags)
-            output.write(encrypt(bytes))
+            val encrypted = encrypt(bytes)
+            try {
+                output.write(encrypted)
+            } finally {
+                encrypted.fill(0)
+            }
             output.flush()
         }
     }
