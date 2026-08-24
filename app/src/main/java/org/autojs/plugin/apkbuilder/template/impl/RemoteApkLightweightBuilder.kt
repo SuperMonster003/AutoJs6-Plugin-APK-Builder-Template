@@ -358,15 +358,30 @@ class RemoteApkLightweightBuilder(
             throw IOException("Failed to create project assets directory: ${projectAssetsDir.path}")
         }
         val scriptEncryptor = createScriptEncryptor(projectConfig)
-
-        when (workspace.sourceKind) {
-            ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY -> copyDirectoryContents(workspace.sourcePath, projectAssetsDir, scriptEncryptor)
-            ApkBuildRequestExtraKeys.SOURCE_KIND_FILE -> copyProjectFile(
-                workspace.sourcePath,
-                File(projectAssetsDir, DEFAULT_MAIN_SCRIPT),
-                scriptEncryptor,
-            )
-            else -> throw IOException("Unsupported project source kind: ${workspace.sourceKind}")
+        val stagingDecryptor = RemoteTypeScriptStagingDecryptor.from(request)
+        try {
+            when (workspace.sourceKind) {
+                ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY -> copyDirectoryContents(
+                    sourceDir = workspace.sourcePath,
+                    targetDir = projectAssetsDir,
+                    scriptEncryptor = scriptEncryptor,
+                    stagingDecryptor = stagingDecryptor,
+                    relativeRoot = "",
+                )
+                ApkBuildRequestExtraKeys.SOURCE_KIND_FILE -> copyProjectFile(
+                    source = workspace.sourcePath,
+                    target = File(projectAssetsDir, DEFAULT_MAIN_SCRIPT),
+                    relativePath = DEFAULT_MAIN_SCRIPT,
+                    scriptEncryptor = scriptEncryptor,
+                    stagingDecryptor = stagingDecryptor,
+                )
+                else -> throw IOException(
+                    "Unsupported project source kind: ${workspace.sourceKind}",
+                )
+            }
+            stagingDecryptor?.requireAllConsumed()
+        } finally {
+            stagingDecryptor?.close()
         }
 
         File(projectAssetsDir, CONFIG_FILE_NAME).writeText(projectConfigJson, Charsets.UTF_8)
@@ -455,16 +470,35 @@ class RemoteApkLightweightBuilder(
         sourceDir: File,
         targetDir: File,
         scriptEncryptor: RemoteScriptEncryptor,
+        stagingDecryptor: RemoteTypeScriptStagingDecryptor?,
+        relativeRoot: String,
     ) {
         sourceDir.listFiles()?.forEach { child ->
             val target = File(targetDir, child.name)
+            val relativePath = if (relativeRoot.isEmpty()) {
+                child.name
+            } else {
+                "$relativeRoot/${child.name}"
+            }
             if (child.isDirectory) {
                 if (!target.mkdirs() && !target.isDirectory) {
                     throw IOException("Failed to create project assets directory: ${target.path}")
                 }
-                copyDirectoryContents(child, target, scriptEncryptor)
+                copyDirectoryContents(
+                    child,
+                    target,
+                    scriptEncryptor,
+                    stagingDecryptor,
+                    relativePath,
+                )
             } else if (child.isFile) {
-                copyProjectFile(child, target, scriptEncryptor)
+                copyProjectFile(
+                    child,
+                    target,
+                    relativePath,
+                    scriptEncryptor,
+                    stagingDecryptor,
+                )
             }
         }
     }
@@ -472,9 +506,25 @@ class RemoteApkLightweightBuilder(
     private fun copyProjectFile(
         source: File,
         target: File,
+        relativePath: String,
         scriptEncryptor: RemoteScriptEncryptor,
+        stagingDecryptor: RemoteTypeScriptStagingDecryptor?,
     ) {
         ensureActive()
+        val stagedCleartext = stagingDecryptor?.decryptIfRequired(source, relativePath)
+        if (stagedCleartext != null) {
+            try {
+                if (!scriptEncryptor.isJavaScriptFileName(target.name)) {
+                    throw IOException(
+                        "Encrypted TypeScript staging entry is not JavaScript: $relativePath",
+                    )
+                }
+                scriptEncryptor.encryptBytes(source.name, stagedCleartext, target)
+            } finally {
+                stagedCleartext.fill(0)
+            }
+            return
+        }
         if (scriptEncryptor.isJavaScriptFileName(target.name)) {
             scriptEncryptor.encryptFile(source, target)
         } else {

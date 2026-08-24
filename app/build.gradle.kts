@@ -56,7 +56,7 @@ android {
         buildConfigField("long", "HOST_VERSION_CODE", "${versions.appVersionCode}L")
         buildConfigField("int", "PROTOCOL_VERSION", "2")
         buildConfigField("boolean", "ENABLE_REMOTE_BUILD", enableRemoteBuild.get().toString())
-        buildConfigField("int", "REMOTE_BUILD_PROTOCOL_VERSION", "2")
+        buildConfigField("int", "REMOTE_BUILD_PROTOCOL_VERSION", "3")
         buildConfigField("String", "TEMPLATE_PACKAGE_NAME", "\"org.autojs.autojs6.inrt\"")
     }
 
