@@ -24,6 +24,7 @@
         "Le plugin ne pouvait pas être activé depuis le centre de plugins après son installation sur certains systèmes"
       ],
       "improvement": [
+        "Le workflow de publication de confiance prend désormais en charge un mode candidat isolé qui produit cinq APK signés en production et leur evidence depuis un artefact Actions hôte épinglé, sans créer de Release ni mettre à jour la matrice de compatibilité de référence",
         "Unification des règles de validation du Runtime Kit entre Gradle et Python, notamment les résumés, tailles, fichiers obligatoires, entrées APK et la cohérence des cinq variantes",
         "Publication avec les cinq APK d'un manifeste de preuves JSON lisible par machine, liant les empreintes des artefacts, le certificat de signature, les versions plugin/hôte, la plage de compatibilité, les ID Runtime Kit et les versions de protocole",
         "Mise à jour des instructions d'installation, de la FAQ, de la répétition de publication et de la documentation en 10 langues pour les versions associées, la sélection ABI, la récupération après rétrogradation et le versionnement indépendant",

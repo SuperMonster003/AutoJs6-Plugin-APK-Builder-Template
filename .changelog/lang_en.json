@@ -24,6 +24,7 @@
         "The plugin could not be activated from Plugin Center after installation on some systems"
       ],
       "improvement": [
+        "Trusted release workflow now supports an isolated candidate mode that builds five production-signed APKs and evidence from a pinned host Actions artifact without creating a Release or updating the authoritative compatibility matrix",
         "Unified Runtime Kit validation rules across Gradle and Python, including hashes, sizes, required files, APK entries, and five-variant consistency",
         "Published a machine-readable JSON evidence manifest beside the five APKs, binding artifact digests, signer certificate, plugin/host versions, compatibility range, Runtime Kit IDs, and protocol versions",
         "Updated installation instructions, FAQ, release drill, and 10-language documentation for paired versions, ABI selection, downgrade recovery, and independent versioning",

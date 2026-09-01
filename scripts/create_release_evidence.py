@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Create a machine-readable evidence manifest for one signed plugin release.
+"""Create a machine-readable evidence manifest for signed plugin assets.
 
 The release workflow has already verified each APK signature before invoking
 this script. This step binds that verified signer digest to the exact APK
 bytes, Runtime Kit identities, host compatibility contract, and plugin version
-that are about to be published.
+that are either retained as an isolated candidate or published as a Release.
 """
 
 import argparse
@@ -43,6 +43,14 @@ def crc32_of(path: Path) -> str:
 
 def host_version_slug(version_name: str) -> str:
     return re.sub(r"\s+", "-", version_name.strip()).lower()
+
+
+def validate_workflow_run_url(value: str, repository: str, field: str) -> str:
+    normalized = value.strip()
+    prefix = f"https://github.com/{repository.strip()}/actions/runs/"
+    if not normalized.startswith(prefix) or not normalized.removeprefix(prefix).isdigit():
+        raise SystemExit(f"{field} must identify an Actions run in {repository}")
+    return normalized
 
 
 def shared_runtime_kit_identity(metadata: dict) -> dict:
@@ -99,6 +107,9 @@ def build_release_evidence(
     source_tag: str,
     signer_certificate_sha256: str,
     released_at: str,
+    candidate_only: bool = False,
+    workflow_run_url: str = "",
+    source_workflow_run_url: str = "",
 ) -> dict:
     manifest = json.loads(runtime_kits_manifest.read_text("utf-8"))
     if int(manifest.get("schemaVersion") or 0) != SCHEMA_VERSION:
@@ -127,6 +138,22 @@ def build_release_evidence(
         raise SystemExit("Release and source repository/tag identities are required")
     if not released_at.strip():
         raise SystemExit("Release timestamp is required")
+    normalized_workflow_run_url = ""
+    normalized_source_workflow_run_url = ""
+    if workflow_run_url.strip():
+        normalized_workflow_run_url = validate_workflow_run_url(
+            workflow_run_url,
+            repository,
+            "workflow_run_url",
+        )
+    if source_workflow_run_url.strip():
+        normalized_source_workflow_run_url = validate_workflow_run_url(
+            source_workflow_run_url,
+            source_repository,
+            "source_workflow_run_url",
+        )
+    if candidate_only and (not normalized_workflow_run_url or not normalized_source_workflow_run_url):
+        raise SystemExit("Candidate evidence requires plugin and source Actions run URLs")
 
     baseline_identity = None
     runtime_kits = []
@@ -184,7 +211,11 @@ def build_release_evidence(
                 "variant": variant,
                 "supportedAbis": supported_abis,
                 "fileName": apk.name,
-                "downloadUrl": f"https://github.com/{repository}/releases/download/{release_tag}/{encoded_name}",
+                "downloadUrl": (
+                    None
+                    if candidate_only
+                    else f"https://github.com/{repository}/releases/download/{release_tag}/{encoded_name}"
+                ),
                 "sizeBytes": apk.stat().st_size,
                 "sha256": sha256_of(apk),
                 "crc32": actual_crc32,
@@ -208,11 +239,18 @@ def build_release_evidence(
         "generatedAt": released_at,
         "repository": repository,
         "releaseTag": release_tag,
-        "releaseUrl": f"https://github.com/{repository}/releases/tag/{release_tag}",
+        "releaseUrl": None if candidate_only else f"https://github.com/{repository}/releases/tag/{release_tag}",
+        "publication": {
+            "candidateOnly": candidate_only,
+            "channel": "actions-artifact" if candidate_only else "github-release",
+            "workflowRunUrl": normalized_workflow_run_url or None,
+        },
         "source": {
             "repository": source_repository,
             "tag": source_tag,
             "gitSha": baseline_identity["hostGitSha"],
+            "channel": "actions-artifact" if candidate_only else "github-release",
+            "workflowRunUrl": normalized_source_workflow_run_url or None,
         },
         "plugin": {
             "versionName": plugin_version_name,
@@ -254,6 +292,9 @@ def main() -> None:
     parser.add_argument("--source-tag", required=True)
     parser.add_argument("--signer-certificate-sha256", required=True)
     parser.add_argument("--released-at", required=True)
+    parser.add_argument("--candidate-only", action="store_true")
+    parser.add_argument("--workflow-run-url", default="")
+    parser.add_argument("--source-workflow-run-url", default="")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -267,6 +308,9 @@ def main() -> None:
         source_tag=args.source_tag,
         signer_certificate_sha256=args.signer_certificate_sha256,
         released_at=args.released_at,
+        candidate_only=args.candidate_only,
+        workflow_run_url=args.workflow_run_url,
+        source_workflow_run_url=args.source_workflow_run_url,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", "utf-8")

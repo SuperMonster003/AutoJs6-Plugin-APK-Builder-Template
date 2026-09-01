@@ -13,6 +13,21 @@ on:
         description: AutoJs6 source repository
         required: false
         default: SuperMonster003/AutoJs6
+      source_run_id:
+        description: AutoJs6 Actions run ID containing the Runtime Kit candidate artifact
+        required: false
+      expected_source_sha:
+        description: Exact Runtime Kit source commit required for candidate-only builds
+        required: false
+      source_artifact:
+        description: Runtime Kit artifact name in source_run_id
+        required: false
+        default: autojs6-runtime-kit
+      candidate_only:
+        description: Preserve signed APKs as an Actions artifact without creating a Release or updating the compatibility matrix
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -30,7 +45,6 @@ jobs:
       - name: Checkout plugin repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
 
       - name: Set up JDK 21
@@ -42,18 +56,115 @@ jobs:
 
       - name: Resolve build inputs
         id: vars
+        env:
+          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          DISPATCH_SOURCE_REPO: ${{ github.event.client_payload.source_repo }}
+          DISPATCH_SOURCE_RUN_ID: ${{ github.event.client_payload.source_run_id }}
+          DISPATCH_EXPECTED_SOURCE_SHA: ${{ github.event.client_payload.expected_source_sha }}
+          DISPATCH_SOURCE_ARTIFACT: ${{ github.event.client_payload.source_artifact }}
+          DISPATCH_CANDIDATE_ONLY: ${{ github.event.client_payload.candidate_only }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_SOURCE_REPO: ${{ inputs.source_repo }}
+          INPUT_SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          INPUT_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
+          INPUT_SOURCE_ARTIFACT: ${{ inputs.source_artifact }}
+          INPUT_CANDIDATE_ONLY: ${{ inputs.candidate_only }}
         run: |
+          set -euo pipefail
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            echo "tag=${{ github.event.client_payload.tag }}" >> "$GITHUB_OUTPUT"
-            echo "source_repo=${{ github.event.client_payload.source_repo }}" >> "$GITHUB_OUTPUT"
+            tag="$DISPATCH_TAG"
+            source_repo="$DISPATCH_SOURCE_REPO"
+            source_run_id="$DISPATCH_SOURCE_RUN_ID"
+            expected_source_sha="$DISPATCH_EXPECTED_SOURCE_SHA"
+            source_artifact="${DISPATCH_SOURCE_ARTIFACT:-autojs6-runtime-kit}"
+            candidate_only="${DISPATCH_CANDIDATE_ONLY:-false}"
           else
-            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
-            echo "source_repo=${{ inputs.source_repo }}" >> "$GITHUB_OUTPUT"
+            tag="$INPUT_TAG"
+            source_repo="$INPUT_SOURCE_REPO"
+            source_run_id="$INPUT_SOURCE_RUN_ID"
+            expected_source_sha="$INPUT_EXPECTED_SOURCE_SHA"
+            source_artifact="${INPUT_SOURCE_ARTIFACT:-autojs6-runtime-kit}"
+            candidate_only="${INPUT_CANDIDATE_ONLY:-false}"
+          fi
+
+          case "$tag" in
+            v[0-9A-Za-z._-]*) ;;
+            *) echo "Invalid source tag label: $tag" >&2; exit 1 ;;
+          esac
+          [[ "$source_repo" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || {
+            echo "Invalid source repository identity." >&2
+            exit 1
+          }
+          [[ "$source_artifact" =~ ^[A-Za-z0-9_.-]+$ ]] || {
+            echo "Invalid source artifact name." >&2
+            exit 1
+          }
+          if [ -n "$expected_source_sha" ] && [[ ! "$expected_source_sha" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "Invalid expected source commit." >&2
+            exit 1
+          fi
+          case "$candidate_only" in
+            true|false) ;;
+            *) echo "candidate_only must be true or false." >&2; exit 1 ;;
+          esac
+
+          {
+            echo "tag=$tag"
+            echo "source_repo=$source_repo"
+            echo "source_run_id=$source_run_id"
+            echo "expected_source_sha=$expected_source_sha"
+            echo "source_artifact=$source_artifact"
+            echo "candidate_only=$candidate_only"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Validate execution mode
+        env:
+          CANDIDATE_ONLY: ${{ steps.vars.outputs.candidate_only }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          EXPECTED_SOURCE_SHA: ${{ steps.vars.outputs.expected_source_sha }}
+          SOURCE_RUN_ID: ${{ steps.vars.outputs.source_run_id }}
+          TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ "$CANDIDATE_ONLY" = "true" ]; then
+            test "$GITHUB_EVENT_NAME" = "workflow_dispatch" || {
+              echo "candidate_only is allowed only for workflow_dispatch." >&2
+              exit 1
+            }
+            [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || {
+              echo "candidate_only requires a numeric source_run_id." >&2
+              exit 1
+            }
+            [[ "$EXPECTED_SOURCE_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || {
+              echo "candidate_only requires an exact expected_source_sha commit." >&2
+              exit 1
+            }
+            case "$TAG" in
+              v*-rc*|v*-candidate*) ;;
+              *) echo "candidate_only requires an RC/candidate tag label." >&2; exit 1 ;;
+            esac
+          else
+            test "$GITHUB_REF_NAME" = "$DEFAULT_BRANCH" || {
+              echo "Formal publication must run from the default branch." >&2
+              exit 1
+            }
+            test -z "$SOURCE_RUN_ID" || {
+              echo "Formal publication must download Runtime Kits from a GitHub Release." >&2
+              exit 1
+            }
+            test -z "$EXPECTED_SOURCE_SHA" || {
+              echo "expected_source_sha is reserved for candidate_only builds." >&2
+              exit 1
+            }
           fi
 
       - name: Download Runtime Kit
         env:
           GH_TOKEN: ${{ secrets.AUTOJS6_MAIN_REPO_TOKEN || github.token }}
+          SOURCE_ARTIFACT: ${{ steps.vars.outputs.source_artifact }}
+          SOURCE_REPO: ${{ steps.vars.outputs.source_repo }}
+          SOURCE_RUN_ID: ${{ steps.vars.outputs.source_run_id }}
+          SOURCE_TAG: ${{ steps.vars.outputs.tag }}
         run: |
           set -euo pipefail
           shopt -s nullglob
@@ -63,10 +174,17 @@ jobs:
           rm -rf "$archive_dir" "$runtime_kits_dir"
           mkdir -p "$archive_dir" "$runtime_kits_dir"
 
-          gh release download "${{ steps.vars.outputs.tag }}" \
-            --repo "${{ steps.vars.outputs.source_repo }}" \
-            --pattern "autojs6-runtime-kit-*.zip" \
-            --dir "$archive_dir"
+          if [ -n "$SOURCE_RUN_ID" ]; then
+            gh run download "$SOURCE_RUN_ID" \
+              --repo "$SOURCE_REPO" \
+              --name "$SOURCE_ARTIFACT" \
+              --dir "$archive_dir"
+          else
+            gh release download "$SOURCE_TAG" \
+              --repo "$SOURCE_REPO" \
+              --pattern "autojs6-runtime-kit-*.zip" \
+              --dir "$archive_dir"
+          fi
 
           archives=("$archive_dir"/autojs6-runtime-kit-*.zip)
           if [ "${#archives[@]}" -eq 0 ]; then
@@ -84,6 +202,8 @@ jobs:
           echo "RUNTIME_KITS_DIR=$runtime_kits_dir" >> "$GITHUB_ENV"
 
       - name: Verify Runtime Kit variant set
+        env:
+          EXPECTED_SOURCE_SHA: ${{ steps.vars.outputs.expected_source_sha }}
         run: |
           set -euo pipefail
           shopt -s nullglob
@@ -94,6 +214,19 @@ jobs:
 
           manifest="$RUNNER_TEMP/autojs6-runtime-kit-variants.json"
           python3 scripts/verify_runtime_kit_set.py "$RUNTIME_KITS_DIR" --output "$manifest"
+          if [ -n "$EXPECTED_SOURCE_SHA" ]; then
+            python3 - "$manifest" "$EXPECTED_SOURCE_SHA" <<'PY'
+          import json
+          import sys
+
+          manifest = json.load(open(sys.argv[1], encoding="utf-8"))
+          actual = str((manifest.get("host") or {}).get("gitSha") or "").lower()
+          expected = sys.argv[2].lower()
+          if actual != expected:
+              raise SystemExit(f"Runtime Kit source SHA mismatch: expected={expected}, actual={actual}")
+          print(f"Runtime Kit source SHA verified: {actual}")
+          PY
+          fi
           universal_kit="$(
             python3 - "$manifest" <<'PY'
           import json
@@ -254,7 +387,11 @@ jobs:
 
       - name: Create release evidence manifest
         env:
+          CANDIDATE_ONLY: ${{ steps.vars.outputs.candidate_only }}
           SIGNING_CERT_SHA256: ${{ secrets.SIGNING_CERT_SHA256 }}
+          SOURCE_REPO: ${{ steps.vars.outputs.source_repo }}
+          SOURCE_RUN_ID: ${{ steps.vars.outputs.source_run_id }}
+          SOURCE_TAG: ${{ steps.vars.outputs.tag }}
         run: |
           set -euo pipefail
           plugin_version="$(sed -n 's/^PLUGIN_VERSION_NAME=//p' version.properties | head -n 1)"
@@ -266,33 +403,55 @@ jobs:
           evidence_file="$RUNNER_TEMP/autojs6-apk-builder-template-v${plugin_version}-autojs6-v${host_slug}-vc${plugin_version_code}-release-evidence.json"
           released_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
-          python3 scripts/create_release_evidence.py \
-            --runtime-kits-manifest "$RUNTIME_KIT_VARIANTS_MANIFEST" \
-            --version-properties version.properties \
-            --apk-dir "$PLUGIN_APK_DIR" \
-            --repository "$GITHUB_REPOSITORY" \
-            --release-tag "${{ steps.vars.outputs.tag }}" \
-            --source-repository "${{ steps.vars.outputs.source_repo }}" \
-            --source-tag "${{ steps.vars.outputs.tag }}" \
-            --signer-certificate-sha256 "$SIGNING_CERT_SHA256" \
-            --released-at "$released_at" \
+          evidence_args=(
+            --runtime-kits-manifest "$RUNTIME_KIT_VARIANTS_MANIFEST"
+            --version-properties version.properties
+            --apk-dir "$PLUGIN_APK_DIR"
+            --repository "$GITHUB_REPOSITORY"
+            --release-tag "$SOURCE_TAG"
+            --source-repository "$SOURCE_REPO"
+            --source-tag "$SOURCE_TAG"
+            --signer-certificate-sha256 "$SIGNING_CERT_SHA256"
+            --released-at "$released_at"
+            --workflow-run-url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
             --output "$evidence_file"
+          )
+          if [ "$CANDIDATE_ONLY" = "true" ]; then
+            evidence_args+=(
+              --candidate-only
+              --source-workflow-run-url "https://github.com/$SOURCE_REPO/actions/runs/$SOURCE_RUN_ID"
+            )
+          fi
+          python3 scripts/create_release_evidence.py "${evidence_args[@]}"
 
           echo "RELEASED_AT=$released_at" >> "$GITHUB_ENV"
           echo "RELEASE_EVIDENCE_FILE=$evidence_file" >> "$GITHUB_ENV"
 
       - name: Preserve release evidence as workflow artifact
+        if: ${{ steps.vars.outputs.candidate_only != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: apk-builder-template-release-evidence
           path: ${{ env.RELEASE_EVIDENCE_FILE }}
           if-no-files-found: error
 
+      - name: Preserve signed candidate bundle
+        if: ${{ steps.vars.outputs.candidate_only == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-builder-template-signed-candidate
+          path: |
+            ${{ env.PLUGIN_APK_DIR }}/*.apk
+            ${{ env.RELEASE_EVIDENCE_FILE }}
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Remove release signing material
         if: always()
         run: rm -f "$RUNNER_TEMP/autojs6-release-signing.jks"
 
       - name: Publish plugin release
+        if: ${{ steps.vars.outputs.candidate_only != 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -336,6 +495,7 @@ jobs:
           gh release upload "$tag" "${apks[@]}" "$RELEASE_EVIDENCE_FILE" --clobber
 
       - name: Persist released plugin version and compat matrix
+        if: ${{ steps.vars.outputs.candidate_only != 'true' }}
         env:
           RELEASE_TAG: ${{ steps.vars.outputs.tag }}
           TARGET_BRANCH: ${{ github.event.repository.default_branch }}
@@ -404,3 +564,23 @@ jobs:
           echo "Persisted PLUGIN_VERSION_NAME=$plugin_version"
           echo "Persisted PLUGIN_VERSION_BUILD=$plugin_build"
           echo "Persisted PLUGIN_RELEASE_SEQ=$plugin_seq"
+
+      - name: Record candidate-only result
+        if: ${{ steps.vars.outputs.candidate_only == 'true' }}
+        env:
+          EXPECTED_SOURCE_SHA: ${{ steps.vars.outputs.expected_source_sha }}
+          SOURCE_REPO: ${{ steps.vars.outputs.source_repo }}
+          SOURCE_RUN_ID: ${{ steps.vars.outputs.source_run_id }}
+          SOURCE_TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Signed APK Builder candidate"
+            echo
+            echo "- Label: \`$SOURCE_TAG\`"
+            echo "- Runtime Kit source: \`$SOURCE_REPO@$EXPECTED_SOURCE_SHA\` run \`$SOURCE_RUN_ID\`"
+            echo "- Distribution: Actions artifact only (14-day retention)"
+            echo "- GitHub Release created: no"
+            echo "- Compatibility matrix updated: no"
+            echo "- Remote build enabled by default: no"
+          } >> "$GITHUB_STEP_SUMMARY"

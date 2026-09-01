@@ -129,6 +129,11 @@ AutoJs6 插件中心现将该目标显示为 "需要重新安装" 而非普通�
 
 ## 发布时序 (`.github/workflows/build-from-runtime-kit.yml`)
 
+首个正式 tag 前先走隔离候选模式: 宿主工作流以精确 40 位 `source_ref` 生成仅保留为 Actions artifact 的五套
+Runtime Kit; 插件工作流再以 `source_run_id` + `expected_source_sha` 绑定该构件, 使用正式密钥签出五个 APK 并生成
+同时绑定两端 Actions run URL 的 candidate evidence。候选模式不会创建 Release, 不会写入 `compat-matrix.json`, 也不会
+持久化同步后的版本字段; evidence 中 Release/APK URL 为 `null`, 分发通道明确为 `actions-artifact`。
+
 1. 下载 universal + 四个单 ABI Runtime Kit; 分别校验内容, 再校验五变体集合齐全且宿主 / API 契约一致。
 2. 只以 universal Kit 运行一次 `sync_version_from_runtime_kit.py`: 同步宿主配对字段 + 推进
    `PLUGIN_VERSION_BUILD` / `PLUGIN_RELEASE_SEQ` (不触碰 `PLUGIN_VERSION_NAME`)。
