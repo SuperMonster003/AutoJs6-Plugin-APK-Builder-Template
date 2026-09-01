@@ -1,11 +1,16 @@
-# 远程构建协议
+# 设备内插件托管 APK 构建协议
 
-- 状态: 实验性, 官方插件构建默认关闭
-- 当前编译期 API 版本: `ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION = 3`
+- 状态: 正式候选; 新候选装机验收通过前不发布 GA
+- 当前正式 API 版本: `ApkBuilderTemplateProtocol.APK_BUILD_VERSION = 3`
+- 执行模式: `ApkBuilderTemplateProtocol.APK_BUILD_EXECUTION_MODE_ON_DEVICE_PLUGIN = "on-device-plugin"`
+- 旧实验别名: `ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION = APK_BUILD_VERSION`
+- 密钥库 API: `ApkBuilderTemplateProtocol.KEYSTORE_VERSION = 1`
 - AIDL 服务: `org.autojs.plugin.APK_BUILDER`
 - 权限: `org.autojs.permission.PLUGIN`
 
-本文面向 AutoJs6 宿主与 APK Builder Template 插件的集成开发者. 协议真源是
+本文面向 AutoJs6 宿主与 APK Builder Template 插件的集成开发者. 文件名为兼容既有链接而保留 `remote-build`；这里的
+“remote”历史上只表示 Binder 对端位于另一个设备内应用进程，**不表示网络、云端或离设备构建**。正式架构与所有权见
+`docs/plugin-managed-apk-build-architecture.md`。协议真源是
 `plugin-api/apk-builder-template` 中的 AIDL 与 Parcelable Kotlin 类; 本文解释这些字段的组合规则, 生命周期和错误语义.
 若本文与源码冲突, 以源码为准并在同一次协议改动中修正文档.
 
@@ -13,26 +18,33 @@ Node.js 的运行时所有权与 APK 打包边界由 `docs/remote-build-node-pac
 
 ## 1. 能力发现与版本协商
 
-宿主绑定插件后先读取 `getTemplateInfo().capabilities`, 不应直接试调用远程构建.
+宿主绑定插件后先读取 `getTemplateInfo().capabilities`, 不应直接试调用构建接口.
 
 | 能力键 | 类型 | 含义 |
 |---|---:|---|
-| `supportsRemoteBuild` | Boolean | 当前插件构建是否允许远程构建. 官方构建目前为 `false` |
-| `apkBuilderRemoteBuildProtocolVersion` | Int | 与内置 Runtime Kit 配套并对宿主公布的协议版本; 来自 `runtime-kit.json#contract.remoteBuildProtocolVersion`, 缺失时回退到插件构建值 |
-| `remoteBuildApiVersion` | Int | 插件代码实际编译支持的协议上限, 即 `REMOTE_BUILD_VERSION` |
-| `remoteBuildStatus` | String | 当前为 `disabled` 或 `experimental` |
+| `supportsApkBuild` | Boolean | 是否承担 AutoJs6 唯一正式“打包应用”构建路径；官方候选为 `true` |
+| `apkBuilderBuildProtocolVersion` | Int | 正式构建协议上限；来自 `runtime-kit.json#contract.apkBuildProtocolVersion`，缺失时兼容读取 `remoteBuildProtocolVersion` |
+| `apkBuilderBuildExecutionMode` | String | 当前必须精确为 `on-device-plugin`，其他或缺失值失败关闭 |
+| `supportsKeyStoreOperations` | Boolean | 是否支持插件侧创建/验证签名库 |
+| `apkBuilderKeyStoreApiVersion` | Int | 密钥库接口版本，当前为 `KEYSTORE_VERSION` |
+| `supportsRemoteBuild` | Boolean | 旧实验入口是否开放；官方构建继续为 `false`，不作为正式准入依据 |
+| `apkBuilderRemoteBuildProtocolVersion` | Int | 旧实验宿主的配套协议版本 |
+| `remoteBuildApiVersion` | Int | 旧实验代码编译上限，即 `REMOTE_BUILD_VERSION` |
+| `remoteBuildStatus` | String | 旧实验状态，当前为 `disabled` 或 `experimental` |
 
 宿主的协商顺序:
 
-1. `supportsRemoteBuild != true`: 不调用 `openBuildSession`. 当前 R1 语义是显示可行动的“远程构建不可用”并停止本次请求;
-   关闭开关不构成构建回退。只有未来 R2/R3 已另行实现并验收独立构建路径后, 才能按
-   `docs/remote-build-fallback-decision.md` 尝试一次受控回退。即使误调用, 插件会话也以 `STATUS_UNSUPPORTED` 结束.
-2. 取 `min(apkBuilderRemoteBuildProtocolVersion, remoteBuildApiVersion)` 作为该配套构建可用的协议上限.
-3. 宿主只使用不高于该上限的字段, 并把本次请求实际依赖的最低协议写入 `requiredProtocolVersion`.
-4. 插件发现 `requiredProtocolVersion > REMOTE_BUILD_VERSION` 时拒绝请求: `STATUS_FAILED`, `LEVEL_BLOCK`,
+1. 要求 `supportsApkBuild == true`，且 `apkBuilderBuildExecutionMode == on-device-plugin`；否则不打开会话并显示可行动错误。
+2. 要求 `apkBuilderBuildProtocolVersion >= APK_BUILD_VERSION`；宿主把本次请求实际依赖的最低协议写入
+   `requiredProtocolVersion`。正式 v6.8.0 路径固定请求 v3。
+3. 同时执行官方签名、插件启用状态、宿主兼容区间和设备 ABI 门禁，任何一项失败都不得通过 `allowRiskyBuild` 绕过。
+4. 插件发现 `requiredProtocolVersion > APK_BUILD_VERSION` 时拒绝请求: `STATUS_FAILED`, `LEVEL_BLOCK`,
    原因写入 `errors`.
 
-协议版本只约束远程构建, 与模板读取协议 `TEMPLATE_VERSION` 相互独立. v3 在 v2 基础上增加 TypeScript 构建暂存的
+旧宿主仍按 `supportsRemoteBuild`、`apkBuilderRemoteBuildProtocolVersion` 和开发者开关进入实验路径；该路径与正式能力键保持
+区分。官方插件发布 `supportsApkBuild=true`、`supportsRemoteBuild=false`，正式宿主不读取旧实验开关。
+
+协议版本只约束插件托管构建, 与模板读取协议 `TEMPLATE_VERSION` 相互独立. v3 在 v2 基础上增加 TypeScript 构建暂存的
 认证加密元数据; 使用这些字段的请求必须声明 `requiredProtocolVersion >= 3`.
 
 ## 2. 会话时序与 AIDL
@@ -42,6 +54,7 @@ Node.js 的运行时所有权与 APK 打包边界由 `docs/remote-build-node-pac
 | 接口 | 方法 | 语义 |
 |---|---|---|
 | `IApkBuilderTemplatePlugin` | `openBuildSession(request, callback)` | 创建尚未启动的会话; `callback` 应非空 |
+| `IApkBuilderTemplatePlugin` | `manageKeyStore(request)` | 创建或验证签名库；接口追加在 build session 之后以保持既有 Binder 事务号 |
 | `IApkBuildSession` | `start()` | 异步启动; 同一会话重复调用无效果 |
 | `IApkBuildSession` | `cancel()` | 设置协作式取消信号; 可在 `start()` 前调用 |
 | `IApkBuildSession` | `getProgress()` | 读取最近一次进度快照 |
@@ -77,7 +90,7 @@ Node.js 的运行时所有权与 APK 打包边界由 `docs/remote-build-node-pac
 | `hostPackageName` | 建议 | 非空时必须等于插件配对宿主包名, 否则进入风险不匹配处理 |
 | `hostVersionName` | 建议 | 非空时必须等于插件配对版本名 |
 | `hostVersionCode` | 建议 | 大于 0 时必须等于插件配对 versionCode |
-| `requiredProtocolVersion` | 必需 | 本次请求使用的最低远程构建协议; 不得高于插件 `REMOTE_BUILD_VERSION` |
+| `requiredProtocolVersion` | 必需 | 本次请求使用的最低正式构建协议; 不得高于插件 `APK_BUILD_VERSION` |
 | `projectArchiveFd` | 必需 | ZIP 格式项目输入; 插件消费并关闭收到的描述符副本 |
 | `projectArchiveSizeBytes` | 可选校验 | 大于 0 时执行精确长度校验 |
 | `projectArchiveSha256` | 可选校验 | 非空时执行不区分大小写的 SHA-256 校验 |
@@ -213,8 +226,36 @@ Parcelable/Bundle、JSON、路径、keystore、图标、Manifest/ARSC 的 72 条
 最终 39/39 结果见 `docs/remote-build-fuzz-audit.md`。该批次关闭确定性 fuzz 子门槛, 不替代独立安全审查。
 
 当项目配置指定非空 `abis` 且需要宿主原生库时, 宿主必须提供原生输入 ZIP. 缺少归档或所选 ABI 下的必需 `.so` 时是
-`STATUS_UNSUPPORTED`。在当前 R1 阶段宿主显示原因并停止; 只有 R2/R3 已验收独立构建路径后, 才允许按回退 ADR 执行一次
-受控回退。
+`STATUS_UNSUPPORTED`。正式路径显示原因并停止，不重试也不切换到宿主内第二构建器。
+
+### 3.6 `ApkKeyStoreRequest` / `ApkKeyStoreResult`
+
+宿主仅在能力 `supportsKeyStoreOperations=true` 且 `apkBuilderKeyStoreApiVersion >= KEYSTORE_VERSION` 时调用
+`manageKeyStore`。`ApkKeyStoreRequest` 字段如下：
+
+| 字段 | 规则 |
+|---|---|
+| `operation` | `OPERATION_CREATE` (1) 或 `OPERATION_VERIFY` (2) |
+| `keyStoreFd` | create 时为可写输出 FD，verify 时为只读输入 FD；插件消费并关闭自己的副本 |
+| `keyStoreType` | `TYPE_BKS` 或 `TYPE_JKS` |
+| `keyStorePassword` | 必需，最多 1,024 字符 |
+| `keyAlias` | 必需，最多 256 字符 |
+| `keyAliasPassword` | 必需，最多 1,024 字符 |
+| `keyAlgorithm` | create 当前仅支持 `RSA` |
+| `keySize` | create 为 2,048..4,096 |
+| `certificateSignatureAlgorithm` | create 支持 `MD5withRSA`、`SHA1withRSA`、`SHA256withRSA`、`SHA512withRSA`；新建时推荐 SHA-256 或更高 |
+| `certificateValidityYears` | create 为 1..100 |
+| `commonName` | 可选 DN 字段，最多 1,024 字符 |
+| `organization` | 可选 DN 字段，最多 1,024 字符 |
+| `organizationalUnit` | 可选 DN 字段，最多 1,024 字符 |
+| `country` | 可选 DN 字段，最多 1,024 字符 |
+| `state` | 可选 DN 字段，最多 1,024 字符 |
+| `locality` | 可选 DN 字段，最多 1,024 字符 |
+| `street` | 可选 DN 字段，最多 1,024 字符 |
+
+`ApkKeyStoreResult` 只有 `status` 与可选 `message`。成功为 `STATUS_OK`，输入/执行失败为 `STATUS_FAILED`，未知 operation 为
+`STATUS_UNSUPPORTED`，宿主侧无法绑定或能力缺失可映射为 `STATUS_UNAVAILABLE`。verify 的实际输入最多 64 MiB；create/verify
+均在插件私有临时目录完成并在返回前删除临时文件。此 API 不改变构建请求中自定义 keystore 的字段语义。
 
 ## 4. 进度模型
 
@@ -239,11 +280,10 @@ Parcelable/Bundle、JSON、路径、keystore、图标、Manifest/ARSC 的 72 条
 | `STATUS_OK` (0) | `onCompleted` | 无 warning 为 `LEVEL_OK`, 否则 `LEVEL_WARN` | 可有 warning, `errors` 为空 |
 | `STATUS_FAILED` (1) | `onFailed` | `LEVEL_BLOCK` | 失败原因在 `errors` |
 | `STATUS_CANCELLED` (2) | `onCancelled` | `LEVEL_BLOCK` | 正常取消不写 `errors` |
-| `STATUS_UNSUPPORTED` (3) | `onFailed` | `LEVEL_WARN` | 不支持/未来可回退的原因在 `warnings`, `errors` 为空 |
+| `STATUS_UNSUPPORTED` (3) | `onFailed` | `LEVEL_WARN` | 当前输入或能力不支持的原因在 `warnings`, `errors` 为空 |
 
-`STATUS_UNSUPPORTED` 不是损坏或安全失败, 但它也不证明当前存在另一条构建路径。R1 显示 warning 并停止; 只有 R2/R3
-通过独立回退门槛后才可自动尝试一次。`STATUS_FAILED` 默认不应静默吞掉, 应显示 `errors`; 完整性/签名失败不得回退,
-其他失败是否允许用户显式重试或回退由 `docs/remote-build-fallback-decision.md` 约束。
+`STATUS_UNSUPPORTED` 不是损坏或安全失败, 但它也不证明存在另一条构建路径。正式宿主显示 warning 并停止。
+`STATUS_FAILED` 不应静默吞掉, 应显示 `errors`；取消保持独立语义。宿主不自动重试或回退，用户修复插件/项目后重新发起。
 
 结果字段:
 
@@ -291,7 +331,8 @@ APK 只含公开摘要资产, 不含默认私钥库。44/44 JVM 回归、Release
 
 | 条件 | status | 信息位置 |
 |---|---|---|
-| 插件构建关闭远程能力 | `UNSUPPORTED` | warning: disabled |
+| 插件构建不提供正式能力 | 会话前拒绝 | 安装与当前 AutoJs6 匹配的官方 APK Builder 插件 |
+| 旧实验入口关闭 `supportsRemoteBuild` | 会话前拒绝 | 只影响旧宿主实验路径 |
 | Node.js 旧库/项目类型/配置/入口/执行模式 | `UNSUPPORTED` | warning: use the external runtime plugin; 无输出 |
 | 缺少必需原生输入或 `.so` | `UNSUPPORTED` | warning: missing build input |
 | 宿主要求更高协议 | `FAILED` | error: newer protocol |
@@ -319,9 +360,9 @@ APK 只含公开摘要资产, 不含默认私钥库。44/44 JVM 回归、Release
 
 修改任一 AIDL 方法, Parcelable 字段语义, extra 键, status / step 常量或加密信封格式时:
 
-1. 判断是否需要提升 `REMOTE_BUILD_VERSION`.
-2. 同步插件 `BuildConfig.REMOTE_BUILD_PROTOCOL_VERSION` 与 AutoJs6 Runtime Kit 的
-   `contract.remoteBuildProtocolVersion`.
+1. 判断是否需要提升 `APK_BUILD_VERSION`；密钥库接口独立判断是否提升 `KEYSTORE_VERSION`。
+2. 同步插件 `BuildConfig.APK_BUILD_PROTOCOL_VERSION` 与 AutoJs6 Runtime Kit 的
+   `contract.apkBuildProtocolVersion`；继续生成 `remoteBuildProtocolVersion` 供旧消费者兼容。
 3. 更新 `ApkBuilderTemplateCapabilityKeys`, 本文和宿主消费代码.
 4. 为向后协商和拒绝路径补用例.
 5. 运行 `RemoteApkBuildSessionInstrumentedTest` 与发布演练.
@@ -332,8 +373,9 @@ APK 只含公开摘要资产, 不含默认私钥库。44/44 JVM 回归、Release
 python scripts/verify_remote_build_protocol_docs.py
 ```
 
-当前门禁从 AIDL/Kotlin 真源提取 10 个远程方法、20 个 request 字段、10 个 result 字段、7 个 progress 字段、11 个
-extras 键、4 个远程 capability 键、4 个 status、6 个 step 与 1 个协议常量，共 73 个符号，并要求本文逐项出现。新增公开
+当前门禁从 AIDL/Kotlin 真源提取 11 个构建/密钥库方法、20 个 build request 字段、10 个 build result 字段、7 个 progress
+字段、11 个 extras 键、17 个 keystore request 字段、2 个 keystore result 字段、9 个正式/兼容 capability 键、4 个
+build status、6 个 step 与 4 个协议常量，共 101 个符号，并要求本文逐项出现。新增公开
 字段却未更新本文时 CI 失败。该检查只保证覆盖，不判断文字语义是否正确；G7 仍要求人工逐项复核。
 
 本仓库的会话端到端测试:

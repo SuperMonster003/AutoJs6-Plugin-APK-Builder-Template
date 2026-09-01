@@ -6,11 +6,14 @@
   "changelog_label_dependency": "依赖",
   "$data": {
     "v1.0.0": {
-      "released_date": "2026/09/01",
+      "released_date": "2026/09/02",
       "hint": [
+        "普通打包应用现正式依赖设备内 APK Builder 插件; 旧 supportsRemoteBuild 开关继续关闭, 但不再关闭普通打包",
         "插件独立版本线的首个正式发布, 精确配套 AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; 插件复合版本为 1.0.0+autojs6-6.8.0 (versionCode 527701), 插件中心通过 compat-matrix.json 选择配套 ABI 构建, 远程构建仍默认关闭"
       ],
       "feature": [
+        "将插件侧构建器提升为唯一正式设备内打包路径; AutoJs6 保持精简并独立复核每个返回 APK",
+        "通过带版本且失败关闭的签名库 API, 将 BKS/JKS 创建与验证完整迁入插件",
         "引入插件 SemVer 1.0.0, 独立构建号, 复合版本名与单调递增的 Android versionCode, 支持同一宿主发布多个插件构建",
         "新增 universal, arm64-v8a, armeabi-v7a, x86_64 与 x86 变体, 支持精确 ABI 选择及 universal 回退",
         "新增失败关闭的宿主兼容区间契约与权威兼容矩阵, 让经过显式验证的相邻补丁区间可共用一个插件构建"

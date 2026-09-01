@@ -64,6 +64,26 @@
   "p_license": "本專案基於 Mozilla Public License 2.0 開源, 允許在遵循該授權條款的前提下使用, 修改與散布.",
   "h3_resource_layout": "資源結構",
   "p_resource_layout": "`strings.xml` 提供外掛名稱, 描述和備援說明的本地化; `plugin_instruction.md` 提供宿主側展示的外掛使用說明. README 與 CHANGELOG 由 `.python/generate_markdown.py` 根據 JSON 語料產生; 修改文件請編輯對應 JSON 後重新執行指令碼, 不要直接編輯產生的檔案",
+  "p_introduction_plugin_managed": "AutoJs6 的 \"封裝應用程式\" 功能可把指令碼或專案產生為能獨立安裝和執行的 APK. 為保持主程式精簡, 體積較大的範本與全部封裝核心都由本外掛提供.\n\n本外掛沒有圖示和介面. AutoJs6 負責發現與驗證外掛, 準備有界請求並顯示進度; 外掛負責展開自身範本, 寫入專案與資源, 修改 Manifest/resources, 選擇 ABI, 管理簽章並傳回候選 APK; AutoJs6 最後獨立複核輸出再發布.\n\n整個過程都在同一台 Android 裝置上透過 Binder 與檔案描述元完成, 不會把專案原始碼上傳到網路或雲端建置服務.",
+  "p_how_it_works_plugin_managed": "封裝獨立應用程式時, AutoJs6 與本外掛按以下步驟協作:\n\n1. 准入: AutoJs6 驗證官方簽章, 啟用狀態, 宿主版本區間, ABI, 正式建置能力, 協定與裝置內執行模式\n2. 準備請求: AutoJs6 產生有大小邊界的專案/原生程式庫/簽章庫輸入, 並固定預期套件身分與簽署者\n3. 外掛建置: 外掛再次驗證請求, 展開自身 Runtime Kit 範本, 寫入專案, 修改 Manifest/resources, 裁剪 ABI 並簽章\n4. 傳回結果: 外掛透過唯讀檔案描述元傳回候選 APK, 並清理私有工作區\n5. 宿主發布: AutoJs6 重查大小, SHA-256, APK 結構, 簽章, 簽署者, 套件名稱與版本, 全部通過後才原子替換目標",
+  "features_plugin_managed": [
+    "完整擁有 AutoJs6 的裝置內封裝核心, 包括範本處理, 專案/資源寫入, Manifest 與 resources.arsc 修改, ABI 選擇, 簽章庫操作和簽章.",
+    "保持 AutoJs6 精簡: 宿主只負責 UI, 信任/相容准入, 請求準備, 取消/進度和輸出獨立複核, 不保留第二套建置器.",
+    "全部在同一台 Android 裝置上透過 Binder/AIDL 與 ParcelFileDescriptor 執行, 不上傳專案原始碼到網路或雲端.",
+    "每個外掛建置都與經過驗證的 AutoJs6 Runtime Kit 配對, 並可宣告經明確驗證的修補版本閉區間.",
+    "提供 universal, arm64-v8a, armeabi-v7a, x86_64 與 x86 變體, 支援精確 ABI 選擇及 universal 回退.",
+    "內建預設簽章庫, 並由外掛建立/驗證 BKS/JKS, 同時繼續支援自訂簽章庫.",
+    "外掛資訊, 使用說明, README 與 CHANGELOG 覆蓋 10 種語言."
+  ],
+  "boundaries_plugin_managed": [
+    "本外掛不能獨立使用: 它沒有圖示和介面, 只能由相容的 AutoJs6 宿主呼叫.",
+    "裝置內建置不是雲端建置: 本協定不會上傳專案原始碼.",
+    "AutoJs6 不再保留第二套處理程序內封裝核心. 外掛缺失, 被停用, 不受信任, 不相容或建置失敗時, 本次請求停止並保留舊產物.",
+    "Runtime Kit 仍由 AutoJs6 儲存庫產生; 外掛負責驗證, 封裝, 發布和使用該套件, 不自行創造執行階段範本.",
+    "舊 \"遠端建置\" 能力繼續為舊宿主保持關閉. 該名稱只表示另一個裝置內應用程式處理程序, 不是網際網路服務, 且與正式外掛託管能力分離."
+  ],
+  "p_faq_plugin_managed": "**問: 為什麼外掛必須與 AutoJs6 版本搭配?**\n\n答: 範本內的執行階段必須符合宿主 API. 外掛中心會從相容矩陣選擇最高相容外掛版本與最合適的 ABI 資產; 區間外宿主會被阻止.\n\n**問: 桌面上找不到外掛, 是安裝失敗嗎?**\n\n答: 不是. 外掛特意不提供圖示和介面, 只作為 AutoJs6 的背景服務執行; 可在系統 設定 > 應用程式 中確認.\n\n**問: 專案會傳送到遠端伺服器嗎?**\n\n答: 不會. 宿主與外掛只在同一台 Android 裝置的兩個應用程式處理程序之間通訊. 歷史原始碼稱 \"遠端建置\" 是因為 Binder 呼叫跨處理程序; 正式模式明確為 `on-device-plugin`.\n\n**問: 外掛建置失敗會怎樣?**\n\n答: AutoJs6 會停止請求, 顯示可行動錯誤並保留已有輸出 APK, 不會靜默切換到宿主內第二套建置器.",
+  "p_roadmap_plugin_managed": "ROADMAP.md 以可核查清單追蹤正式外掛託管建置, 發布候選, 分 ABI 交付, 相容性, 安全證據與 GA 後保證. 歡迎透過 Issues 參與討論.",
   "h3_links": "相關連結",
   "text_link_autojs6_repo": "AutoJs6 主專案",
   "text_link_autojs6_docs": "AutoJs6 文件"

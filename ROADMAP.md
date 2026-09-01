@@ -2,7 +2,7 @@
 
 本路线图跟踪 APK Builder Template 插件的能力规划与完成情况。README 面向最终用户, 深度工程内容集中在本文件与 `docs/`。
 
-开发哲学: **先保证 "打包应用" 稳定可用, 再逐步把实验性能力做扎实。**
+开发哲学: **让 APK Builder 插件完整拥有构建核心, 让 AutoJs6 保持精简并把安全准入与输出复核做扎实。**
 
 ## 分轨原则
 
@@ -14,8 +14,9 @@
 | **自主轨** | 本仓库或宿主仓库内的工程, 维护者自己即可关闭 | M1—M7 |
 | **外部轨** | 依赖独立审查者, 预览周期, 双维护者签字等外部输入 | M8 |
 
-**外部轨条目不参与 "功能完整且具备发布条件" 的判定。** 远程构建当前默认关闭 (`supportsRemoteBuild=false`),
-把它默认开启 (GA) 是独立的长期目标, 不是发布前置 —— 详见 M8 的范围声明。
+**外部轨条目不参与 "功能完整且具备发布条件" 的判定。** 正式路径使用 `supportsApkBuild=true` 与
+`apkBuilderBuildExecutionMode=on-device-plugin`; `supportsRemoteBuild=false` 只保留旧实验入口的关闭语义, 不再关闭普通打包。
+架构决策见 `docs/plugin-managed-apk-build-architecture.md`。
 
 ## 状态与证据规则
 
@@ -40,12 +41,12 @@
 |---|---|---|---|
 | M1 | 模板分发核心能力 | 自主 | 已完成 (v6.7.1 Alpha4 ~ v6.8.0 Alpha5) |
 | M2 | 文档易读性与多语言流水线 | 自主 | 已完成 |
-| M3 | 远程构建 (实验性, 默认关闭) | 自主 | 已完成 (能力, 协议, 启用标准与仓库内资格门槛均已收口) |
+| M3 | 插件侧构建基础 (历史实验协议) | 自主 | 已完成; 2026/09/02 迁移为 M7 正式插件托管路径 |
 | M4 | 体积与兼容性 | 自主 | 已完成 |
 | M5 | 校验与安全强化 | 自主 | 已完成 |
 | M6 | 插件独立版本机制与兼容矩阵 | 自主 | 进行中 (M6-1 至 M6-5 已完成; M6-6 待 M7 提供发布端点) |
-| **M7** | **首个正式发布 v1.0.0** | 自主 | **阻断 (M7-1 与 M7-2 已完成; 首轮签名候选在装机验收中被拒绝)** |
-| M8 | 远程构建默认启用 (GA) | 外部 | 未开始 (长期目标, 不阻塞发布) |
+| **M7** | **首个正式发布 v1.0.0 + 唯一插件托管构建路径** | 自主 | **进行中 (首轮候选已拒绝; 正在生成替代候选)** |
+| M8 | GA 后独立保证与兼容层收敛 | 外部 | 未开始 (长期目标, 不阻塞首发) |
 
 **当前 "具备发布条件" 的判定只取决于 M7。** M6-6 依赖 M7 产出的首个正式发布端点; M8 全部条目在发布之后继续推进。
 
@@ -73,26 +74,27 @@
   - 验收: 手改生成产物或改 JSON 后漏跑脚本的提交, 会在 CI 中失败并指出差异文件。
   - 证据: `.github/workflows/docs-consistency.yml` 在 push / pull request / 手动触发时重生成文档, 以 `git diff --exit-code` 和未跟踪文件检查作为门禁; 两类沙箱故障注入均按预期失败并列出差异文件 (2026/08/30)。
 
-## M3 —— 远程构建 (实验性, 默认关闭)
+## M3 —— 插件侧构建基础 (历史实验协议)
 
-> 主题: 把插件侧轻量打包 (解包模板, 写入项目, 重写 Manifest 与 `resources.arsc`, ABI 裁剪, 重新签名) 做到功能正确, 协议清晰,
-> 边界可控。**本里程碑的范围到 "实验性能力可用且仓库内资格门槛收口" 为止**; 默认开启属于 M8。
+> 历史主题: 把插件侧轻量打包 (解包模板, 写入项目, 重写 Manifest 与 `resources.arsc`, ABI 裁剪, 重新签名) 做到功能正确,
+> 协议清晰, 边界可控。早期因跨应用进程而称为“远程构建”，实际从未经过网络。
 >
-> 当前默认关闭, 仅在使用 `-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true` 构建的插件中可用。
+> 2026/09/02 迁移结论: 这些实现与证据成为唯一正式“设备内插件托管构建”的基础；正式能力使用
+> `supportsApkBuild` / `APK_BUILD_VERSION` / `on-device-plugin`，不受旧实验开关控制。旧 remote 能力键和内部类名仅作兼容保留。
 
 - [x] [P] **M3-0 TypeScript 构建暂存加密保护**: 远程构建过程中的 TypeScript 暂存内容加密处理, 避免以明文落盘。证据: 提交 `e7f4918`, `RemoteScriptEncryptor.kt`, `RemoteTypeScriptStagingDecryptor.kt`。
-- [x] [P] **M3-1 远程构建端到端用例**
+- [x] [P] **M3-1 插件侧构建端到端用例**
   - 内容: 覆盖构建会话的四类结局 (成功 / 取消 / UNSUPPORTED / 宿主不匹配含 `allowRiskyBuild` 分支), 以及单文件源与项目源两种输入形态。
   - 验收: 用例以 instrumented tests 或可复跑的演练清单形式合入, 全部通过; 失败路径均能拿到明确的 `warnings` / `errors`。
   - 证据: `RemoteApkBuildSessionInstrumentedTest.kt` 39 个测试方法, 五档 API/ABI 各 15 条功能矩阵 0 skipped/failed, API 36/x86_64 整类 39/39。复跑与剩余边界见 `docs/remote-build-e2e-drill.md`, 完整记录见 `docs/evidence/m3-4-gates.md` 第 3 节。
-- [x] [P] **M3-2 远程构建协议文档化**
-  - 内容: 以 `plugin-api/apk-builder-template` 的 AIDL (`IApkBuildSession`, `IApkBuildCallback`, `ApkBuildRequest`, `ApkBuildResult`) 为准编写 `docs/remote-build-protocol.md`, 说明 `REMOTE_BUILD_VERSION` 协商, 进度步骤与错误语义。
+- [x] [P] **M3-2 构建协议文档化**
+  - 内容: 以 `plugin-api/apk-builder-template` 的 AIDL (`IApkBuildSession`, `IApkBuildCallback`, `ApkBuildRequest`, `ApkBuildResult`) 为准编写 `docs/remote-build-protocol.md`, 说明正式 `APK_BUILD_VERSION`、旧 `REMOTE_BUILD_VERSION` 别名、密钥库接口、进度步骤与错误语义。
   - 验收: 文档字段与 AIDL 一一对应; 协议版本号变更时文档同步更新。
-  - 证据: `docs/remote-build-protocol.md` 覆盖能力发现, 双版本协商, 会话生命周期, request / extras / project JSON 字段, ZIP 布局, FD 所有权, 进度与 result / callback / status 映射, 安全边界与升版清单; `scripts/verify_remote_build_protocol_docs.py` 从真源核对 73 个公开符号 (73/73), 已接入 `docs-consistency.yml`。
-- [x] [H+P] **M3-3 制定默认启用条件**
+  - 证据: `docs/remote-build-protocol.md` 覆盖正式/兼容能力发现、会话生命周期、request / extras / project JSON / keystore 字段、ZIP 布局、FD 所有权、进度与 result / callback / status 映射、安全边界与升版清单; `scripts/verify_remote_build_protocol_docs.py` 从真源核对 101 个公开符号 (101/101), 已接入 `docs-consistency.yml`。
+- [x] [H+P] **M3-3 历史实验放量条件**
   - 内容: 明确远程构建从 experimental 到默认开启的判定标准 (稳定性指标, 宿主侧开关与回退策略)。
   - 验收: 标准落入本路线图或 `docs/`; README 的 "能力边界" 与 FAQ 同步更新。
-  - 证据: `docs/remote-build-rollout.md` 定义 G1—G7 硬门槛与 R0—R4 放量/回滚触发器; `docs/remote-build-fallback-decision.md` (2026/08/31) 采纳分阶段修订门槛。当前判定 **No-Go**, 10 语言 README 与 11 份插件说明保持 "实验性, 官方构建默认关闭" 的一致文案。
+  - 证据: `docs/remote-build-rollout.md` 与 `docs/remote-build-fallback-decision.md` 保存 2026/09/01 前的实验路径决策与证据。其“恢复第二构建器后才能默认启用”结论已由 2026/09/02 架构 ADR 取代，不再作为正式路径发布门槛。
 - [x] [P] **M3-4 资格门槛的仓库内工程部分**
   - 内容: 按 `docs/remote-build-rollout.md` 完成 G1—G7 中**不依赖外部输入**的全部工程与自动化: 功能矩阵, 稳定性批次, 双构建器等价性, 性能与压力, 安全实现与自动化审计, 宿主 R1 控制面。
   - 验收: 上述各项均有可复核的设备 / 单测 / 脚本证据; 依赖外部审查者, 预览周期或他人签字的部分转入 M8, 不计入本条。
@@ -106,11 +108,12 @@
     | G4 性能与设备压力 | [x] | 三档 p95 均低于 1.5x, 大小差异低于 2%; 1.5 GiB 为最低资格档 |
     | G5 完整性与安全 (仓库内) | [x] | 有界解压, 输出结构/签名者身份绑定, 敏感数据审计, 确定性 fuzz 均已收口 |
     | G6 R1 控制面 | [x] | 默认关闭总开关, 能力门禁, 失败停止, 原子输出, 脱敏诊断, Binder death |
-    | G5 独立安全审查 | → M8-1 | 需外部审查者, 硬阻断 |
-    | G6 R2/R3 独立回退 | → M8-2 | 宿主侧独立构建路径尚未实现 |
-    | G7 发布与支持 | → M8-3 | 需正式签名候选, 预览周期与双维护者签字 |
+    | G5 独立安全审查 | → M8-1 | 需外部审查者; GA 后增强项, 不阻塞 M7 |
+    | G6 R2/R3 独立回退 | 历史条件 | 2026/09/02 ADR 已以唯一插件路径取代恢复第二构建器的方向 |
+    | G7 发布与支持 | → M7 | 由替代正式候选、五 ABI 资产与装机闭环承接 |
 
-  - 阶段结论: 仓库内工程已全部收口; 当前阶段 **R0**, 官方 `supportsRemoteBuild=false`, **No-Go for default**。
+  - 阶段结论: 仓库内工程证据已收口。历史实验入口继续保持 `supportsRemoteBuild=false`; 正式路径改由
+    `supportsApkBuild=true` 独立准入，并把这些历史资格证据作为实现基线而非第二条构建路径的放量依据。
 
 ## M4 —— 体积与兼容性
 
@@ -177,13 +180,17 @@
 > 主题: **把已完成的能力真正交付出去。** 这是当前唯一决定 "项目是否具备发布条件" 的里程碑。
 >
 > 范围声明: 本次发布**包含**模板分发 (M1), 多语言文档 (M2), 五 ABI 变体 (M4-1), 补丁级兼容 (M4-2),
-> 设备端签名门禁 (M5), 独立版本与兼容矩阵 (M6-1—M6-5); **远程构建随包提供但默认关闭**, 且在 10 语言文案中
-> 明确标注为实验性。M8 的任何条目都不是本里程碑的前置。
+> 设备端签名门禁 (M5), 独立版本与兼容矩阵 (M6-1—M6-5), 以及唯一正式的设备内插件托管构建路径。
+> 旧实验入口继续 `supportsRemoteBuild=false`; M8 的任何条目都不是本里程碑的前置。
 >
 > 2026/09/01 候选审计结论: 上述范围在当前宿主架构中尚不可同时满足。AutoJs6 `b2fd2b6ae` 已移除完整的宿主
 > 本地构建器, 而候选 `71e684b8d` 又按 R0 规则默认关闭远程总开关; 官方插件也上报 `supportsRemoteBuild=false`。
 > 因此普通打包入口没有可执行路径。首轮签名候选已按失败关闭原则拒绝, 在重新建立非实验性打包路径并完成新候选装机
 > 验收前, **禁止运行正式发布路径**。完整证据见 `docs/v1.0.0-rc1-candidate-audit-2026-09-01.md`。
+>
+> 2026/09/02 已采纳替代架构: 不恢复 AutoJs6 进程内构建器，而把插件侧构建正式化。宿主只负责发现/信任/兼容准入、请求准备、
+> UI 与输出独立复核；插件独占模板处理、资源修改、ABI 裁剪、密钥库与签名。正式能力与旧实验键分离，详见
+> `docs/plugin-managed-apk-build-architecture.md`。该决策需由新的精确宿主 SHA、五 ABI 插件候选和完整装机闭环重新验收。
 
 - [x] [P] **M7-1 整理未提交实现为可审阅提交**
   - 内容: 将此前两个工作树中的实现 (远程构建加固, 输出复核, 脱敏审计, 协议门禁, 文档语料等) 固定为可定位, 可复核的提交。
@@ -191,12 +198,14 @@
   - 证据: 插件侧 `e7f4918` (TypeScript 暂存保护), `9587f28` (远程构建/发布流程收口) 与 PR [#5](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/pull/5), 宿主侧 `71e684b8d` (插件中心与能力集成); 2026/09/01 两个主工作树均为干净状态。
 - [x] [P] **M7-2 全量门禁绿灯**
   - 内容: 在整理后的提交上跑通全部既有门禁。
-  - 验收: `docs-consistency.yml` (含 `.python/generate_markdown.py` + `git diff --exit-code`), `scripts/verify_remote_build_protocol_docs.py` 73/73, Python 回归全绿, `:app:verifyApkBuilderRuntimeKit` 通过, 插件 app / API 单测与 Release Kotlin 编译通过。
+  - 验收: `docs-consistency.yml` (含 `.python/generate_markdown.py` + `git diff --exit-code`), `scripts/verify_remote_build_protocol_docs.py` 101/101, Python 回归全绿, `:app:verifyApkBuilderRuntimeKit` 通过, 插件 app / API 单测与 Release Kotlin 编译通过。
   - 证据: 2026/09/01 在插件发布候选上重生成文档后差异为 0, 协议真源覆盖 73/73, Python 回归 25/25 (含 Release evidence 与候选隔离失败关闭用例); Gradle Runtime Kit 门禁, app/API 单测与 `:app:compileReleaseKotlin` 强制重跑 166/166 任务通过。PR #5 的 push/PR 文档门禁 ([33477042749](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477042749), [33477047543](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477047543)) 与签名配置门禁 ([33477047547](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477047547)) 全绿。
+  - 正式路径复验: 2026/09/02 协议文档扩展为 101/101, Python 回归 25/25, 精确 Runtime Kit 的插件 API/app 单测、Release Kotlin、Runtime Kit 校验与 AndroidTest 编译通过；Sony G8441 上最终 arm64 Debug 设备类 45/45 通过。
 - [ ] [P] **M7-3 版本定档**
   - 内容: 确定首发版本三元组 —— `PLUGIN_VERSION_NAME=1.0.0`, `PLUGIN_VERSION_BUILD`, `PLUGIN_RELEASE_SEQ`, 以及由 `hostVersionCode * 100 + 序号` 推出的 versionCode 与复合 versionName。确认配对宿主版本与兼容区间。
   - 验收: `version.properties` 与生成的 APK 元数据一致; versionCode 相对既有装机 (5201) 保持单调递增; 复合 versionName 与双版本文件名符合 `docs/versioning.md`。
   - 首轮候选: 已将 AutoJs6 源提交精确固定为 `71e684b8dc1a59783293e0ad282638e3a88e37b6`, 配对 `6.8.0 / 5277`, 精确兼容区间 `5277..5277`, 首发三元组 `1.0.0 / build 1 / seq 1`, 推导 Android versionCode `527701` 与复合 versionName `1.0.0+autojs6-6.8.0`; 私有 Actions artifact 端点完成来源绑定与签名构建。该源候选因 M7-6 装机阻断被拒绝, 所以本条保持未完成; 替代候选必须修复非实验性打包路径并重新固定新的精确源 SHA。
+  - 替代候选: 保持 `6.8.0 / 5277` 与首发插件三元组不变；包含正式插件托管构建能力的新 AutoJs6 精确 SHA 已固定为 `18e6b28b469ec8192a129945cebf87b090590425`。五套本地 Runtime Kit 均绑定该 SHA，正式协议为 3；维护者确认该 SHA 前不得运行候选专用受信工作流，且本阶段不创建公开 Release。
 - [ ] [P] **M7-4 受信流水线产出五 ABI 签名资产**
   - 内容: 用 `build-from-runtime-kit.yml` 的 `workflow_dispatch` (输入 AutoJs6 tag) 从确定提交产出 universal + 四个 ABI 的**正式签名** APK。本地 unsigned / debug 产物不计。
   - 验收: 五个资产齐全, `SIGNING_CERT_SHA256` 证书指纹校验通过, 逐个记录文件名, 大小, SHA-256, 签名证书摘要, 插件版本, 宿主范围, Runtime Kit ID 与协议版本。
@@ -209,39 +218,30 @@
   - 本地矩阵预演: 同一候选的五个 APK 已成功合并为单个 `v1.0.0 / 527701` 条目, `universal`, `arm64-v8a`, `armeabi-v7a`, `x86_64`, `x86` 均解析到对应资产; 权威矩阵仍保持为空, 等待 M7-4 的正式 Release URL 与签名资产后由流水线原子写入。
 - [ ] [H+P] **M7-6 装机验收**
   - 内容: 在真实设备 / AVD 上走完 `docs/e2e-release-drill.md` 的核心场景: 插件中心按矩阵解析 → 下载匹配版本 → 安装 → 打包应用 → 安装产物并冷启动。
-  - 验收: 场景 1 (匹配版本安装) 与场景 7 (兼容区间行为) 通过; 签名门禁对官方资产放行; 远程构建入口保持不可见 / 不可用。
+  - 验收: 场景 1 (匹配版本安装) 与场景 7 (兼容区间行为) 通过; 签名门禁对官方资产放行；普通“打包应用”经
+    `supportsApkBuild` 正式路径完成产物安装与冷启动；旧实验开关保持关闭且不影响普通打包。
   - 首轮候选结果: **失败 / No-Go**。Sony G8441 (Android 9 / API 28 / arm64-v8a) 全新安装精确源宿主与官方签名 arm64 候选后, 插件中心正确识别并启用 `1.0.0+autojs6-6.8.0 / 527701 / inrt-arm64-v8a`, 但打包入口在传输模板前报告插件不可用与远程总开关关闭。源码追踪确认 `TemplateApkResolver` 只解析远程构建候选, `BuildActivity` 只调用 `RemoteApkBuildClient`; 在 `supportsRemoteBuild=false` 与宿主开关默认关闭时无普通打包路径。未生成可安装输出, 因此安装/冷启动阶段不能继续。证据级别 T1, 详见 `docs/v1.0.0-rc1-candidate-audit-2026-09-01.md`。
-- [ ] [P] **M7-7 发行文案定稿**
-  - 内容: 10 语言 CHANGELOG 补记 v1.0.0, 写明精确宿主 / 插件 / Runtime Kit 版本与 "远程构建默认关闭"; README 的能力边界与 FAQ 保持 R0 语义, **不提前宣传远程构建**。
+  - 替代候选本地结果: **Debug 路径通过，正式签名候选仍待执行**。同一 G8441 上，宿主 `18e6b28b4` 与精确 arm64 Runtime Kit 插件在旧实验偏好键缺失（默认 `false`）时，从普通“Build APK”入口完成插件私有进程构建、签名、宿主发布复核、独立签名校验、安装与冷启动；最终 UI/logcat 命中 `PLUGIN BUILD SMOKE OK`，设备类 45/45。该证据不含生产签名、矩阵下载或受信候选工作流，故本条保持未完成。详见 `docs/v1.0.0-plugin-managed-local-smoke-2026-09-02.md`。
+- [x] [P] **M7-7 发行文案定稿**
+  - 内容: 10 语言 CHANGELOG 补记 v1.0.0, 写明精确宿主 / 插件 / Runtime Kit 版本与“构建核心完全由设备内插件承担”；README 与插件说明明确不上传项目、不再存在宿主内第二构建器，并把“远程构建”解释为旧兼容名称。
   - 验收: 生成器校验通过, `docs-consistency.yml` 绿灯, 10 语言键序与占位符断言无残留。
-  - 证据级别: T3。
+  - 证据: 2026/09/02 十语言 CHANGELOG、README 与 11 套插件说明均已迁移到唯一 `on-device-plugin` 正式路径；明确项目不上传、宿主不存在第二构建器、旧 remote 名称只作兼容保留。生成器、JSON 解析、占位符与协议文档 101/101 校验通过。证据级别 T3。
 
-## M8 —— 远程构建默认启用 (GA)
+## M8 —— GA 后独立保证与兼容层收敛
 
-> 主题: 把默认关闭的实验能力推进到默认开启。**长期目标, 依赖外部输入, 不阻塞 M7 发布, 也不影响 "功能完整" 判定。**
->
-> 本里程碑承接 M3-4 中所有无法由维护者单方关闭的门槛。判定标准见 `docs/remote-build-rollout.md` (G1—G7, R0—R4),
-> 材料索引见 `docs/remote-build-release-evidence-index.md`, 逐门槛记录见 `docs/evidence/m3-4-gates.md`。
->
-> **推进顺序: M8-3 的签名候选依赖 M7 建立的受信发布流程, 因此 M8 的实质推进应在 M7 之后。**
+> 主题: 在唯一正式插件托管路径稳定发布后继续提高独立保证、可观测性与协议整洁度。**长期目标, 不阻塞 M7 首发。**
+> 旧 `docs/remote-build-rollout.md`、回退 ADR 和证据索引作为历史审计保留；其中要求恢复宿主第二构建器的 R2/R3 条件已被
+> 2026/09/02 架构 ADR 取代，不再是产品方向。
 
-| 条目 | 阻塞类型 |
-|---|---|
-| M8-1 独立安全审查 | 外部人 |
-| M8-2 R2 独立回退 | 宿主工程 (自主, 但仅 GA 需要) |
-| M8-3 发布与支持门槛 | 外部人 + 日历时间 |
-| M8-4 分阶段放量 | 日历时间 |
-
-- [ ] [H+P] **M8-1 G5 独立安全审查**
-  - 内容: 按 `docs/remote-build-independent-security-review.md` 固定的源码快照, 攻击面与必审范围, 由独立审查者完成评审并处理发现。
-  - 验收: Critical/High 未解决为 0, 审查决定栏填写完毕并引用精确的内容寻址 manifest 摘要。
-  - 说明: **不建议削减此项。** 远程构建会解未信任 ZIP, 改写 Manifest 与 `resources.arsc` 并重新签名 APK, 是真实攻击面。它挂在 "默认开启" 这道门上, 而不是 "能否发布" 这道门上。
-- [ ] [H] **M8-2 R2 真正独立的构建回退**
-  - 内容: 在宿主侧实现与远程构建完全独立的构建路径, 含一次远程 / 一次回退的循环保护与取消共享。关闭总开关不能冒充回退 —— 见 `docs/remote-build-fallback-decision.md`。
-  - 验收: 独立路径, 循环保护, 取消共享与产物等价性均有设备证据。这是进入 R2/R3 的硬前置。
-- [ ] [H+P] **M8-3 G7 发布与支持门槛**
-  - 内容: 由受信工作流生成显式开启能力的正式签名五 ABI 候选; 在默认关闭, 显式 opt-in 的 R1 语义下完成一个完整宿主预览周期; 宿主与插件维护者对同一内容寻址候选分别签字。
-  - 验收: `docs/remote-build-release-evidence-index.md` 第 7 / 8 节的全部 `PENDING` 栏填写完毕, 两人引用的候选摘要一致。
-- [ ] [H+P] **M8-4 R1 → R3 分阶段放量**
-  - 内容: 按 `docs/remote-build-rollout.md` 的 R0—R4 推进, 含至少 14 天受控灰度。
-  - 验收: R1 仅允许默认关闭的显式试用且失败停止; R2 前必须完成 M8-2; R3 默认启用后仍保留可即时关闭的开关与独立构建回退。
+- [ ] [H+P] **M8-1 独立安全审查**
+  - 内容: 按既有独立审查范围增加正式能力键、密钥库接口、宿主准入与输出复核，固定双仓库精确源码快照后交由独立审查者。
+  - 验收: Critical/High 未解决为 0，决定栏引用同一内容寻址 manifest；发现项进入公开可追踪修复流程。
+- [ ] [H+P] **M8-2 完整预览周期与支持数据**
+  - 内容: 对唯一插件路径观察至少一个完整宿主预览周期，按 ABI/API/项目类型收集脱敏终态、Binder 失联、取消、超时和输出拒绝分类。
+  - 验收: 没有损坏、错签、数据泄露或不可恢复升级链问题；所有新增失败都有可行动分类和回归用例。
+- [ ] [H+P] **M8-3 旧实验兼容层弃用计划**
+  - 内容: 盘点仍使用 `supportsRemoteBuild`、`REMOTE_BUILD_VERSION` 与旧开发者开关的宿主版本，制定不少于两个稳定版本的弃用窗口。
+  - 验收: 删除前有使用证据、迁移说明和兼容测试；不得重排既有 AIDL 事务或 Parcelable 字段。
+- [ ] [H+P] **M8-4 将来真正的离设备构建另立 ADR**
+  - 内容: 如未来需要云端/局域网构建，使用全新能力键、认证、隐私、传输和威胁模型，不复用 `on-device-plugin` 或旧 remote 语义。
+  - 验收: 明确用户授权、源码数据边界、端到端加密、服务身份、失败回收与本地插件路径关系后，才允许进入实现。

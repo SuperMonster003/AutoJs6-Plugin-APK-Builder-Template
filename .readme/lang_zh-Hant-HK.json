@@ -64,6 +64,26 @@
   "p_license": "本項目基於 Mozilla Public License 2.0 開源, 允許在遵循該協議的前提下使用, 修改與分發.",
   "h3_resource_layout": "資源結構",
   "p_resource_layout": "`strings.xml` 提供插件名稱, 描述和兜底說明的本地化; `plugin_instruction.md` 提供宿主側展示的插件使用說明. README 與 CHANGELOG 由 `.python/generate_markdown.py` 根據 JSON 語料生成; 修改文檔請編輯對應 JSON 後重新運行腳本, 不要直接編輯生成產物",
+  "p_introduction_plugin_managed": "AutoJs6 的 \"打包應用\" 功能可把腳本或項目生成能獨立安裝和運行的 APK. 為保持主程式精簡, 體積較大的模板與全部打包核心都由本插件提供.\n\n本插件沒有圖示和介面. AutoJs6 負責發現與校驗插件, 準備有界請求並顯示進度; 插件負責展開自身模板, 寫入項目與資源, 修改 Manifest/resources, 選擇 ABI, 管理簽名並返回候選 APK; AutoJs6 最後獨立覆核輸出再發布.\n\n整個過程都在同一台 Android 裝置上透過 Binder 與檔案描述符完成, 不會把項目原始碼上傳到網絡或雲端構建服務.",
+  "p_how_it_works_plugin_managed": "打包獨立應用時, AutoJs6 與本插件按以下步驟協作:\n\n1. 准入: AutoJs6 校驗官方簽名, 啟用狀態, 宿主版本區間, ABI, 正式構建能力, 協議與裝置內執行模式\n2. 準備請求: AutoJs6 生成有大小邊界的項目/原生庫/簽名庫輸入, 並固定預期包身份與簽名者\n3. 插件構建: 插件再次校驗請求, 展開自身 Runtime Kit 模板, 寫入項目, 修改 Manifest/resources, 裁剪 ABI 並簽名\n4. 返回結果: 插件透過唯讀檔案描述符返回候選 APK, 並清理私有工作區\n5. 宿主發布: AutoJs6 重查大小, SHA-256, APK 結構, 簽名, 簽名者, 包名與版本, 全部通過後才原子替換目標",
+  "features_plugin_managed": [
+    "完整擁有 AutoJs6 的裝置內打包核心, 包括模板處理, 項目/資源寫入, Manifest 與 resources.arsc 修改, ABI 選擇, 簽名庫操作和簽名.",
+    "保持 AutoJs6 精簡: 宿主只負責 UI, 信任/兼容准入, 請求準備, 取消/進度和輸出獨立覆核, 不保留第二套構建器.",
+    "全部在同一台 Android 裝置上透過 Binder/AIDL 與 ParcelFileDescriptor 執行, 不上傳項目原始碼到網絡或雲端.",
+    "每個插件構建都與經過校驗的 AutoJs6 Runtime Kit 配對, 並可聲明經顯式驗證的補丁版本閉區間.",
+    "提供 universal, arm64-v8a, armeabi-v7a, x86_64 與 x86 變體, 支援精確 ABI 選擇及 universal 回退.",
+    "內置預設簽名庫, 並由插件建立/驗證 BKS/JKS, 同時繼續支援自訂簽名庫.",
+    "插件資訊, 使用說明, README 與 CHANGELOG 覆蓋 10 種語言."
+  ],
+  "boundaries_plugin_managed": [
+    "本插件不能獨立使用: 它沒有圖示和介面, 只能由兼容的 AutoJs6 宿主調用.",
+    "裝置內構建不是雲端構建: 本協議不會上傳項目原始碼.",
+    "AutoJs6 不再保留第二套進程內打包核心. 插件缺失, 被停用, 不受信任, 不兼容或構建失敗時, 本次請求停止並保留舊產物.",
+    "Runtime Kit 仍由 AutoJs6 倉庫生成; 插件負責校驗, 封裝, 分發和使用該套件, 不自行創造運行時模板.",
+    "舊 \"遠程構建\" 能力繼續為舊宿主保持關閉. 該名稱只表示另一個裝置內應用進程, 不是互聯網服務, 且與正式插件託管能力分離."
+  ],
+  "p_faq_plugin_managed": "**問: 為什麼插件必須與 AutoJs6 版本配套?**\n\n答: 模板內的運行時必須匹配宿主 API. 插件中心會從兼容矩陣選擇最高兼容插件版本與最合適的 ABI 資產; 區間外宿主會被阻止.\n\n**問: 桌面上找不到插件, 是安裝失敗嗎?**\n\n答: 不是. 插件特意不提供圖示和介面, 只作為 AutoJs6 的後台服務運行; 可在系統 設定 > 應用程式 中確認.\n\n**問: 項目會發送到遠程伺服器嗎?**\n\n答: 不會. 宿主與插件只在同一台 Android 裝置的兩個應用進程之間通信. 歷史源碼稱 \"遠程構建\" 是因為 Binder 調用跨進程; 正式模式明確為 `on-device-plugin`.\n\n**問: 插件構建失敗會怎樣?**\n\n答: AutoJs6 會停止請求, 顯示可行動錯誤並保留已有輸出 APK, 不會靜默切換到宿主內第二套構建器.",
+  "p_roadmap_plugin_managed": "ROADMAP.md 以可核查清單跟蹤正式插件託管構建, 發布候選, 分 ABI 交付, 兼容性, 安全證據與 GA 後保證. 歡迎透過 Issues 參與討論.",
   "h3_links": "相關連結",
   "text_link_autojs6_repo": "AutoJs6 主項目",
   "text_link_autojs6_docs": "AutoJs6 文件"

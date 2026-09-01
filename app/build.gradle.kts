@@ -113,6 +113,8 @@ android {
         buildConfigField("String", "HOST_VERSION_NAME", "\"${versions.appVersionName}\"")
         buildConfigField("long", "HOST_VERSION_CODE", "${versions.appVersionCode}L")
         buildConfigField("int", "PROTOCOL_VERSION", "2")
+        buildConfigField("boolean", "ENABLE_APK_BUILD", "true")
+        buildConfigField("int", "APK_BUILD_PROTOCOL_VERSION", "3")
         buildConfigField("boolean", "ENABLE_REMOTE_BUILD", enableRemoteBuild.get().toString())
         buildConfigField("int", "REMOTE_BUILD_PROTOCOL_VERSION", "3")
         buildConfigField(
@@ -178,6 +180,7 @@ dependencies {
     implementation(project(":modules:android-arsc-editor"))
     implementation(project(":modules:apk-signer"))
     implementation(libs.arsclib)
+    implementation(libs.prov)
     testImplementation(libs.junit)
     androidTestImplementation(libs.test.ext.junit)
     androidTestImplementation(libs.test.runner)

@@ -33,8 +33,11 @@ class ReleaseEvidenceTest(unittest.TestCase):
 
             self.assertEqual("1.0.0+autojs6-6.8.0", evidence["plugin"]["compositeVersionName"])
             self.assertEqual(527701, evidence["plugin"]["versionCode"])
+            self.assertTrue(evidence["plugin"]["apkBuildEnabledByDefault"])
+            self.assertEqual("on-device-plugin", evidence["plugin"]["apkBuildExecutionMode"])
             self.assertFalse(evidence["plugin"]["remoteBuildEnabledByDefault"])
             self.assertEqual(5277, evidence["host"]["minCompatibleVersionCode"])
+            self.assertEqual(3, evidence["protocol"]["apkBuildProtocolVersion"])
             self.assertEqual(3, evidence["protocol"]["remoteBuildProtocolVersion"])
             self.assertFalse(evidence["publication"]["candidateOnly"])
             self.assertEqual("github-release", evidence["publication"]["channel"])
@@ -199,6 +202,7 @@ def runtime_kit_metadata(variant: str, supported_abis: list[str], runtime_kit_id
         },
         "contract": {
             "apkBuilderProtocolVersion": 2,
+            "apkBuildProtocolVersion": 3,
             "remoteBuildProtocolVersion": 3,
             "runtimeApiLevel": 5277,
             "runtimeApiHash": "3" * 64,

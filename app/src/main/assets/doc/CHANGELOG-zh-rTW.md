@@ -6,9 +6,12 @@
 
 # v1.0.0
 
-###### 2026/09/01
+###### 2026/09/02
 
+* `提示` 一般封裝應用程式現正式依賴裝置內 APK Builder 外掛; 舊 supportsRemoteBuild 開關繼續關閉, 但不再關閉一般封裝
 * `提示` 外掛獨立版本線的首個正式發佈, 精確配套 AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; 外掛複合版本為 1.0.0+autojs6-6.8.0 (versionCode 527701), 外掛中心透過 compat-matrix.json 選擇配套 ABI 建置, 遠端建置仍預設關閉
+* `新增` 將外掛側建置器提升為唯一正式裝置內封裝路徑; AutoJs6 保持精簡並獨立複核每個傳回 APK
+* `新增` 透過帶版本且失敗關閉的簽章庫 API, 將 BKS/JKS 建立與驗證完整遷入外掛
 * `新增` 導入外掛 SemVer 1.0.0, 獨立建置編號, 複合版本名稱與單調遞增的 Android versionCode, 支援同一宿主發佈多個外掛建置
 * `新增` 新增 universal, arm64-v8a, armeabi-v7a, x86_64 與 x86 變體, 支援精確 ABI 選擇及 universal 備援
 * `新增` 新增失敗關閉的宿主相容區間契約與權威相容矩陣, 讓經過明確驗證的相鄰修補區間可共用一個外掛建置

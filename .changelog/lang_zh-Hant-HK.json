@@ -6,11 +6,14 @@
   "changelog_label_dependency": "依賴",
   "$data": {
     "v1.0.0": {
-      "released_date": "2026/09/01",
+      "released_date": "2026/09/02",
       "hint": [
+        "普通打包應用現正式依賴裝置內 APK Builder 插件; 舊 supportsRemoteBuild 開關繼續關閉, 但不再關閉普通打包",
         "外掛程式獨立版本線的首個正式發佈, 精確配套 AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; 外掛程式複合版本為 1.0.0+autojs6-6.8.0 (versionCode 527701), 外掛程式中心透過 compat-matrix.json 選擇配套 ABI 構建, 遠端構建仍預設關閉"
       ],
       "feature": [
+        "將插件側構建器提升為唯一正式裝置內打包路徑; AutoJs6 保持精簡並獨立覆核每個返回 APK",
+        "透過帶版本且失敗關閉的簽名庫 API, 將 BKS/JKS 建立與驗證完整遷入插件",
         "引入外掛程式 SemVer 1.0.0, 獨立構建號, 複合版本名稱與單調遞增的 Android versionCode, 支援同一宿主發佈多個外掛程式構建",
         "新增 universal, arm64-v8a, armeabi-v7a, x86_64 與 x86 變體, 支援精確 ABI 選擇及 universal 後備",
         "新增失敗關閉的宿主兼容區間契約與權威兼容矩陣, 讓經過明確驗證的相鄰修補區間可共用一個外掛程式構建"

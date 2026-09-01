@@ -11,4 +11,4 @@ Runtime Kit は検証済みのパッチ区間を明示的に対象にできま�
 - `default_key_store.bks`
 - `runtime-kit.json`
 
-リモートビルド対応は既定で無効です. `-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true` で作成されたビルドでのみ有効化できます.
+包装は同じ Android 端末上のプラグインプロセス内で完結し, プロジェクトのソースは送信されません. AutoJs6 は信頼性と互換性を判定し, 返された APK を独立して検証します. 旧 `supportsRemoteBuild` スイッチは無効のままですが, この正式経路は無効になりません.

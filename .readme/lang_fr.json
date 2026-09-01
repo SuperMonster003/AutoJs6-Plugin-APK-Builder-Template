@@ -64,6 +64,26 @@
   "p_license": "Ce projet est publié sous la Mozilla Public License 2.0, qui permet l'utilisation, la modification et la distribution selon ses termes.",
   "h3_resource_layout": "Structure Des Ressources",
   "p_resource_layout": "`strings.xml` contient les noms, descriptions et instructions de secours localisés du plugin ; `plugin_instruction.md` contient les instructions affichées par l'hôte. Les fichiers README et CHANGELOG sont générés depuis les sources JSON par `.python/generate_markdown.py` ; pour modifier la documentation, éditez les JSON puis relancez le script au lieu de modifier les fichiers générés",
+  "p_introduction_plugin_managed": "La fonction \"Empaqueter l'application\" d'AutoJs6 transforme un script ou un projet en APK autonome. Pour alléger l'application principale, le modèle volumineux et tout le cœur d'empaquetage résident dans ce plugin.\n\nLe plugin n'a ni icône ni interface. AutoJs6 le découvre et le valide, prépare une requête bornée et affiche la progression. Le plugin décompresse son propre modèle, écrit le projet et les ressources, modifie Manifest/resources, choisit les ABI, gère la signature et renvoie un APK candidat. AutoJs6 vérifie indépendamment ce résultat avant de le publier.\n\nTout s'exécute sur le même appareil Android via Binder et des descripteurs de fichier. Le code source du projet n'est envoyé ni sur le réseau ni vers un service de build cloud.",
+  "p_how_it_works_plugin_managed": "Lors de l'empaquetage, AutoJs6 et le plugin coopèrent ainsi :\n\n1. Admission : AutoJs6 vérifie signature officielle, activation, intervalle d'hôte, ABI, capacité formelle, protocole et exécution sur l'appareil\n2. Préparation : AutoJs6 crée des entrées bornées projet/bibliothèques/keystore et fixe l'identité attendue du package et du signataire\n3. Build du plugin : il valide la requête, ouvre son modèle Runtime Kit, écrit le projet, modifie Manifest/resources, élague les ABI et signe\n4. Résultat : il renvoie l'APK candidat par descripteur en lecture seule et nettoie son espace privé\n5. Publication : AutoJs6 revérifie taille, SHA-256, structure, signature, signataire, package et version, puis remplace atomiquement la cible",
+  "features_plugin_managed": [
+    "Possède tout le cœur d'empaquetage sur l'appareil : modèle, projet/ressources, Manifest et resources.arsc, ABI, keystores et signature.",
+    "Maintient AutoJs6 léger : l'hôte fournit UI, admission de confiance/compatibilité, préparation, annulation/progression et validation indépendante, pas un second builder.",
+    "S'exécute entièrement sur le même appareil via Binder/AIDL et ParcelFileDescriptor ; aucun projet n'est envoyé sur Internet ou dans le cloud.",
+    "Associe chaque build du plugin à un Runtime Kit AutoJs6 validé et prend en charge des intervalles fermés de correctifs vérifiés.",
+    "Fournit les variantes universal, arm64-v8a, armeabi-v7a, x86_64 et x86 avec sélection ABI précise et repli universal.",
+    "Inclut un keystore par défaut et la création/vérification BKS/JKS gérée par le plugin, tout en acceptant les keystores personnalisés.",
+    "Métadonnées, instructions, README et CHANGELOG couvrent 10 langues."
+  ],
+  "boundaries_plugin_managed": [
+    "Le plugin ne fonctionne pas seul : il n'a ni icône ni interface et doit être appelé par un AutoJs6 compatible.",
+    "Le build sur l'appareil n'est pas un build cloud : ce protocole n'envoie pas le code du projet.",
+    "AutoJs6 ne conserve pas un second cœur d'empaquetage dans son processus. Plugin absent, désactivé, non fiable, incompatible ou en échec : la requête s'arrête et l'ancien résultat est conservé.",
+    "Le dépôt AutoJs6 génère toujours le Runtime Kit ; le plugin le vérifie, l'empaquette, le distribue et l'utilise sans inventer seul un modèle de runtime.",
+    "L'ancienne capacité de \"construction distante\" reste désactivée pour les hôtes historiques. Ce nom désignait un autre processus local, pas un service Internet, et reste distinct de la capacité formelle."
+  ],
+  "p_faq_plugin_managed": "**Q : Pourquoi le plugin doit-il correspondre à AutoJs6 ?**\n\nR : Le runtime du modèle doit correspondre à l'API hôte. Le Centre de plugins choisit le build compatible le plus récent et le meilleur ABI ; un hôte hors intervalle est bloqué.\n\n**Q : Le plugin n'apparaît pas dans le lanceur. L'installation a-t-elle échoué ?**\n\nR : Non. Il n'a volontairement ni icône ni interface et ne fonctionne que comme service AutoJs6. Vérifiez-le dans Paramètres > Applications.\n\n**Q : Mon projet est-il envoyé à un serveur distant ?**\n\nR : Non. Hôte et plugin communiquent entre deux processus du même appareil Android. Les anciens noms parlent de \"construction distante\" parce que Binder traverse une frontière de processus ; le mode formel est `on-device-plugin`.\n\n**Q : Que se passe-t-il si le plugin échoue ?**\n\nR : AutoJs6 arrête la requête, affiche une erreur exploitable et conserve tout APK existant ; il ne bascule pas silencieusement vers un second builder hôte.",
+  "p_roadmap_plugin_managed": "ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le plugin, les candidats, la livraison par ABI, la compatibilité, les preuves de sécurité et l'assurance après GA.",
   "h3_links": "Liens",
   "text_link_autojs6_repo": "Projet principal AutoJs6",
   "text_link_autojs6_docs": "Documentation AutoJs6"

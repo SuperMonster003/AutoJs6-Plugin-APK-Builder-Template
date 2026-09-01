@@ -21,8 +21,13 @@ object ApkBuilderTemplateCapabilityKeys {
     const val RESOURCES_CONTRACT_HASH = "resourcesContractHash"
     const val NATIVE_LIB_MANIFEST_HASH = "nativeLibManifestHash"
     const val SUPPORTS_TEMPLATE_APK = "supportsTemplateApk"
+    const val SUPPORTS_APK_BUILD = "supportsApkBuild"
+    const val APK_BUILD_PROTOCOL_VERSION = "apkBuilderBuildProtocolVersion"
+    const val APK_BUILD_EXECUTION_MODE = "apkBuilderBuildExecutionMode"
     const val SUPPORTS_REMOTE_BUILD = "supportsRemoteBuild"
     const val REMOTE_BUILD_PROTOCOL_VERSION = "apkBuilderRemoteBuildProtocolVersion"
     const val REMOTE_BUILD_STATUS = "remoteBuildStatus"
     const val REMOTE_BUILD_API_VERSION = "remoteBuildApiVersion"
+    const val SUPPORTS_KEYSTORE_OPERATIONS = "supportsKeyStoreOperations"
+    const val KEYSTORE_API_VERSION = "apkBuilderKeyStoreApiVersion"
 }

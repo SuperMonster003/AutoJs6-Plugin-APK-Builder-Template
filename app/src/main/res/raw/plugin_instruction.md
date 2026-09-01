@@ -11,4 +11,4 @@ The packaged Runtime Kit includes:
 - `default_key_store.bks`
 - `runtime-kit.json`
 
-Remote build support is disabled by default and can be enabled only in builds made with `-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true`.
+Packaging runs entirely inside this plugin's process on the same Android device; project source is not uploaded. AutoJs6 performs trust and compatibility admission and independently validates the returned APK. The legacy `supportsRemoteBuild` switch remains off and does not disable this formal path.

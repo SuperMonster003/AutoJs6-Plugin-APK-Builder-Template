@@ -19,18 +19,20 @@ class RemoteBuildProtocolDocsTest(unittest.TestCase):
     def test_current_protocol_document_covers_authoritative_surface(self) -> None:
         result = verify_repo(REPO_ROOT)
         self.assertEqual("PASS", result["status"], result["missing"])
-        self.assertEqual(73, result["totalRequiredTokens"])
+        self.assertEqual(101, result["totalRequiredTokens"])
         self.assertEqual(
             {
-                "aidlMethods": 10,
+                "aidlMethods": 11,
                 "requestFields": 20,
                 "resultFields": 10,
                 "progressFields": 7,
                 "requestExtraKeys": 11,
-                "remoteCapabilityKeys": 4,
+                "keyStoreRequestFields": 17,
+                "keyStoreResultFields": 2,
+                "buildCapabilityKeys": 9,
                 "resultStatuses": 4,
                 "progressSteps": 6,
-                "protocolConstants": 1,
+                "protocolConstants": 4,
             },
             result["categories"],
         )

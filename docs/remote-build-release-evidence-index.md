@@ -2,8 +2,9 @@
 
 - 关联: ROADMAP M3-4 (仓库内工程门槛), M8 (外部门槛), `docs/evidence/m3-4-gates.md` (逐门槛审计记录),
   `docs/remote-build-rollout.md`
-- 范围提醒: 本索引针对**远程构建默认启用 (GA)** 的门槛。插件自身的首个正式发布 (ROADMAP M7) 不以本索引为前置 ——
-  远程构建随包提供但默认关闭, 两条路径互不阻塞。
+- 范围提醒: 本索引保存 2026/09/01 前“旧实验远程入口默认启用”的历史门槛与证据。2026/09/02 起正式路径改用
+  `supportsApkBuild` / `on-device-plugin`, 不受旧入口的 R0/R1/R2/R3 状态约束；同一插件侧引擎被正式化，而不是形成第二条
+  构建路径。当前决策见 `docs/plugin-managed-apk-build-architecture.md`, 外部增强项见 ROADMAP M8。
 
 ## 1. 发布结论
 

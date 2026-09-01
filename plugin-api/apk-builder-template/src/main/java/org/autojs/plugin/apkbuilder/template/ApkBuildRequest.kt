@@ -10,7 +10,7 @@ data class ApkBuildRequest(
     var hostPackageName: String = "",
     var hostVersionName: String = "",
     var hostVersionCode: Long = 0L,
-    var requiredProtocolVersion: Int = ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
+    var requiredProtocolVersion: Int = ApkBuilderTemplateProtocol.APK_BUILD_VERSION,
     var projectArchiveFd: ParcelFileDescriptor? = null,
     var projectArchiveSizeBytes: Long = 0L,
     var projectArchiveSha256: String? = null,

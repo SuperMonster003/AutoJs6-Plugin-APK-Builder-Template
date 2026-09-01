@@ -160,8 +160,8 @@ def build_language_list(target_code, languages):
 def build_readme_values(code, languages, changelogs):
     content = dict(languages[code])
     content["placeholder_ul_languages_all_supported"] = build_language_list(code, languages)
-    content["placeholder_features"] = bullet_list(content["features"])
-    content["placeholder_boundaries"] = bullet_list(content["boundaries"])
+    content["placeholder_features"] = bullet_list(content["features_plugin_managed"])
+    content["placeholder_boundaries"] = bullet_list(content["boundaries_plugin_managed"])
     content["placeholder_latest_release_history"] = format_changelog_items(changelogs[code], limit=3).rstrip()
     content["placeholder_read_more_in_changelog"] = markdown_link(
         content["text_changelog"],

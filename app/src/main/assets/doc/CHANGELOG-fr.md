@@ -6,9 +6,12 @@
 
 # v1.0.0
 
-###### 2026/09/01
+###### 2026/09/02
 
+* `Info` La voie normale Empaqueter l'application exige désormais le plugin APK Builder sur l'appareil ; l'ancien commutateur supportsRemoteBuild reste désactivé sans désactiver l'empaquetage normal
 * `Info` Première version officielle de la ligne indépendante du plugin, associée exactement au Runtime Kit d'AutoJs6 v6.8.0 (versionCode 5277); la version composite du plugin est 1.0.0+autojs6-6.8.0 (versionCode 527701), le Centre de plugins sélectionne la build ABI associée via compat-matrix.json et les builds distantes restent désactivées par défaut
+* `Ajout` Le moteur du plugin devient l'unique voie formelle d'empaquetage sur l'appareil ; AutoJs6 reste léger et valide indépendamment chaque APK renvoyé
+* `Ajout` La création et la vérification BKS/JKS sont déplacées dans le plugin via une API de keystore versionnée et à échec fermé
 * `Ajout` Ajout du SemVer 1.0.0 du plugin, d'une numérotation de build indépendante, de noms de version composés et de valeurs Android versionCode monotones permettant plusieurs versions du plugin pour un même hôte
 * `Ajout` Ajout des variantes universal, arm64-v8a, armeabi-v7a, x86_64 et x86 avec sélection exacte de l'ABI et repli universal
 * `Ajout` Ajout d'un contrat de plage de compatibilité hôte à échec fermé et d'une matrice de compatibilité faisant autorité afin qu'une plage de correctifs adjacents explicitement validée puisse partager une build du plugin
