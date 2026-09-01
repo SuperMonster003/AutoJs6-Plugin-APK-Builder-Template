@@ -38,8 +38,14 @@ class Versions @JvmOverloads constructor(
     val sdkVersionTarget = bp.requireInt("TARGET_SDK_VERSION")
     val sdkVersionTargetInrt = bp.requireInt("TARGET_SDK_VERSION_INRT")
     val sdkVersionCompile = bp.requireInt("COMPILE_SDK_VERSION")
+    // VERSION_NAME / VERSION_BUILD carry the paired AutoJs6 host version (kept under
+    // their historical names for compatibility); the plugin's own version line lives
+    // in the PLUGIN_* properties. See docs/versioning.md.
     val appVersionName = bp.requireString("VERSION_NAME")
     val appVersionCode = bp.requireInt("VERSION_BUILD")
+    val pluginVersionName = bp.requireString("PLUGIN_VERSION_NAME")
+    val pluginVersionBuild = bp.requireInt("PLUGIN_VERSION_BUILD")
+    val pluginReleaseSeq = bp.getIntOrNull("PLUGIN_RELEASE_SEQ") ?: 0
 
     val javaVersion: JavaVersion
         get() = JavaVersion.toVersion(javaVersionInt)
@@ -54,8 +60,9 @@ class Versions @JvmOverloads constructor(
     fun showInfo() {
         val title = "Version information for ${project.rootProject.name} app library"
 
-        val infoVerName = "Version name: $appVersionName"
-        val infoVerCode = "Version code: ${if (wasBuildNumberAutoIncremented) "${appVersionCode + 1} [auto-incremented]" else appVersionCode}"
+        val infoPluginVer = "Plugin version: $pluginVersionName [build $pluginVersionBuild / seq $pluginReleaseSeq]"
+        val infoVerName = "Paired host version name: $appVersionName"
+        val infoVerCode = "Paired host version code: ${if (wasBuildNumberAutoIncremented) "${appVersionCode + 1} [auto-incremented]" else appVersionCode}"
         val infoVerSdk = "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]"
         val infoVerJdk = "JDK versions: min [$javaVersionMinSupported] / select [$javaVersionInt] / current [$javaVersionCurrentInt] / max [$javaVersionMaxSupported]"
         val infoVerJava = "Java version: $javaVersion${
@@ -65,12 +72,13 @@ class Versions @JvmOverloads constructor(
             }
         }"
 
-        val maxLength = arrayOf(title, infoVerName, infoVerCode, infoVerSdk, infoVerJdk, infoVerJava).maxOf { it.length }
+        val maxLength = arrayOf(title, infoPluginVer, infoVerName, infoVerCode, infoVerSdk, infoVerJdk, infoVerJava).maxOf { it.length }
 
         arrayOf(
             "=".repeat(maxLength),
             title,
             "-".repeat(maxLength),
+            infoPluginVer,
             infoVerName,
             infoVerCode,
             infoVerSdk,

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "runtimeKit": {
+    "metadataFile": "runtime-kit.json",
+    "schemaVersion": 1,
+    "minimumApkBuilderProtocolVersion": 2
+  },
+  "requiredFiles": [
+    "runtime-kit.json",
+    "template.apk",
+    "template.apk.sha256",
+    "default_key_store.bks",
+    "default_key_store.bks.sha256"
+  ],
+  "sha256Artifacts": [
+    {
+      "path": "template.apk",
+      "sidecar": "template.apk.sha256",
+      "metadataSha256": "template.sha256",
+      "metadataSizeBytes": "template.sizeBytes"
+    },
+    {
+      "path": "default_key_store.bks",
+      "sidecar": "default_key_store.bks.sha256",
+      "metadataSha256": "defaultKeyStore.sha256",
+      "metadataSizeBytes": "defaultKeyStore.sizeBytes"
+    }
+  ],
+  "templateApk": {
+    "path": "template.apk",
+    "requiredEntries": [
+      "AndroidManifest.xml",
+      "resources.arsc",
+      "classes.dex",
+      "assets/init.js"
+    ]
+  },
+  "templateVariant": {
+    "variantMetadata": "template.variant",
+    "supportedAbisMetadata": "template.supportedAbis",
+    "universalVariant": "inrt-universal",
+    "variantPrefix": "inrt-",
+    "allowedAbis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64",
+      "x86"
+    ],
+    "allowLegacyMissingMetadata": true
+  },
+  "compatibility": {
+    "builtForHostVersionCodeMetadata": "host.versionCode",
+    "minHostVersionCodeMetadata": "compatibility.minHostVersionCode",
+    "maxHostVersionCodeMetadata": "compatibility.maxHostVersionCode",
+    "allowPatchVersionMismatchMetadata": "compatibility.allowPatchVersionMismatch",
+    "allowLegacyMissingMetadata": true
+  }
+}

@@ -17,7 +17,14 @@ internal class RemoteTypeScriptStagingDecryptor private constructor(
 
     fun decryptIfRequired(source: File, relativePath: String): ByteArray? {
         val path = canonicalPath(relativePath)
-        if (path !in remainingPaths) return null
+        if (path !in remainingPaths) {
+            if (isJavaScriptPath(path) && hasEncryptedEnvelopePrefix(source)) {
+                throw IOException(
+                    "Encrypted TypeScript staging entry is absent from the path inventory: $path",
+                )
+            }
+            return null
+        }
         if (!source.isFile || source.length() !in MIN_ENVELOPE_BYTES..MAX_ENVELOPE_BYTES) {
             throw IOException("Invalid encrypted TypeScript staging entry: $path")
         }
@@ -135,6 +142,26 @@ internal class RemoteTypeScriptStagingDecryptor private constructor(
             return lower.endsWith(".js") ||
                 lower.endsWith(".mjs") ||
                 lower.endsWith(".cjs")
+        }
+
+        private fun hasEncryptedEnvelopePrefix(source: File): Boolean {
+            if (!source.isFile || source.length() !in MIN_ENVELOPE_BYTES..MAX_ENVELOPE_BYTES) {
+                return false
+            }
+            val prefix = ByteArray(MIN_ENVELOPE_BYTES.toInt())
+            return try {
+                source.inputStream().use { input ->
+                    var offset = 0
+                    while (offset < prefix.size) {
+                        val read = input.read(prefix, offset, prefix.size - offset)
+                        if (read < 0) return false
+                        offset += read
+                    }
+                }
+                TypeScriptBuildStagingCipher.isEncrypted(prefix)
+            } finally {
+                prefix.fill(0)
+            }
         }
 
         private const val MIN_ENVELOPE_BYTES = 36L

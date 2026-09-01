@@ -5,17 +5,53 @@
   "changelog_label_improvement": "優化",
   "changelog_label_dependency": "依賴",
   "$data": {
+    "v1.0.0": {
+      "released_date": "2026/09/01",
+      "hint": [
+        "外掛程式獨立版本線的首個發佈版本; 外掛程式中心透過 compat-matrix.json 選擇配套 ABI 構建, 手動下載時應核對 autojs6- 宿主後綴, 遠端構建仍預設關閉"
+      ],
+      "feature": [
+        "引入外掛程式 SemVer 1.0.0, 獨立構建號, 複合版本名稱與單調遞增的 Android versionCode, 支援同一宿主發佈多個外掛程式構建",
+        "新增 universal, arm64-v8a, armeabi-v7a, x86_64 與 x86 變體, 支援精確 ABI 選擇及 universal 後備",
+        "新增失敗關閉的宿主兼容區間契約與權威兼容矩陣, 讓經過明確驗證的相鄰修補區間可共用一個外掛程式構建"
+      ],
+      "fix": [
+        "使實驗性遠程單檔案構建編號與舊構建器保持一致，並新增失敗關閉的工作區空間預檢：交叉核對輸入解壓大小、使用構建期驗證的範本展開上限，並保留 256 MiB 空間",
+        "在進入 BUILD/SIGN 前拒絕舊版內嵌 Node.js 封裝中繼資料及原始碼指令並提示遷移至外部 Runtime 外掛程式，同時移除已棄用的 Manifest 服務及前台權限注入",
+        "修正實驗性遠端工作階段中關閉與建置執行緒的競態: 取消或關閉後, 工作執行緒可能重新建立已刪除的工作階段工作區; 現時會等待工作執行緒結束再清理, 最終保持零殘留",
+        "加強實驗性遠端構建: 拒絕路徑清單未聲明的 TypeScript 暫存密文, 並在工作區規範化檔案名稱後正確識別自訂 BKS 簽名庫",
+        "收緊實驗性遠端構建輸入邊界: 嚴格驗證 Parcelable/Bundle 與 project.json 的類型, 大小及巢狀深度, 限制金鑰庫, 圖示及 ZIP 路徑深度/段長, 並修正 ARSC 套件名稱和衍生輸出檔名越界",
+        "部分系統安裝後無法透過插件中心激活的問題"
+      ],
+      "improvement": [
+        "統一 Gradle 與 Python 的 Runtime Kit 驗證規則, 涵蓋摘要, 大小, 必需檔案, APK 項目及五變體一致性",
+        "更新安裝說明, FAQ, 發佈演練與 10 種語言文件, 說明配套版本, ABI 選擇, 降級復原及獨立版本機制",
+        "統一 README 版式與 Gradle 平台版本管理方式"
+      ]
+    },
     "v6.8.0 Alpha5": {
       "released_date": "2026/07/16",
+      "hint": [
+        "配套 AutoJs6 v6.8.0 Alpha5; 支援該機制的插件中心會自動解析配套構建, 手動安裝時按 Release 標籤或 autojs6- 後綴確認; 插件沒有圖示與介面, 由 AutoJs6 在打包應用時自動調用"
+      ],
       "feature": [
-        "APK Builder Template 插件服務, 插件 ID 為 `autojs6-apk-builder-template`, 引擎為 `apk-builder-template`, 變體為 `inrt-universal`",
-        "透過 `org.autojs.plugin.INFO` 暴露插件資訊, 透過 `org.autojs.plugin.APK_BUILDER` 提供模板 APK",
-        "將 AutoJs6 Runtime Kit 打包到 `assets/runtime-kit/`, 包含 `template.apk`, 預設簽名庫, 元數據和契約文件",
-        "構建時校驗 Runtime Kit 元數據, SHA-256 摘要和 `template.apk` 必需項目",
-        "上報宿主版本, 協議版本, 模板包名, 模板 SHA-256, Runtime API 摘要和遠程構建能力",
-        "支援透過 `autojs.apkBuilder.templatePlugin.enableRemoteBuild` 啟用實驗性遠程構建協議",
-        "發布流程支援下載 Runtime Kit, 驗證資產, 使用受信任密鑰簽名並上傳通用 APK",
-        "插件資訊, 使用說明, README 與 CHANGELOG 增加西班牙語/法語/俄語/阿拉伯語/日語/韓語/英語/簡體中文/香港繁體/台灣繁體多語言資源"
+        "支援被 AutoJs6 自動發現並讀取內置模板, \"打包應用\" 功能不再依賴主程式內置的模板 APK",
+        "內置完整 Runtime Kit: 模板 APK, 預設簽名庫, 運行時元數據與契約文件",
+        "打包前自動進行版本與協議兼容性檢查, 不匹配時明確警告或阻止, 避免產出無法運行的應用",
+        "構建插件時校驗 Runtime Kit 的 SHA-256 摘要與模板必需項目, 運行時向 AutoJs6 上報模板摘要供覆核",
+        "實驗性遠程構建協議: 可由插件進程獨立完成輕量打包 (預設關閉, 需構建時顯式開啟)",
+        "接入自動化發布流程: AutoJs6 主倉庫發版時自動構建插件, 使用受信任密鑰簽名並校驗證書指紋後發布配套 APK",
+        "插件資訊, 使用說明, README 與 CHANGELOG 覆蓋簡體中文, 香港繁體, 台灣繁體, 英語, 法語, 西班牙語, 日語, 韓語, 俄語與阿拉伯語共 10 種語言"
+      ]
+    },
+    "v6.7.1 Alpha4": {
+      "released_date": "2026/07/09",
+      "hint": [
+        "首個公開發布版本, 需搭配同版本 AutoJs6 (v6.7.1 Alpha4) 使用"
+      ],
+      "feature": [
+        "從 AutoJs6 主倉庫拆分為獨立插件倉庫, 提供模板 APK 插件服務的初始實現",
+        "建立由 AutoJs6 主倉庫觸發的 Runtime Kit 獲取, 校驗與插件構建發布流水線"
       ]
     }
   }

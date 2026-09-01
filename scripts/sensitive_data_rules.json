@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "literals": [
+    {
+      "id": "m3-g5.typescript-cleartext",
+      "value": "M3_G5_TYPESCRIPT_CLEARTEXT_DO_NOT_EXPOSE_20260831"
+    },
+    {
+      "id": "m3-g5.keystore-password",
+      "value": "M3_G5_KEYSTORE_PASSWORD_DO_NOT_EXPOSE_20260831"
+    },
+    {
+      "id": "m3-g5.alias-password",
+      "value": "M3_G5_ALIAS_PASSWORD_DO_NOT_EXPOSE_20260831"
+    },
+    {
+      "id": "m3-g5.typescript-staging-key",
+      "valueHex": "4d3347355f53544147494e475f4b45595f32303236303833315f333242595445"
+    }
+  ]
+}
