@@ -6,6 +6,7 @@
 *.log
 *.ffs_db
 *.patch
+*.py[cod]
 *.salive
 .tmp_*.txt
 
@@ -20,6 +21,7 @@ desktop.ini
 .git/
 .gradle/
 .hprof/
+__pycache__/
 
 !.run
 

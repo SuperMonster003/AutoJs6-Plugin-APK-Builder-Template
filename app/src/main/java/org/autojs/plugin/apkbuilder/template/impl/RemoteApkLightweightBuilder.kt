@@ -1,7 +1,6 @@
 package org.autojs.plugin.apkbuilder.template.impl
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import com.reandroid.arsc.chunk.TableBlock
@@ -25,10 +24,11 @@ import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import org.json.JSONObject
 
-class RemoteApkLightweightBuilder(
+internal class RemoteApkLightweightBuilder(
     context: Context,
     private val request: ApkBuildRequest,
     private val workspace: RemoteApkBuildWorkspace,
+    private val projectConfig: RemoteProjectConfig,
     private val cancelSignal: AtomicBoolean,
     private val progress: (ApkBuildProgress) -> Unit,
 ) {
@@ -45,7 +45,6 @@ class RemoteApkLightweightBuilder(
     )
 
     fun build(): Output {
-        val projectConfig = parseProjectConfig()
         val buildDir = File(workspace.root, "apk-workspace")
         val outputApk = File(workspace.root, sanitizeOutputFileName(request.outputFileName))
 
@@ -96,58 +95,6 @@ class RemoteApkLightweightBuilder(
                 putString("projectSource", workspace.sourcePath.path)
             },
         )
-    }
-
-    private fun parseProjectConfig(): RemoteProjectConfig {
-        val json = JSONObject(request.projectConfigJson ?: throw IOException("Project config JSON is missing."))
-        if (workspace.sourceKind == ApkBuildRequestExtraKeys.SOURCE_KIND_FILE) {
-            json.put(KEY_MAIN, DEFAULT_MAIN_SCRIPT)
-        }
-
-        val name = json.optString(KEY_NAME).takeIf { it.isNotBlank() } ?: throw IOException("Project name is missing.")
-        val packageName = json.optString(KEY_PACKAGE_NAME).takeIf { it.isNotBlank() }
-            ?: throw IOException("Project packageName is missing.")
-        val versionName = json.optString(KEY_VERSION_NAME).takeIf { it.isNotBlank() }
-            ?: throw IOException("Project versionName is missing.")
-        val versionCode = json.optInt(KEY_VERSION_CODE, -1).takeIf { it > 0 }
-            ?: throw IOException("Project versionCode is missing.")
-        val mainScript = json.optString(KEY_MAIN).takeIf { it.isNotBlank() } ?: DEFAULT_MAIN_SCRIPT
-        val abis = parseStringArray(json, KEY_ABIS)
-        val libs = parseStringArray(json, KEY_LIBS).orEmpty()
-        val permissions = parseStringArray(json, KEY_PERMISSIONS)
-        val signatureScheme = json.optString(KEY_SIGNATURE_SCHEME).takeIf { it.isNotBlank() } ?: DEFAULT_SIGNATURE_SCHEME
-        val launchConfig = json.optJSONObject(KEY_LAUNCH_CONFIG)
-        val splashVisible = launchConfig?.optBoolean(KEY_SPLASH_VISIBLE, true) ?: true
-
-        if (!PACKAGE_NAME_PATTERN.matches(packageName)) {
-            throw IOException("Invalid project packageName: $packageName")
-        }
-
-        return RemoteProjectConfig(
-            json = json,
-            name = name,
-            packageName = packageName,
-            versionName = versionName,
-            versionCode = versionCode,
-            mainScript = mainScript,
-            abis = abis,
-            libs = libs,
-            permissions = permissions,
-            signatureScheme = signatureScheme,
-            splashVisible = splashVisible,
-        )
-    }
-
-    private fun parseStringArray(json: JSONObject, key: String): List<String>? {
-        if (!json.has(key) || json.isNull(key)) {
-            return null
-        }
-        val array = json.optJSONArray(key) ?: return null
-        return buildList {
-            for (index in 0 until array.length()) {
-                array.optString(index).takeIf { it.isNotBlank() }?.let(::add)
-            }
-        }
     }
 
     private fun unzipTemplate(targetDir: File) {
@@ -209,58 +156,16 @@ class RemoteApkLightweightBuilder(
     }
 
     private fun unzipBuildInputsArchive(zipFile: File, buildDir: File) {
-        val canonicalRoot = buildDir.canonicalFile
-        ZipInputStream(FileInputStream(zipFile).buffered(BUFFER_SIZE)).use { zip ->
-            while (true) {
-                val entry = zip.nextEntry ?: break
-                extractBuildInputEntry(zip, entry, canonicalRoot)
-                zip.closeEntry()
-            }
-        }
-    }
-
-    private fun extractBuildInputEntry(zip: ZipInputStream, entry: ZipEntry, root: File) {
-        ensureActive()
-        val name = entry.name.replace('\\', '/')
-        if (name.isBlank() || name.startsWith('/') || name.split('/').any { it == ".." }) {
-            throw IOException("Unsafe remote build input archive entry: ${entry.name}")
-        }
-        validateBuildInputEntry(name, entry)
-        val out = File(root, name).canonicalFile
-        if (!out.path.startsWith(root.path + File.separator) && out.path != root.path) {
-            throw IOException("Remote build input archive entry escapes build directory: ${entry.name}")
-        }
-        if (entry.isDirectory) {
-            if (!out.exists() && !out.mkdirs()) {
-                throw IOException("Failed to create remote build input directory: ${out.path}")
-            }
-            return
-        }
-        out.parentFile?.let { parent ->
-            if (!parent.exists() && !parent.mkdirs()) {
-                throw IOException("Failed to create remote build input parent directory: ${parent.path}")
-            }
-        }
-        FileOutputStream(out, false).use { output ->
-            zip.copyTo(output, BUFFER_SIZE)
-            output.flush()
-        }
-    }
-
-    private fun validateBuildInputEntry(name: String, entry: ZipEntry) {
-        val segments = name.split('/')
-        when (segments.firstOrNull()) {
-            "lib" -> {
-                if (entry.isDirectory) {
-                    return
-                }
-                if (segments.size != 3 || !segments[2].endsWith(".so")) {
-                    throw IOException("Unexpected native library archive entry: ${entry.name}")
-                }
-            }
-            "assets" -> Unit
-            else -> throw IOException("Unexpected remote build input archive entry: ${entry.name}")
-        }
+        RemoteZipExtractor.extract(
+            zipFile = zipFile,
+            targetDir = buildDir,
+            limits = RemoteZipExtractor.BUILD_INPUT_ARCHIVE_LIMITS,
+            expectedUncompressedBytes = RemoteBuildStoragePolicy.declaredNativeUncompressedBytes(
+                request.extras,
+            ),
+            checkActive = ::ensureActive,
+            validateEntry = RemoteZipExtractor::validateBuildInputEntry,
+        )
     }
 
     private fun extractZipEntry(zip: ZipInputStream, entry: ZipEntry, root: File) {
@@ -304,12 +209,6 @@ class RemoteApkLightweightBuilder(
                 editor.setSplashThemeReplacement(splashThemeId, noSplashThemeId)
             }
         }
-        if (projectConfig.libs.contains(LIB_EMBEDDED_NODE_JS)) {
-            editor
-                .addEmbeddedNodeScriptServiceIfMissing()
-                .addEmbeddedNodeForegroundServicePermissionsIfMissing()
-        }
-
         editor.commit().writeTo(FileOutputStream(manifestFile, false))
     }
 
@@ -335,8 +234,13 @@ class RemoteApkLightweightBuilder(
         val build = projectConfig.json.optJSONObject(KEY_BUILD) ?: JSONObject().also {
             projectConfig.json.put(KEY_BUILD, it)
         }
-        val nextNumber = (build.optLong(KEY_BUILD_NUMBER, 0L).takeIf { it > 0L }
-            ?: projectConfig.versionCode.toLong()) + 1L
+        val nextNumber = when (workspace.sourceKind) {
+            ApkBuildRequestExtraKeys.SOURCE_KIND_DIRECTORY ->
+                (build.optLong(KEY_BUILD_NUMBER, 0L).takeIf { it > 0L }
+                    ?: projectConfig.versionCode.toLong()) + 1L
+            ApkBuildRequestExtraKeys.SOURCE_KIND_FILE -> projectConfig.versionCode.toLong()
+            else -> throw IOException("Unsupported project source kind while updating build metadata.")
+        }
         val buildTime = System.currentTimeMillis()
         build.put(KEY_BUILD_ID, generateBuildId(nextNumber, buildTime))
         build.put(KEY_BUILD_NUMBER, nextNumber)
@@ -442,26 +346,26 @@ class RemoteApkLightweightBuilder(
                 }
             }
         }
-        val bitmap = BitmapFactory.decodeFile(iconFile.path)
-            ?: throw IOException("Failed to decode remote project icon: ${iconFile.path}")
-        FileOutputStream(targetIconFile, false).use { output ->
-            if (!bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)) {
-                throw IOException("Failed to write remote app icon: ${targetIconFile.path}")
+        val bitmap = RemoteApkIconPolicy.decode(iconFile)
+        try {
+            FileOutputStream(targetIconFile, false).use { output ->
+                if (!bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)) {
+                    throw IOException("Failed to write remote app icon.")
+                }
+                output.flush()
             }
-            output.flush()
+        } finally {
+            bitmap.recycle()
         }
-        Log.d(TAG, "Remote APK icon replaced: ${iconFile.path} -> ${targetIconFile.path}")
+        Log.d(TAG, "Remote APK icon replaced.")
     }
 
     private fun resolveProjectArchiveEntry(relativePath: String): File {
-        val normalized = relativePath.replace('\\', '/')
-        if (normalized.isBlank() || normalized.startsWith('/') || normalized.split('/').any { it == ".." }) {
-            throw IOException("Unsafe project archive path: $relativePath")
-        }
+        val normalized = RemoteZipExtractor.normalizeRelativePath(relativePath, "project archive path")
         val canonicalRoot = workspace.projectRoot.canonicalFile
         val resolved = File(canonicalRoot, normalized).canonicalFile
         if (!resolved.path.startsWith(canonicalRoot.path + File.separator) && resolved.path != canonicalRoot.path) {
-            throw IOException("Project archive path escapes workspace: $relativePath")
+            throw IOException("Project archive path escapes workspace.")
         }
         return resolved
     }
@@ -710,20 +614,6 @@ class RemoteApkLightweightBuilder(
         return "%08X-$buildNumber".format(crc32.value)
     }
 
-    private data class RemoteProjectConfig(
-        val json: JSONObject,
-        val name: String,
-        val packageName: String,
-        val versionName: String,
-        val versionCode: Int,
-        val mainScript: String,
-        val abis: List<String>?,
-        val libs: List<String>,
-        val permissions: List<String>?,
-        val signatureScheme: String,
-        val splashVisible: Boolean,
-    )
-
     private data class SigningConfig(
         val keyStoreFile: File,
         val password: String,
@@ -738,7 +628,6 @@ class RemoteApkLightweightBuilder(
         private const val CONFIG_FILE_NAME = "project.json"
         private const val DEFAULT_MAIN_SCRIPT = "main.js"
         private const val DEFAULT_OUTPUT_APK = "remote-build.apk"
-        private const val DEFAULT_SIGNATURE_SCHEME = "V1 + V2"
         private const val DEFAULT_KEY_STORE_PASSWORD = "AutoJs6"
         private const val DEFAULT_KEY_ALIAS = "AutoJs6"
         private const val DEFAULT_KEY_ALIAS_PASSWORD = "AutoJs6"
@@ -746,24 +635,11 @@ class RemoteApkLightweightBuilder(
         private const val ICON_NAME = "ic_launcher"
         private const val TAG = "RemoteApkBuilder"
 
-        private const val KEY_NAME = "name"
-        private const val KEY_PACKAGE_NAME = "packageName"
-        private const val KEY_VERSION_NAME = "versionName"
-        private const val KEY_VERSION_CODE = "versionCode"
         private const val KEY_MAIN = "main"
-        private const val KEY_ABIS = "abis"
-        private const val KEY_LIBS = "libs"
-        private const val KEY_PERMISSIONS = "permissions"
-        private const val KEY_SIGNATURE_SCHEME = "signatureScheme"
-        private const val KEY_LAUNCH_CONFIG = "launchConfig"
-        private const val KEY_SPLASH_VISIBLE = "splashVisible"
         private const val KEY_BUILD = "build"
         private const val KEY_BUILD_ID = "id"
         private const val KEY_BUILD_NUMBER = "number"
         private const val KEY_BUILD_TIME = "time"
-        private const val LIB_EMBEDDED_NODE_JS = "Embedded Node.js"
-
-        private val PACKAGE_NAME_PATTERN = Regex("[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+")
         private val DEFAULT_NATIVE_LIBRARIES = listOf(
             "libjackpal-androidterm5.so",
             "libjackpal-termexec2.so",

@@ -17,6 +17,9 @@ object ApkBuilderTemplateMetadata {
     const val DEFAULT_KEY_STORE_ASSET = "runtime-kit/default_key_store.bks"
     private const val TEMPLATE_SHA256_ASSET = "runtime-kit/template.apk.sha256"
 
+    @Volatile
+    private var cachedTemplateSizeBytes = -1L
+
     fun pluginInfo(context: Context): PluginInfo {
         val templateInfo = templateInfo(context)
         return PluginInfo(
@@ -26,13 +29,16 @@ object ApkBuilderTemplateMetadata {
                 ?: context.getString(R.string.plugin_instruction),
             author = "SuperMonster003",
             collaborators = null,
-            versionName = templateInfo.versionName,
-            versionCode = templateInfo.versionCode,
+            versionName = BuildConfig.VERSION_NAME,
+            versionCode = BuildConfig.VERSION_CODE.toLong(),
             versionDate = null,
             id = ApkBuilderTemplatePluginIds.ID,
             engine = ApkBuilderTemplatePluginIds.ENGINE,
-            variant = ApkBuilderTemplatePluginIds.VARIANT_INRT_UNIVERSAL,
-            supportedAbis = emptyArray(),
+            variant = templateInfo.capabilities?.getString(ApkBuilderTemplateCapabilityKeys.TEMPLATE_KIND)
+                ?: ApkBuilderTemplatePluginIds.VARIANT_INRT_UNIVERSAL,
+            supportedAbis = templateInfo.capabilities?.getStringArray(
+                ApkBuilderTemplateCapabilityKeys.TEMPLATE_SUPPORTED_ABIS
+            ) ?: emptyArray(),
             capabilities = templateInfo.capabilities,
         )
     }
@@ -55,15 +61,22 @@ object ApkBuilderTemplateMetadata {
             ?: readTextAssetOrNull(context, TEMPLATE_SHA256_ASSET)?.trim()?.takeIf { it.isNotEmpty() }
         val runtimeApiLevel = contract.optIntOrDefault("runtimeApiLevel", hostVersionCode.toInt())
         val runtimeKitId = kit.optStringOrNull("runtimeKitId")
-        val requiresHostVersion = compatibility.optLongOrDefault("minHostVersionCode", hostVersionCode)
+        val minHostVersionCode = compatibility.optLongOrDefault("minHostVersionCode", hostVersionCode)
+        val maxHostVersionCode = compatibility.optLongOrDefault("maxHostVersionCode", hostVersionCode)
+        val allowPatchVersionMismatch = compatibility.optBooleanOrDefault("allowPatchVersionMismatch", false)
+        val templateVariant = template.optStringOrDefault(
+            "variant",
+            ApkBuilderTemplatePluginIds.VARIANT_INRT_UNIVERSAL,
+        )
+        val templateSupportedAbis = template.optStringArray("supportedAbis")
 
         return ApkBuilderTemplateInfo(
             id = ApkBuilderTemplatePluginIds.ID,
             name = context.getString(R.string.plugin_name),
             description = context.getString(R.string.plugin_description),
             author = "SuperMonster003",
-            versionName = hostVersionName,
-            versionCode = hostVersionCode,
+            versionName = BuildConfig.VERSION_NAME,
+            versionCode = BuildConfig.VERSION_CODE.toLong(),
             versionDate = null,
             protocolVersion = protocolVersion,
             hostPackageName = host.optStringOrDefault("packageName", BuildConfig.HOST_PACKAGE_NAME),
@@ -73,11 +86,18 @@ object ApkBuilderTemplateMetadata {
             templateSha256 = templateSha256,
             templateSizeBytes = templateSizeBytes(context),
             capabilities = Bundle().apply {
-                putLong(PluginCapabilityKeys.REQUIRES_HOST_VERSION, requiresHostVersion)
+                putLong(PluginCapabilityKeys.REQUIRES_HOST_VERSION, minHostVersionCode)
+                putString(ApkBuilderTemplateCapabilityKeys.PLUGIN_VERSION_NAME, BuildConfig.PLUGIN_VERSION_NAME)
+                putLong(ApkBuilderTemplateCapabilityKeys.PLUGIN_VERSION_CODE, BuildConfig.VERSION_CODE.toLong())
+                putInt(ApkBuilderTemplateCapabilityKeys.PLUGIN_VERSION_BUILD, BuildConfig.PLUGIN_VERSION_BUILD)
                 putString(ApkBuilderTemplateCapabilityKeys.BUILT_FOR_HOST_VERSION_NAME, hostVersionName)
                 putLong(ApkBuilderTemplateCapabilityKeys.BUILT_FOR_HOST_VERSION_CODE, hostVersionCode)
+                putLong(ApkBuilderTemplateCapabilityKeys.COMPATIBILITY_MIN_HOST_VERSION_CODE, minHostVersionCode)
+                putLong(ApkBuilderTemplateCapabilityKeys.COMPATIBILITY_MAX_HOST_VERSION_CODE, maxHostVersionCode)
+                putBoolean(ApkBuilderTemplateCapabilityKeys.ALLOW_PATCH_VERSION_MISMATCH, allowPatchVersionMismatch)
                 putInt(ApkBuilderTemplateCapabilityKeys.PROTOCOL_VERSION, protocolVersion)
-                putString(ApkBuilderTemplateCapabilityKeys.TEMPLATE_KIND, ApkBuilderTemplatePluginIds.VARIANT_INRT_UNIVERSAL)
+                putString(ApkBuilderTemplateCapabilityKeys.TEMPLATE_KIND, templateVariant)
+                putStringArray(ApkBuilderTemplateCapabilityKeys.TEMPLATE_SUPPORTED_ABIS, templateSupportedAbis)
                 putString(ApkBuilderTemplateCapabilityKeys.TEMPLATE_PACKAGE_NAME, template.optStringOrDefault("packageName", BuildConfig.TEMPLATE_PACKAGE_NAME))
                 putString(ApkBuilderTemplateCapabilityKeys.TEMPLATE_SHA256, templateSha256)
                 putString(ApkBuilderTemplateCapabilityKeys.RUNTIME_KIT_ID, runtimeKitId)
@@ -89,8 +109,14 @@ object ApkBuilderTemplateMetadata {
                 putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_TEMPLATE_APK, true)
                 putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD, BuildConfig.ENABLE_REMOTE_BUILD)
                 putInt(ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_PROTOCOL_VERSION, remoteBuildProtocolVersion)
-                putString("remoteBuildStatus", if (BuildConfig.ENABLE_REMOTE_BUILD) "experimental" else "disabled")
-                putInt("remoteBuildApiVersion", ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION)
+                putString(
+                    ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_STATUS,
+                    if (BuildConfig.ENABLE_REMOTE_BUILD) "experimental" else "disabled",
+                )
+                putInt(
+                    ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_API_VERSION,
+                    ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
+                )
             },
         )
     }
@@ -117,6 +143,19 @@ object ApkBuilderTemplateMetadata {
         return this?.optInt(key, defaultValue) ?: defaultValue
     }
 
+    private fun JSONObject?.optBooleanOrDefault(key: String, defaultValue: Boolean): Boolean {
+        return this?.optBoolean(key, defaultValue) ?: defaultValue
+    }
+
+    private fun JSONObject?.optStringArray(key: String): Array<String> {
+        val values = this?.optJSONArray(key) ?: return emptyArray()
+        return buildList {
+            for (index in 0 until values.length()) {
+                values.optString(index).trim().takeIf { it.isNotEmpty() }?.let(::add)
+            }
+        }.distinct().toTypedArray()
+    }
+
     private fun readTextAssetOrNull(context: Context, assetPath: String): String? {
         return runCatching {
             context.assets.open(assetPath).use { input ->
@@ -134,17 +173,22 @@ object ApkBuilderTemplateMetadata {
     }
 
     private fun templateSizeBytes(context: Context): Long {
-        return runCatching {
-            context.assets.open(TEMPLATE_APK_ASSET).use { input ->
-                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                var total = 0L
-                while (true) {
-                    val read = input.read(buffer)
-                    if (read < 0) break
-                    total += read
+        cachedTemplateSizeBytes.takeIf { it >= 0L }?.let { return it }
+        return synchronized(this) {
+            cachedTemplateSizeBytes.takeIf { it >= 0L } ?: runCatching {
+                context.assets.open(TEMPLATE_APK_ASSET).use { input ->
+                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                    var total = 0L
+                    while (true) {
+                        val read = input.read(buffer)
+                        if (read < 0) break
+                        total += read
+                    }
+                    total
                 }
-                total
+            }.getOrDefault(0L).also { measured ->
+                cachedTemplateSizeBytes = measured
             }
-        }.getOrDefault(0L)
+        }
     }
 }

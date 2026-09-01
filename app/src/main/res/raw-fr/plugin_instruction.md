@@ -1,12 +1,14 @@
-APK Builder Template fournit le Runtime Kit utilise par AutoJs6 pour empaqueter des applications autonomes.
+APK Builder Template fournit le Runtime Kit utilisé par AutoJs6 pour empaqueter des applications autonomes.
 
-Installez la version du plugin correspondant a votre version d'AutoJs6. L'hote le decouvre via `org.autojs.plugin.APK_BUILDER` et lit `assets/runtime-kit/template.apk`.
+Installez de préférence depuis un Centre de plugins AutoJs6 récent: il lit `compat-matrix.json`, choisit le build apparié à cet hôte, privilégie l'ABI exact de l'appareil et se replie sur universal. Pour une installation manuelle, utilisez le tag Release correspondant ou le suffixe autojs6- de la version du plugin; pour revenir depuis un build plus récent, désinstallez-le d'abord, car Android ne peut pas écraser l'application par une rétrogradation. L'hôte découvre le plugin via `org.autojs.plugin.APK_BUILDER` et lit `assets/runtime-kit/template.apk`.
 
-Le Runtime Kit empaquete contient:
+Un Runtime Kit peut couvrir explicitement un intervalle de correctifs vérifié. Son hôte exact de construction empaquette sans avertissement; un autre hôte dans l'intervalle continue avec un avertissement, tandis qu'un hôte hors intervalle est bloqué avant le transfert du modèle.
+
+Le Runtime Kit empaqueté contient :
 
 - `template.apk`
 - `template.apk.sha256`
 - `default_key_store.bks`
 - `runtime-kit.json`
 
-La construction distante est desactivee par defaut et ne peut etre activee que dans les builds crees avec `-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true`.
+La construction distante est désactivée par défaut et ne peut être activée que dans les builds créés avec `-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true`.

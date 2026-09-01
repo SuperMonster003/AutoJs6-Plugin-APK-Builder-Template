@@ -1,0 +1,41 @@
+name: Verify Generated Documentation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs-consistency:
+    name: README and CHANGELOG are up to date
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Regenerate multilingual documentation
+        run: python3 .python/generate_markdown.py
+
+      - name: Verify remote-build protocol documentation coverage
+        run: python3 scripts/verify_remote_build_protocol_docs.py
+
+      - name: Verify generated files are committed
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if ! git diff --exit-code; then
+            echo "::error title=Generated documentation is stale::Run 'python3 .python/generate_markdown.py' and commit the changed files."
+            git status --short
+            exit 1
+          fi
+
+          untracked="$(git ls-files --others --exclude-standard)"
+          if [ -n "$untracked" ]; then
+            echo "::error title=Generated documentation is untracked::Run 'python3 .python/generate_markdown.py' and commit the files listed below."
+            printf '%s\n' "$untracked"
+            exit 1
+          fi
