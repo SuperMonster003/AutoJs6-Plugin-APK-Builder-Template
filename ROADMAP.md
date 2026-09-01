@@ -196,9 +196,11 @@
   - 内容: 用 `build-from-runtime-kit.yml` 的 `workflow_dispatch` (输入 AutoJs6 tag) 从确定提交产出 universal + 四个 ABI 的**正式签名** APK。本地 unsigned / debug 产物不计。
   - 验收: 五个资产齐全, `SIGNING_CERT_SHA256` 证书指纹校验通过, 逐个记录文件名, 大小, SHA-256, 签名证书摘要, 插件版本, 宿主范围, Runtime Kit ID 与协议版本。
   - 发布前接线: `scripts/create_release_evidence.py` 将上述字段绑定为机器可读 JSON, 同时保留为 Actions artifact 并随五个 APK 上传到同名 Release; 三类失败关闭回归覆盖五变体完整性, CRC32 文件名与版本/Runtime Kit 身份一致性。
+  - 本地发布预演: 2026/09/01 从宿主 `71e684b8d` 生成 AutoJs6 `6.8.0 / 5277` 的五套 Runtime Kit, 在隔离工作树实际构建五个 `527701 / 1.0.0+autojs6-6.8.0` Release APK; Runtime Kit 集合校验, APK 资产校验, `aapt` 版本复核, CRC32 文件名和五资产 evidence JSON 生成均通过。该轮为未签名结构预演, 不代替本条所需的受信签名证据。
 - [ ] [P] **M7-5 首条兼容矩阵记录**
   - 内容: 由流水线把首个条目写入 `compat-matrix.json` (当前 `entries` 为空), 含五个 ABI `artifacts` 与顶层 `apk*` 投影。
   - 验收: `scripts/update_compat_matrix.py resolve --abi <各架构>` 对配对 hostVersionCode 均能确定性解析到该版本, 缺失架构正确回退 universal; 旧 tag 通道并存不受影响。
+  - 本地矩阵预演: 同一候选的五个 APK 已成功合并为单个 `v1.0.0 / 527701` 条目, `universal`, `arm64-v8a`, `armeabi-v7a`, `x86_64`, `x86` 均解析到对应资产; 权威矩阵仍保持为空, 等待 M7-4 的正式 Release URL 与签名资产后由流水线原子写入。
 - [ ] [H+P] **M7-6 装机验收**
   - 内容: 在真实设备 / AVD 上走完 `docs/e2e-release-drill.md` 的核心场景: 插件中心按矩阵解析 → 下载匹配版本 → 安装 → 打包应用 → 安装产物并冷启动。
   - 验收: 场景 1 (匹配版本安装) 与场景 7 (兼容区间行为) 通过; 签名门禁对官方资产放行; 远程构建入口保持不可见 / 不可用。
