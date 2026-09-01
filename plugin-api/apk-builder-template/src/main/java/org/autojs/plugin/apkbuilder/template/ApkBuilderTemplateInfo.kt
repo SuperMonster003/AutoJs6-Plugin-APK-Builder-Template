@@ -10,6 +10,8 @@ data class ApkBuilderTemplateInfo(
     var name: String = "APK Builder Template",
     var description: String? = null,
     var author: String = "SuperMonster003",
+    // versionName/versionCode identify the plugin build itself (composite form such as
+    // "1.0.0+autojs6-6.8.0-alpha5"); compatibility decisions must rely on hostVersion* below.
     var versionName: String = "",
     var versionCode: Long = 0L,
     var versionDate: String? = null,

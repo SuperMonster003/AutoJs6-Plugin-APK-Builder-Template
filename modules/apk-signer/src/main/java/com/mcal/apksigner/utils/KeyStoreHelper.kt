@@ -44,10 +44,38 @@ object KeyStoreHelper {
     @JvmStatic
     @Throws(java.lang.Exception::class)
     fun loadKeyStore(keystoreFile: File, password: CharArray): KeyStore {
-        return if (keystoreFile.path.lowercase(Locale.getDefault()).endsWith(".bks")) {
-            loadBks(keystoreFile, password)
+        val prefersBks = keystoreFile.path
+            .lowercase(Locale.getDefault())
+            .endsWith(".bks")
+        return if (prefersBks) {
+            loadWithFallback(
+                primary = { loadBks(keystoreFile, password) },
+                fallback = { loadJks(keystoreFile, password) },
+            )
         } else {
-            loadJks(keystoreFile, password)
+            loadWithFallback(
+                primary = { loadJks(keystoreFile, password) },
+                fallback = { loadBks(keystoreFile, password) },
+            )
+        }
+    }
+
+    private inline fun loadWithFallback(
+        primary: () -> KeyStore,
+        fallback: () -> KeyStore,
+    ): KeyStore {
+        return try {
+            primary()
+        } catch (primaryError: Exception) {
+            try {
+                fallback()
+            } catch (fallbackError: Exception) {
+                primaryError.addSuppressed(fallbackError)
+                throw RuntimeException(
+                    "Failed to load keystore as JKS or BKS.",
+                    primaryError,
+                )
+            }
         }
     }
 

@@ -2,18 +2,16 @@
 
 <div align="center">
   <p>
-    <img src="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/app/src/main/res/mipmap/ic_launcher.png?raw=true" alt="autojs6-plugin-apk-builder-template-ic-launcher" border="0" width="128" />
+    <picture>
+      <img src="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/app/src/main/res/mipmap/ic_launcher.png?raw=true" alt="autojs6-plugin-apk-builder-template-ic-launcher" border="0" width="128" />
+    </picture>
   </p>
 
-  <p>Template APK plugin for AutoJs6 standalone application packaging</p>
+  <p>Template plugin that powers the AutoJs6 "Package Application" feature</p>
 
   <p>
     <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template?label=Release"/></a>
     <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/issues"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template?color=A24232&label=Issues"/></a>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/commit/dc4627c752f8c1f709b302651a7de57992eac2b5"><img alt="Created" src="https://img.shields.io/date/1784208939?color=2e7d32&label=Created"/></a>
-    <br>
-    <a href="https://developer.android.com/studio/archive"><img alt="Android Studio" src="https://img.shields.io/badge/Android%20Studio-2023.3+-B64FC8"/></a>
-    <a href="https://www.jetbrains.com/idea/download/other.html"><img alt="IntelliJ IDEA" src="https://img.shields.io/badge/IntelliJ%20IDEA-2023.3+-EE4677"/></a>
     <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template?color=534BAE&label=License"/></a>
   </p>
 </div>
@@ -43,7 +41,25 @@ The current README.md supports the following languages:
 
 ******
 
-The AutoJs6 APK Builder Template Plugin supplies the external template APK and Runtime Kit used by AutoJs6 when packaging standalone applications. The host reads the template APK from the plugin service and checks version and protocol metadata for compatibility.
+The AutoJs6 "Package Application" feature turns a script or project into an APK that installs and runs independently. The large template and all packaging machinery live in this plugin so the AutoJs6 app can stay lean.
+
+The plugin has no icon or UI. AutoJs6 discovers and validates it, prepares a bounded request, and shows progress. The plugin then unpacks its own template, writes the project and resources, changes the manifest/resources, selects ABIs, manages signing, and returns a candidate APK. AutoJs6 independently verifies that output before publishing it.
+
+Everything runs on the same Android device through Binder and file descriptors. This feature does not upload project source to a network or cloud build service.
+
+******
+
+### How It Works
+
+******
+
+When packaging a standalone application, AutoJs6 and this plugin cooperate as follows:
+
+1. Admission: AutoJs6 checks the official signature, enabled state, host version interval, ABI, formal build capability, protocol, and on-device execution mode
+2. Request preparation: AutoJs6 creates bounded project/native/keystore inputs and fixes the expected package and signer identity
+3. Plugin build: the plugin validates the request, unpacks its own Runtime Kit template, writes the project, changes Manifest/resources, trims ABIs, and signs the APK
+4. Result transfer: the plugin returns the candidate APK through a read-only file descriptor and cleans its private workspace
+5. Host publication: AutoJs6 rechecks size, SHA-256, APK structure, signature, signer, package name, and version, then atomically replaces the target only if every check passes
 
 ******
 
@@ -51,20 +67,76 @@ The AutoJs6 APK Builder Template Plugin supplies the external template APK and R
 
 ******
 
-- Provides the `autojs6-apk-builder-template` plugin service with plugin ID `autojs6-apk-builder-template` and engine `apk-builder-template`.
-- Exposes common plugin metadata through `org.autojs.plugin.INFO` and serves the template APK through `org.autojs.plugin.APK_BUILDER`.
-- Validates Runtime Kit SHA-256 digests and required `template.apk` entries during the build.
-- Packages `template.apk`, the default keystore, runtime metadata, and contract files under `assets/runtime-kit/`.
-- Reports host version, protocol version, template package name, template digest, and remote build capability metadata.
-- Plugin metadata, usage instructions, README, and CHANGELOG cover Spanish, French, Russian, Arabic, Japanese, Korean, English, Simplified Chinese, Hong Kong Traditional Chinese, and Taiwan Traditional Chinese.
+- Owns the complete on-device packaging core for AutoJs6, including template processing, project/resource injection, Manifest and resources.arsc changes, ABI selection, keystore operations, and signing.
+- Keeps AutoJs6 lean: the host provides UI, trust and compatibility admission, request preparation, cancellation/progress, and independent output validation rather than a second builder.
+- Runs entirely on the same Android device through Binder/AIDL and ParcelFileDescriptor; project source is not uploaded to a network or cloud service.
+- Pairs every plugin build with a validated AutoJs6 Runtime Kit and can declare an explicitly verified closed patch interval.
+- Provides universal, arm64-v8a, armeabi-v7a, x86_64, and x86 variants with exact-ABI selection and universal fallback.
+- Ships a default keystore and supports plugin-owned BKS/JKS creation and verification, while custom keystores remain supported.
+- Plugin metadata, usage instructions, README, and CHANGELOG cover 10 languages.
 
 ******
 
-### Runtime Kit
+### Quick Start
 
 ******
 
-The Runtime Kit comes from the AutoJs6 main repository and is the only source of truth for the standalone application template. This plugin only verifies and packages that artifact. It does not generate `template.apk`. A complete Runtime Kit usually contains these files
+- **How to install**: Install from the AutoJs6 Plugin Center when possible: supported host builds read the compatibility matrix and automatically select both the paired plugin version and the exact device ABI artifact, with universal fallback. For a manual install, download the APK from [Releases](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/releases) and use the AutoJs6-named release tag or the autojs6- suffix in the plugin version to identify the paired host (e.g. plugin v1.0.0+autojs6-6.8.0-alpha5 pairs with AutoJs6 v6.8.0 Alpha5). If Plugin Center selects a lower version than the one installed, follow its uninstall-and-reinstall guidance because Android cannot overwrite an app with a downgrade.
+- **How to use**: No extra steps. Use the "Package Application" feature in AutoJs6 as usual; the packaging flow discovers the plugin and uses its built-in template automatically.
+- **How to confirm it works**: Without the plugin (or with a mismatched version), the packaging entry in AutoJs6 prompts you to install or enable it; once a matching version is installed the prompt disappears, which means the plugin is recognized. The plugin has no icon or UI, so not finding it on the launcher is expected.
+- **Where to look when something fails**: On a compatibility warning, use the build selected by Plugin Center from the compatibility matrix or verify that the current host is inside the plugin's declared interval; if an incompatibility blocks packaging, install the matrix-matched build; on a template corruption or verification error, reinstall the plugin from an official source; for anything else, file an [issue](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/issues) with AutoJs6 logs and reproduction steps.
+
+******
+
+### Boundaries
+
+******
+
+To avoid misunderstandings, the following are explicitly outside the scope of this plugin:
+
+- The plugin cannot be used on its own: it has no icon or UI and is invoked by a compatible AutoJs6 host.
+- The device build path is not a cloud build: no project source is uploaded by this protocol.
+- AutoJs6 does not retain a second in-process packaging core. If the plugin is missing, disabled, untrusted, incompatible, or fails, that build stops and any previous output is preserved.
+- The AutoJs6 repository still generates the Runtime Kit; the plugin verifies, packages, distributes, and uses that kit but does not invent a runtime template independently.
+- The old "remote build" capability remains disabled for legacy hosts. Its name meant another on-device app process, not an Internet service, and it is separate from the formal plugin-managed capability.
+
+******
+
+### FAQ
+
+******
+
+**Q: How does Plugin Center choose a build?**
+
+A: Supported AutoJs6 versions query compat-matrix.json with their own versionCode, select the highest compatible plugin build, then prefer the exact device ABI and fall back to universal. A matrix entry may cover a verified patch interval only when allowPatchVersionMismatch is explicitly true: its exact built-for host packages silently, another host inside the interval reuses the same build with a warning, and a host outside the interval cannot use it. If no matrix entry is usable, the existing Release/tag channel remains the fallback. If the matched plugin version is lower than the installed one, Plugin Center asks you to uninstall first and then install the matched build; Android cannot perform an in-place downgrade.
+
+**Q: Why must the plugin pair with my AutoJs6 version?**
+
+A: The runtime inside the template must match the host API. Plugin Center selects the highest compatible plugin build and the best ABI asset from the compatibility matrix; hosts outside the declared interval are blocked.
+
+**Q: I cannot find the plugin on my launcher. Did installation fail?**
+
+A: No. It intentionally has no icon or UI and runs only as a background service for AutoJs6. Check it under system Settings > Apps.
+
+**Q: Is my project sent to a remote server?**
+
+A: No. The host and plugin communicate between two app processes on the same Android device. Historical source names say "remote build" because Binder calls cross a process boundary; the formal mode is explicitly `on-device-plugin`.
+
+**Q: What happens if the plugin fails?**
+
+A: AutoJs6 stops the request, shows an actionable error, and preserves any existing output APK. It does not silently switch to a second host-side builder.
+
+******
+
+### Technical Reference
+
+******
+
+The sections below target plugin developers and integrators; they are usually not needed for simply using the plugin.
+
+#### Runtime Kit
+
+The Runtime Kit is built by the AutoJs6 main repository and is the only source of truth for the standalone application template. This plugin only verifies and packages that artifact; it does not generate `template.apk`. A complete Runtime Kit usually contains these files:
 
 ```text
 template.apk
@@ -79,11 +151,19 @@ native-libs.json
 provenance.json
 ```
 
-******
+#### Discovery Identifiers
 
-### Local Build
+The host discovers and binds this plugin through the following identifiers:
 
-******
+```text
+Plugin ID:  autojs6-apk-builder-template
+Engine:     apk-builder-template
+Variant:    inrt-universal
+Actions:    org.autojs.plugin.INFO / org.autojs.plugin.APK_BUILDER
+Template:   org.autojs.autojs6.inrt
+```
+
+#### Local Build
 
 Generate a Runtime Kit from the AutoJs6 main repository first:
 
@@ -104,11 +184,7 @@ You can also unpack a released `autojs6-runtime-kit-*.zip` to `runtime-kit/` and
 .\gradlew.bat --console=plain :app:assembleRelease
 ```
 
-******
-
-### Release Flow
-
-******
+#### Release Flow
 
 The expected production release flow is:
 
@@ -120,14 +196,11 @@ AutoJs6 tag
 -> this repository downloads and verifies the Runtime Kit
 -> this repository builds the plugin APK
 -> this repository uploads the plugin APK to the same tag Release
+-> this repository records the pairing into compat-matrix.json
 -> AutoJs6 Plugin Center installs this plugin
 ```
 
-******
-
-### Signing
-
-******
+#### Signing
 
 Production plugin releases must be signed with the trusted AutoJs6 plugin signing key. GitHub Actions releases require these repository secrets:
 
@@ -150,26 +223,77 @@ keyPassword=...
 
 ******
 
+### Roadmap
+
+******
+
+ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-ABI delivery, compatibility, security evidence, and post-GA assurance as a verifiable checklist. Discussion is welcome in Issues.
+
+- [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/ROADMAP.md)
+
+******
+
 ### Release History
 
 ******
+
+# v1.0.0
+
+###### 2026/09/02
+
+* `Hint` The ordinary Package Application path now requires the on-device APK Builder plugin; the legacy supportsRemoteBuild switch remains disabled but no longer disables normal packaging
+* `Hint` First formal release on the independent plugin version line, paired exactly with the AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; the composite plugin version is 1.0.0+autojs6-6.8.0 (versionCode 527701), Plugin Center selects the paired ABI build through compat-matrix.json, and remote builds remain disabled by default
+* `Feature` Promoted the plugin-side engine to the only formal on-device packaging path; AutoJs6 stays lean and independently validates every returned APK
+* `Feature` Moved BKS/JKS creation and verification into the plugin through a versioned, fail-closed keystore API
+* `Feature` Introduced plugin SemVer 1.0.0, independent build numbering, composite version names, and monotonic Android versionCode values that support multiple plugin releases for the same host
+* `Feature` Added universal, arm64-v8a, armeabi-v7a, x86_64, and x86 variants with exact-ABI selection and universal fallback
+* `Feature` Added a fail-closed host compatibility range contract and an authoritative compatibility matrix so one explicitly validated adjacent patch range can share a plugin build
+* `Fix` Aligned experimental remote single-file build numbering with the legacy builder, and added fail-closed workspace storage preflight using cross-checked expanded input sizes, a build-verified template expansion bound, and a 256 MiB reserve
+* `Fix` Rejected legacy Embedded Node.js packaging metadata and source directives before BUILD/SIGN with external Runtime-plugin migration guidance, and removed obsolete Manifest service and foreground-permission injection
+* `Fix` Fixed a close/build-thread race in experimental remote sessions that could recreate a deleted session workspace after cancellation or closure; cleanup now waits for the worker and leaves zero residual files
+* `Fix` Hardened experimental remote builds by rejecting unlisted TypeScript staging ciphertext and loading custom BKS keystores after workspace filename normalization
+* `Fix` Tightened experimental remote-build input boundaries with strict Parcelable/Bundle and project.json type, size, and nesting checks; bounded keystores, icons, and ZIP path depth/segments; and fixed ARSC package-name and derived-output filename overflows
+* `Fix` The plugin could not be activated from Plugin Center after installation on some systems
+* `Improvement` Trusted release workflow now supports an isolated candidate mode that builds five production-signed APKs and evidence from a pinned host Actions artifact without creating a Release or updating the authoritative compatibility matrix
+* `Improvement` Unified Runtime Kit validation rules across Gradle and Python, including hashes, sizes, required files, APK entries, and five-variant consistency
+* `Improvement` Published a machine-readable JSON evidence manifest beside the five APKs, binding artifact digests, signer certificate, plugin/host versions, compatibility range, Runtime Kit IDs, and protocol versions
+* `Improvement` Updated installation instructions, FAQ, release drill, and 10-language documentation for paired versions, ABI selection, downgrade recovery, and independent versioning
+* `Improvement` Standardize the README layout and Gradle platform version management
 
 # v6.8.0 Alpha5
 
 ###### 2026/07/16
 
-* `Feature` Added the APK Builder Template plugin service with plugin ID `autojs6-apk-builder-template`, engine `apk-builder-template`, and variant `inrt-universal`
-* `Feature` Exposed plugin metadata through `org.autojs.plugin.INFO` and served the template APK through `org.autojs.plugin.APK_BUILDER`
-* `Feature` Packaged the AutoJs6 Runtime Kit under `assets/runtime-kit/`, including `template.apk`, the default keystore, metadata, and contract files
-* `Feature` Added build-time validation for Runtime Kit metadata, SHA-256 digests, and required `template.apk` entries
-* `Feature` Reported host version, protocol version, template package name, template SHA-256, Runtime API digests, and remote build capability
-* `Feature` Added optional experimental remote build protocol support through `autojs.apkBuilder.templatePlugin.enableRemoteBuild`
-* `Feature` Added release flow support for downloading the Runtime Kit, validating assets, signing with the trusted key, and uploading the universal APK
-* `Feature` Added localized plugin metadata, usage instructions, README, and CHANGELOG resources for Spanish, French, Russian, Arabic, Japanese, Korean, English, Simplified Chinese, Hong Kong Traditional Chinese, and Taiwan Traditional Chinese
+* `Hint` Pairs with AutoJs6 v6.8.0 Alpha5; supported Plugin Center versions resolve paired builds automatically, while manual installs use the matching Release tag or autojs6- suffix; the plugin has no icon or UI and is invoked automatically when packaging applications
+* `Feature` Let AutoJs6 discover the plugin and read its built-in template automatically, so "Package Application" no longer depends on a template APK bundled in the main app
+* `Feature` Bundled the complete Runtime Kit: template APK, default keystore, runtime metadata, and contract files
+* `Feature` Added automatic version and protocol compatibility checks before packaging, warning or blocking on mismatch to avoid producing broken apps
+* `Feature` Validated Runtime Kit SHA-256 digests and required template entries at plugin build time, and reported the template digest to AutoJs6 for re-verification at runtime
+* `Feature` Added an experimental remote build protocol that performs a lightweight build inside the plugin process (disabled by default, must be enabled explicitly at build time)
+* `Feature` Wired up the automated release flow: when the AutoJs6 main repository publishes a release, a matching plugin APK is built, signed with the trusted key, certificate-fingerprint-verified, and published
+* `Feature` Covered 10 languages in plugin metadata, usage instructions, README, and CHANGELOG: Simplified Chinese, Traditional Chinese (Hong Kong/Taiwan), English, French, Spanish, Japanese, Korean, Russian, and Arabic
+
+# v6.7.1 Alpha4
+
+###### 2026/07/09
+
+* `Hint` First public release; pairs with AutoJs6 of the same version (v6.7.1 Alpha4)
+* `Feature` Split off from the AutoJs6 main repository as a standalone plugin repository with the initial template APK plugin service
+* `Feature` Established the Runtime-Kit-driven pipeline, triggered by the AutoJs6 main repository, that fetches, verifies, builds, and publishes the plugin
 
 ##### For more release history
 
-* [CHANGELOG](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/.changelog/CHANGELOG-en.md)
+* [CHANGELOG](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/app/src/main/assets/doc/CHANGELOG-en.md)
+
+******
+
+### License
+
+******
+
+This project is released under the Mozilla Public License 2.0, which permits use, modification, and distribution under its terms.
+
+- [Mozilla Public License 2.0](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/LICENSE)
 
 ******
 
@@ -186,7 +310,7 @@ app/src/main/res/raw-*/plugin_instruction.md
 app/src/main/assets/doc/CHANGELOG-*.md
 ```
 
-`strings.xml` contains localized plugin names, descriptions, and fallback instructions; `plugin_instruction.md` contains usage instructions displayed by the host. README and CHANGELOG files are generated from JSON sources by `.python/generate_markdown.py`.
+`strings.xml` contains localized plugin names, descriptions, and fallback instructions; `plugin_instruction.md` contains usage instructions displayed by the host. README and CHANGELOG files are generated from JSON sources by `.python/generate_markdown.py`; to change the documentation, edit the JSON sources and re-run the script instead of editing generated files.
 
 ******
 

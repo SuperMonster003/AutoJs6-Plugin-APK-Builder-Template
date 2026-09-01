@@ -153,6 +153,9 @@ public class LEDataOutputStream {
 	 * @throws IOException
 	 */
 	public void writeNulEndedString(String name) throws IOException {
+		if (name == null || name.length() >= 128) {
+			throw new IOException("ARSC package name must contain at most 127 UTF-16 code units");
+		}
 		char[] ch = name.toCharArray();
 		int length = ch.length;
 

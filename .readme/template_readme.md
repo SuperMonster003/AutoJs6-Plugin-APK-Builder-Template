@@ -2,19 +2,17 @@
 
 <div align="center">
   <p>
-    <img src="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/app/src/main/res/mipmap/ic_launcher.png?raw=true" alt="autojs6-plugin-apk-builder-template-ic-launcher" border="0" width="128" />
+    <picture>
+      <img src="{{ repo_url }}/blob/master/app/src/main/res/mipmap/ic_launcher.png?raw=true" alt="{{ icon_alt }}" border="0" width="128" />
+    </picture>
   </p>
 
   <p>{{ text_plugin_synopsis }}</p>
 
   <p>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template?label=Release"/></a>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/issues"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template?color=A24232&label=Issues"/></a>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/commit/dc4627c752f8c1f709b302651a7de57992eac2b5"><img alt="Created" src="https://img.shields.io/date/1784208939?color=2e7d32&label=Created"/></a>
-    <br>
-    <a href="https://developer.android.com/studio/archive"><img alt="Android Studio" src="https://img.shields.io/badge/Android%20Studio-2023.3+-B64FC8"/></a>
-    <a href="https://www.jetbrains.com/idea/download/other.html"><img alt="IntelliJ IDEA" src="https://img.shields.io/badge/IntelliJ%20IDEA-2023.3+-EE4677"/></a>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template?color=534BAE&label=License"/></a>
+    <a href="{{ repo_url }}/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/{{ repo_slug }}?label=Release"/></a>
+    <a href="{{ repo_url }}/issues"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/{{ repo_slug }}?color=A24232&label=Issues"/></a>
+    <a href="{{ license_url }}"><img alt="GitHub License" src="https://img.shields.io/github/license/{{ repo_slug }}?color=534BAE&label=License"/></a>
   </p>
 </div>
 
@@ -34,7 +32,15 @@
 
 ******
 
-{{ p_introduction }}
+{{ p_introduction_plugin_managed }}
+
+******
+
+### {{ h3_how_it_works }}
+
+******
+
+{{ p_how_it_works_plugin_managed }}
 
 ******
 
@@ -46,21 +52,60 @@
 
 ******
 
-### {{ h3_runtime_kit }}
+### {{ h3_quick_start }}
 
 ******
 
-{{ p_runtime_kit }}
+- **{{ quick_start_install_title }}**: {{ quick_start_install }}
+- **{{ quick_start_use_title }}**: {{ quick_start_use }}
+- **{{ quick_start_verify_title }}**: {{ quick_start_verify }}
+- **{{ quick_start_debug_title }}**: {{ quick_start_debug }}
+
+******
+
+### {{ h3_boundaries }}
+
+******
+
+{{ p_boundaries_intro }}:
+
+{{ placeholder_boundaries }}
+
+******
+
+### {{ h3_faq }}
+
+******
+
+{{ p_matrix_faq }}
+
+{{ p_faq_plugin_managed }}
+
+******
+
+### {{ h3_reference }}
+
+******
+
+{{ p_reference_intro }}
+
+#### {{ h4_reference_runtime_kit }}
+
+{{ p_runtime_kit }}:
 
 ```text
 {{ runtime_kit_files }}
 ```
 
-******
+#### {{ h4_reference_discovery }}
 
-### {{ h3_local_build }}
+{{ p_reference_discovery }}:
 
-******
+```text
+{{ discovery_ids }}
+```
+
+#### {{ h4_reference_local_build }}
 
 {{ p_local_build_runtime_kit }}:
 
@@ -81,11 +126,7 @@
 .\gradlew.bat --console=plain :app:assembleRelease
 ```
 
-******
-
-### {{ h3_release_flow }}
-
-******
+#### {{ h4_reference_release_flow }}
 
 {{ p_release_flow_intro }}:
 
@@ -93,11 +134,7 @@
 {{ release_flow }}
 ```
 
-******
-
-### {{ h3_signing }}
-
-******
+#### {{ h4_reference_signing }}
 
 {{ p_signing_intro }}:
 
@@ -120,6 +157,16 @@ keyPassword=...
 
 ******
 
+### {{ h3_roadmap }}
+
+******
+
+{{ p_roadmap_plugin_managed }}
+
+- [{{ text_link_roadmap }}]({{ repo_url }}/blob/master/ROADMAP.md)
+
+******
+
 ### {{ h3_release_history }}
 
 ******
@@ -129,6 +176,16 @@ keyPassword=...
 ##### {{ h5_for_more_release_history }}
 
 * {{ placeholder_read_more_in_changelog }}
+
+******
+
+### {{ h3_license }}
+
+******
+
+{{ p_license }}
+
+- [Mozilla Public License 2.0]({{ repo_url }}/blob/master/LICENSE)
 
 ******
 

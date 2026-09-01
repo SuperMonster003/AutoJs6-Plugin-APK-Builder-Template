@@ -13,9 +13,30 @@ on:
         description: AutoJs6 source repository
         required: false
         default: SuperMonster003/AutoJs6
+      source_run_id:
+        description: AutoJs6 Actions run ID containing the Runtime Kit candidate artifact
+        required: false
+      expected_source_sha:
+        description: Exact Runtime Kit source commit required for candidate-only builds
+        required: false
+      source_artifact:
+        description: Runtime Kit artifact name in source_run_id
+        required: false
+        default: autojs6-runtime-kit
+      candidate_only:
+        description: Preserve signed APKs as an Actions artifact without creating a Release or updating the compatibility matrix
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+
+# Releases are serialized: PLUGIN_RELEASE_SEQ / compat-matrix.json advance per run
+# and must not race between concurrent workflow runs.
+concurrency:
+  group: build-from-runtime-kit
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -24,7 +45,6 @@ jobs:
       - name: Checkout plugin repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
 
       - name: Set up JDK 21
@@ -36,46 +56,192 @@ jobs:
 
       - name: Resolve build inputs
         id: vars
+        env:
+          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          DISPATCH_SOURCE_REPO: ${{ github.event.client_payload.source_repo }}
+          DISPATCH_SOURCE_RUN_ID: ${{ github.event.client_payload.source_run_id }}
+          DISPATCH_EXPECTED_SOURCE_SHA: ${{ github.event.client_payload.expected_source_sha }}
+          DISPATCH_SOURCE_ARTIFACT: ${{ github.event.client_payload.source_artifact }}
+          DISPATCH_CANDIDATE_ONLY: ${{ github.event.client_payload.candidate_only }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_SOURCE_REPO: ${{ inputs.source_repo }}
+          INPUT_SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          INPUT_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
+          INPUT_SOURCE_ARTIFACT: ${{ inputs.source_artifact }}
+          INPUT_CANDIDATE_ONLY: ${{ inputs.candidate_only }}
         run: |
+          set -euo pipefail
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            echo "tag=${{ github.event.client_payload.tag }}" >> "$GITHUB_OUTPUT"
-            echo "source_repo=${{ github.event.client_payload.source_repo }}" >> "$GITHUB_OUTPUT"
+            tag="$DISPATCH_TAG"
+            source_repo="$DISPATCH_SOURCE_REPO"
+            source_run_id="$DISPATCH_SOURCE_RUN_ID"
+            expected_source_sha="$DISPATCH_EXPECTED_SOURCE_SHA"
+            source_artifact="${DISPATCH_SOURCE_ARTIFACT:-autojs6-runtime-kit}"
+            candidate_only="${DISPATCH_CANDIDATE_ONLY:-false}"
           else
-            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
-            echo "source_repo=${{ inputs.source_repo }}" >> "$GITHUB_OUTPUT"
+            tag="$INPUT_TAG"
+            source_repo="$INPUT_SOURCE_REPO"
+            source_run_id="$INPUT_SOURCE_RUN_ID"
+            expected_source_sha="$INPUT_EXPECTED_SOURCE_SHA"
+            source_artifact="${INPUT_SOURCE_ARTIFACT:-autojs6-runtime-kit}"
+            candidate_only="${INPUT_CANDIDATE_ONLY:-false}"
+          fi
+
+          case "$tag" in
+            v[0-9A-Za-z._-]*) ;;
+            *) echo "Invalid source tag label: $tag" >&2; exit 1 ;;
+          esac
+          [[ "$source_repo" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || {
+            echo "Invalid source repository identity." >&2
+            exit 1
+          }
+          [[ "$source_artifact" =~ ^[A-Za-z0-9_.-]+$ ]] || {
+            echo "Invalid source artifact name." >&2
+            exit 1
+          }
+          if [ -n "$expected_source_sha" ] && [[ ! "$expected_source_sha" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            echo "Invalid expected source commit." >&2
+            exit 1
+          fi
+          case "$candidate_only" in
+            true|false) ;;
+            *) echo "candidate_only must be true or false." >&2; exit 1 ;;
+          esac
+
+          {
+            echo "tag=$tag"
+            echo "source_repo=$source_repo"
+            echo "source_run_id=$source_run_id"
+            echo "expected_source_sha=$expected_source_sha"
+            echo "source_artifact=$source_artifact"
+            echo "candidate_only=$candidate_only"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Validate execution mode
+        env:
+          CANDIDATE_ONLY: ${{ steps.vars.outputs.candidate_only }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          EXPECTED_SOURCE_SHA: ${{ steps.vars.outputs.expected_source_sha }}
+          SOURCE_RUN_ID: ${{ steps.vars.outputs.source_run_id }}
+          TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ "$CANDIDATE_ONLY" = "true" ]; then
+            test "$GITHUB_EVENT_NAME" = "workflow_dispatch" || {
+              echo "candidate_only is allowed only for workflow_dispatch." >&2
+              exit 1
+            }
+            [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || {
+              echo "candidate_only requires a numeric source_run_id." >&2
+              exit 1
+            }
+            [[ "$EXPECTED_SOURCE_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || {
+              echo "candidate_only requires an exact expected_source_sha commit." >&2
+              exit 1
+            }
+            case "$TAG" in
+              v*-rc*|v*-candidate*) ;;
+              *) echo "candidate_only requires an RC/candidate tag label." >&2; exit 1 ;;
+            esac
+          else
+            test "$GITHUB_REF_NAME" = "$DEFAULT_BRANCH" || {
+              echo "Formal publication must run from the default branch." >&2
+              exit 1
+            }
+            test -z "$SOURCE_RUN_ID" || {
+              echo "Formal publication must download Runtime Kits from a GitHub Release." >&2
+              exit 1
+            }
+            test -z "$EXPECTED_SOURCE_SHA" || {
+              echo "expected_source_sha is reserved for candidate_only builds." >&2
+              exit 1
+            }
           fi
 
       - name: Download Runtime Kit
         env:
           GH_TOKEN: ${{ secrets.AUTOJS6_MAIN_REPO_TOKEN || github.token }}
+          SOURCE_ARTIFACT: ${{ steps.vars.outputs.source_artifact }}
+          SOURCE_REPO: ${{ steps.vars.outputs.source_repo }}
+          SOURCE_RUN_ID: ${{ steps.vars.outputs.source_run_id }}
+          SOURCE_TAG: ${{ steps.vars.outputs.tag }}
         run: |
           set -euo pipefail
           shopt -s nullglob
 
           archive_dir="$RUNNER_TEMP/autojs6-runtime-kit-download"
-          rm -rf runtime-kit "$archive_dir"
-          mkdir -p runtime-kit "$archive_dir"
+          runtime_kits_dir="$RUNNER_TEMP/autojs6-runtime-kits"
+          rm -rf "$archive_dir" "$runtime_kits_dir"
+          mkdir -p "$archive_dir" "$runtime_kits_dir"
 
-          gh release download "${{ steps.vars.outputs.tag }}" \
-            --repo "${{ steps.vars.outputs.source_repo }}" \
-            --pattern "autojs6-runtime-kit-*.zip" \
-            --dir "$archive_dir"
+          if [ -n "$SOURCE_RUN_ID" ]; then
+            gh run download "$SOURCE_RUN_ID" \
+              --repo "$SOURCE_REPO" \
+              --name "$SOURCE_ARTIFACT" \
+              --dir "$archive_dir"
+          else
+            gh release download "$SOURCE_TAG" \
+              --repo "$SOURCE_REPO" \
+              --pattern "autojs6-runtime-kit-*.zip" \
+              --dir "$archive_dir"
+          fi
 
           archives=("$archive_dir"/autojs6-runtime-kit-*.zip)
-          if [ "${#archives[@]}" -ne 1 ]; then
-            printf 'Expected exactly one Runtime Kit archive, found %d.\n' "${#archives[@]}" >&2
-            printf '  %s\n' "${archives[@]-}" >&2
+          if [ "${#archives[@]}" -eq 0 ]; then
+            echo "No Runtime Kit archives were downloaded." >&2
             exit 1
           fi
 
-          unzip "${archives[0]}" -d runtime-kit
+          for archive in "${archives[@]}"; do
+            archive_name="$(basename "${archive%.zip}")"
+            target_dir="$runtime_kits_dir/$archive_name"
+            mkdir -p "$target_dir"
+            unzip -q "$archive" -d "$target_dir"
+          done
           rm -rf "$archive_dir"
+          echo "RUNTIME_KITS_DIR=$runtime_kits_dir" >> "$GITHUB_ENV"
 
-      - name: Verify Runtime Kit
-        run: python3 scripts/verify_runtime_kit.py runtime-kit
+      - name: Verify Runtime Kit variant set
+        env:
+          EXPECTED_SOURCE_SHA: ${{ steps.vars.outputs.expected_source_sha }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          kit_dirs=("$RUNTIME_KITS_DIR"/*)
+          for kit_dir in "${kit_dirs[@]}"; do
+            python3 scripts/verify_runtime_kit.py "$kit_dir"
+          done
+
+          manifest="$RUNNER_TEMP/autojs6-runtime-kit-variants.json"
+          python3 scripts/verify_runtime_kit_set.py "$RUNTIME_KITS_DIR" --output "$manifest"
+          if [ -n "$EXPECTED_SOURCE_SHA" ]; then
+            python3 - "$manifest" "$EXPECTED_SOURCE_SHA" <<'PY'
+          import json
+          import sys
+
+          manifest = json.load(open(sys.argv[1], encoding="utf-8"))
+          actual = str((manifest.get("host") or {}).get("gitSha") or "").lower()
+          expected = sys.argv[2].lower()
+          if actual != expected:
+              raise SystemExit(f"Runtime Kit source SHA mismatch: expected={expected}, actual={actual}")
+          print(f"Runtime Kit source SHA verified: {actual}")
+          PY
+          fi
+          universal_kit="$(
+            python3 - "$manifest" <<'PY'
+          import json
+          import sys
+
+          manifest = json.load(open(sys.argv[1], encoding="utf-8"))
+          print(next(item["runtimeKitDir"] for item in manifest["variants"] if item["variant"] == "inrt-universal"))
+          PY
+          )"
+          test -n "$universal_kit"
+          echo "RUNTIME_KIT_VARIANTS_MANIFEST=$manifest" >> "$GITHUB_ENV"
+          echo "UNIVERSAL_RUNTIME_KIT_DIR=$universal_kit" >> "$GITHUB_ENV"
 
       - name: Sync plugin version
-        run: python3 scripts/sync_version_from_runtime_kit.py runtime-kit
+        run: python3 scripts/sync_version_from_runtime_kit.py "$UNIVERSAL_RUNTIME_KIT_DIR"
 
       - name: Prepare release signing keystore
         env:
@@ -100,45 +266,89 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build signed plugin APK
+      - name: Build signed plugin APK variants
         env:
           SIGNING_KEY_STORE_PASSWORD: ${{ secrets.SIGNING_KEY_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: ./gradlew :app:assembleRelease -Pautojs.apkBuilder.templatePlugin.runtimeKitDir=runtime-kit --no-daemon
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          apk_dir="$RUNNER_TEMP/autojs6-plugin-apks"
+          rm -rf "$apk_dir"
+          mkdir -p "$apk_dir"
 
-      - name: Verify release APK signature
-        id: apk
+          while IFS=$'\t' read -r variant kit_dir; do
+            echo "Building $variant from $kit_dir"
+            rm -rf app/build/outputs/apk/release
+            ./gradlew :app:assembleRelease \
+              "-Pautojs.apkBuilder.templatePlugin.runtimeKitDir=$kit_dir"
+            outputs=(app/build/outputs/apk/release/*.apk)
+            if [ "${#outputs[@]}" -ne 1 ]; then
+              printf 'Expected one APK for %s, found %d.\n' "$variant" "${#outputs[@]}" >&2
+              exit 1
+            fi
+            cp "${outputs[0]}" "$apk_dir/"
+          done < <(
+            python3 - "$RUNTIME_KIT_VARIANTS_MANIFEST" <<'PY'
+          import json
+          import sys
+
+          for item in json.load(open(sys.argv[1], encoding="utf-8"))["variants"]:
+              print(f'{item["variant"]}\t{item["runtimeKitDir"]}')
+          PY
+          )
+
+          expected_count="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["variants"]))' "$RUNTIME_KIT_VARIANTS_MANIFEST")"
+          staged=("$apk_dir"/*.apk)
+          test "${#staged[@]}" -eq "$expected_count"
+          echo "PLUGIN_APK_DIR=$apk_dir" >> "$GITHUB_ENV"
+
+      - name: Verify release APK signatures and add CRC32 suffixes
         env:
           SIGNING_CERT_SHA256: ${{ secrets.SIGNING_CERT_SHA256 }}
         run: |
           set -euo pipefail
           shopt -s nullglob
-          apks=(app/build/outputs/apk/release/*.apk)
-          test "${#apks[@]}" -eq 1 || exit 1
-          apk="${apks[0]}"
+          apks=("$PLUGIN_APK_DIR"/*.apk)
+          test "${#apks[@]}" -gt 0
           apksigner="$(command -v apksigner || true)"
           if [ -z "$apksigner" ]; then
             apksigner="$(find "${ANDROID_HOME:?}/build-tools" -mindepth 2 -maxdepth 2 -type f -name apksigner -print | sort -V | tail -n 1)"
           fi
           test -x "$apksigner"
+          aapt="$(dirname "$apksigner")/aapt"
+          test -x "$aapt"
           expected_sha256="$(printf '%s' "$SIGNING_CERT_SHA256" | tr '[:upper:]' '[:lower:]' | tr -d ':[:space:]')"
-          verification="$($apksigner verify --verbose --print-certs "$apk")"
-          printf '%s\n' "$verification"
-          actual_sha256="$(
-            printf '%s\n' "$verification" \
-              | grep -E 'certificate SHA-256 digest:' \
-              | head -n 1 \
-              | sed 's/.*digest: //' \
-              | tr '[:upper:]' '[:lower:]' \
-              | tr -d ':[:space:]'
-          )"
-          echo "Expected signer certificate SHA-256: $expected_sha256"
-          echo "Actual signer certificate SHA-256:   $actual_sha256"
-          test "$actual_sha256" = "$expected_sha256"
+          plugin_version="$(sed -n 's/^PLUGIN_VERSION_NAME=//p' version.properties | head -n 1)"
+          plugin_seq="$(sed -n 's/^PLUGIN_RELEASE_SEQ=//p' version.properties | head -n 1)"
+          host_version="$(sed -n 's/^VERSION_NAME=//p' version.properties | head -n 1)"
+          host_code="$(sed -n 's/^VERSION_BUILD=//p' version.properties | head -n 1)"
+          host_slug="$(printf '%s' "$host_version" | tr '[:upper:] ' '[:lower:]-')"
+          expected_version_code="$((host_code * 100 + plugin_seq))"
+          expected_version_name="${plugin_version}+autojs6-${host_slug}"
+          for apk in "${apks[@]}"; do
+            verification="$($apksigner verify --verbose --print-certs "$apk")"
+            printf '%s\n' "$verification"
+            actual_sha256="$(
+              printf '%s\n' "$verification" \
+                | grep -E 'certificate SHA-256 digest:' \
+                | head -n 1 \
+                | sed 's/.*digest: //' \
+                | tr '[:upper:]' '[:lower:]' \
+                | tr -d ':[:space:]'
+            )"
+            echo "Expected signer certificate SHA-256: $expected_sha256"
+            echo "Actual signer certificate SHA-256:   $actual_sha256"
+            test "$actual_sha256" = "$expected_sha256"
 
-          crc32="$(
-            python3 - "$apk" <<'PY'
+            badging="$("$aapt" dump badging "$apk" | head -n 1)"
+            printf '%s\n' "$badging"
+            grep -F "versionCode='$expected_version_code'" <<< "$badging"
+            grep -F "versionName='$expected_version_name'" <<< "$badging"
+
+            crc32="$(
+              python3 - "$apk" <<'PY'
           import sys
           import zlib
           from pathlib import Path
@@ -149,37 +359,99 @@ jobs:
                   digest = zlib.crc32(chunk, digest)
           print(f"{digest & 0xffffffff:08x}")
           PY
-          )"
-          apk_with_crc="${apk%.apk}-$crc32.apk"
-          mv "$apk" "$apk_with_crc"
-          echo "APK CRC32: $crc32"
-          echo "path=$apk_with_crc" >> "$GITHUB_OUTPUT"
-          echo "name=$(basename "$apk_with_crc")" >> "$GITHUB_OUTPUT"
-          echo "legacy_name=$(basename "$apk")" >> "$GITHUB_OUTPUT"
+            )"
+            apk_with_crc="${apk%.apk}-$crc32.apk"
+            mv "$apk" "$apk_with_crc"
+            echo "$(basename "$apk_with_crc"): CRC32=$crc32"
+          done
 
-      - name: Verify plugin APK assets
-        env:
-          PLUGIN_APK: ${{ steps.apk.outputs.path }}
+      - name: Verify plugin APK variant assets
         run: |
           set -euo pipefail
-          python3 scripts/check_apk_assets.py --plugin-apk "$PLUGIN_APK"
+          shopt -s nullglob
+          apks=("$PLUGIN_APK_DIR"/*.apk)
+          for apk in "${apks[@]}"; do
+            python3 scripts/check_apk_assets.py --plugin-apk "$apk"
 
-          embedded_archives="$(
-            unzip -Z1 "$PLUGIN_APK" \
-              | grep -E '^assets/runtime-kit/(.*/)?autojs6-runtime-kit-.*\.zip$' \
-              || true
-          )"
-          if [ -n "$embedded_archives" ]; then
-            echo "Plugin APK contains an unexpected embedded Runtime Kit archive:" >&2
-            printf '  %s\n' "$embedded_archives" >&2
-            exit 1
+            embedded_archives="$(
+              unzip -Z1 "$apk" \
+                | grep -E '^assets/runtime-kit/(.*/)?autojs6-runtime-kit-.*\.zip$' \
+                || true
+            )"
+            if [ -n "$embedded_archives" ]; then
+              echo "Plugin APK contains an unexpected embedded Runtime Kit archive: $apk" >&2
+              printf '  %s\n' "$embedded_archives" >&2
+              exit 1
+            fi
+          done
+
+      - name: Create release evidence manifest
+        env:
+          CANDIDATE_ONLY: ${{ steps.vars.outputs.candidate_only }}
+          SIGNING_CERT_SHA256: ${{ secrets.SIGNING_CERT_SHA256 }}
+          SOURCE_REPO: ${{ steps.vars.outputs.source_repo }}
+          SOURCE_RUN_ID: ${{ steps.vars.outputs.source_run_id }}
+          SOURCE_TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          set -euo pipefail
+          plugin_version="$(sed -n 's/^PLUGIN_VERSION_NAME=//p' version.properties | head -n 1)"
+          plugin_seq="$(sed -n 's/^PLUGIN_RELEASE_SEQ=//p' version.properties | head -n 1)"
+          host_version="$(sed -n 's/^VERSION_NAME=//p' version.properties | head -n 1)"
+          host_code="$(sed -n 's/^VERSION_BUILD=//p' version.properties | head -n 1)"
+          host_slug="$(printf '%s' "$host_version" | tr '[:upper:] ' '[:lower:]-')"
+          plugin_version_code="$((host_code * 100 + plugin_seq))"
+          evidence_file="$RUNNER_TEMP/autojs6-apk-builder-template-v${plugin_version}-autojs6-v${host_slug}-vc${plugin_version_code}-release-evidence.json"
+          released_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
+          evidence_args=(
+            --runtime-kits-manifest "$RUNTIME_KIT_VARIANTS_MANIFEST"
+            --version-properties version.properties
+            --apk-dir "$PLUGIN_APK_DIR"
+            --repository "$GITHUB_REPOSITORY"
+            --release-tag "$SOURCE_TAG"
+            --source-repository "$SOURCE_REPO"
+            --source-tag "$SOURCE_TAG"
+            --signer-certificate-sha256 "$SIGNING_CERT_SHA256"
+            --released-at "$released_at"
+            --workflow-run-url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            --output "$evidence_file"
+          )
+          if [ "$CANDIDATE_ONLY" = "true" ]; then
+            evidence_args+=(
+              --candidate-only
+              --source-workflow-run-url "https://github.com/$SOURCE_REPO/actions/runs/$SOURCE_RUN_ID"
+            )
           fi
+          python3 scripts/create_release_evidence.py "${evidence_args[@]}"
+
+          echo "RELEASED_AT=$released_at" >> "$GITHUB_ENV"
+          echo "RELEASE_EVIDENCE_FILE=$evidence_file" >> "$GITHUB_ENV"
+
+      - name: Preserve release evidence as workflow artifact
+        if: ${{ steps.vars.outputs.candidate_only != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-builder-template-release-evidence
+          path: ${{ env.RELEASE_EVIDENCE_FILE }}
+          if-no-files-found: error
+
+      - name: Preserve signed candidate bundle
+        if: ${{ steps.vars.outputs.candidate_only == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-builder-template-signed-candidate
+          path: |
+            ${{ env.PLUGIN_APK_DIR }}/*.apk
+            ${{ env.RELEASE_EVIDENCE_FILE }}
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Remove release signing material
         if: always()
         run: rm -f "$RUNNER_TEMP/autojs6-release-signing.jks"
 
       - name: Publish plugin release
+        if: ${{ steps.vars.outputs.candidate_only != 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -190,46 +462,125 @@ jobs:
           release_date="$(TZ=Asia/Shanghai date '+%Y/%m/%d')"
           release_title="$release_version @ $release_date"
 
-          if gh release view "$tag" >/dev/null 2>&1; then
-            gh release edit "$tag" --title "$release_title"
-          else
-            gh release create "$tag" --title "$release_title" --notes "Built from AutoJs6 Runtime Kit $tag"
-          fi
-          legacy_asset_name="${{ steps.apk.outputs.legacy_name }}"
-          if [ -n "$legacy_asset_name" ]; then
-            gh release delete-asset "$tag" "$legacy_asset_name" --yes >/dev/null 2>&1 || true
-          fi
-          gh release upload "$tag" "${{ steps.apk.outputs.path }}" --clobber
+          plugin_version="$(sed -n 's/^PLUGIN_VERSION_NAME=//p' version.properties | head -n 1)"
+          plugin_build="$(sed -n 's/^PLUGIN_VERSION_BUILD=//p' version.properties | head -n 1)"
+          plugin_seq="$(sed -n 's/^PLUGIN_RELEASE_SEQ=//p' version.properties | head -n 1)"
+          host_version="$(sed -n 's/^VERSION_NAME=//p' version.properties | head -n 1)"
+          host_code="$(sed -n 's/^VERSION_BUILD=//p' version.properties | head -n 1)"
+          plugin_version_code="$((host_code * 100 + plugin_seq))"
+          release_notes="$(cat <<EOF
+          APK Builder Template v$plugin_version built from AutoJs6 Runtime Kit $tag.
 
-      - name: Persist released plugin version
+          - Plugin: $plugin_version (build $plugin_build, Android versionCode $plugin_version_code)
+          - Paired host: AutoJs6 $host_version (versionCode $host_code)
+          - Assets: universal + arm64-v8a + armeabi-v7a + x86_64 + x86
+          - Remote build: experimental and disabled by default
+          - Evidence: $(basename "$RELEASE_EVIDENCE_FILE")
+
+          The APK includes the 10-language changelog and usage documentation.
+          EOF
+          )"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --title "$release_title" --notes "$release_notes"
+          else
+            gh release create "$tag" --title "$release_title" --notes "$release_notes"
+          fi
+          shopt -s nullglob
+          apks=("$PLUGIN_APK_DIR"/*.apk)
+          for apk in "${apks[@]}"; do
+            legacy_asset_name="$(basename "$apk" | sed -E 's/-[0-9a-f]{8}\.apk$/.apk/')"
+            gh release delete-asset "$tag" "$legacy_asset_name" --yes >/dev/null 2>&1 || true
+          done
+          gh release upload "$tag" "${apks[@]}" "$RELEASE_EVIDENCE_FILE" --clobber
+
+      - name: Persist released plugin version and compat matrix
+        if: ${{ steps.vars.outputs.candidate_only != 'true' }}
         env:
           RELEASE_TAG: ${{ steps.vars.outputs.tag }}
           TARGET_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
+          shopt -s nullglob
 
           git fetch --no-tags origin \
             "+refs/heads/$TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH"
           git reset --hard "origin/$TARGET_BRANCH"
-          python3 scripts/sync_version_from_runtime_kit.py runtime-kit
+          python3 scripts/sync_version_from_runtime_kit.py "$UNIVERSAL_RUNTIME_KIT_DIR"
+
+          released_at="${RELEASED_AT:?Release evidence timestamp was not recorded}"
+          while IFS=$'\t' read -r variant slug kit_dir; do
+            matches=("$PLUGIN_APK_DIR"/*-"$slug"-????????.apk)
+            if [ "${#matches[@]}" -ne 1 ]; then
+              printf 'Expected one staged APK for %s, found %d.\n' "$variant" "${#matches[@]}" >&2
+              exit 1
+            fi
+            apk="${matches[0]}"
+            python3 scripts/update_compat_matrix.py add \
+              --matrix compat-matrix.json \
+              --runtime-kit "$kit_dir" \
+              --version-properties version.properties \
+              --apk "$apk" \
+              --apk-name "$(basename "$apk")" \
+              --tag "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --released-at "$released_at"
+          done < <(
+            python3 - "$RUNTIME_KIT_VARIANTS_MANIFEST" <<'PY'
+          import json
+          import sys
+
+          for item in json.load(open(sys.argv[1], encoding="utf-8"))["variants"]:
+              print(f'{item["variant"]}\t{item["slug"]}\t{item["runtimeKitDir"]}')
+          PY
+          )
 
           version_build="$(sed -n 's/^VERSION_BUILD=//p' version.properties | head -n 1)"
           version_name="$(sed -n 's/^VERSION_NAME=//p' version.properties | head -n 1)"
+          plugin_version="$(sed -n 's/^PLUGIN_VERSION_NAME=//p' version.properties | head -n 1)"
+          plugin_build="$(sed -n 's/^PLUGIN_VERSION_BUILD=//p' version.properties | head -n 1)"
+          plugin_seq="$(sed -n 's/^PLUGIN_RELEASE_SEQ=//p' version.properties | head -n 1)"
           test -n "$version_build"
           test -n "$version_name"
+          test -n "$plugin_version"
+          test -n "$plugin_build"
+          test -n "$plugin_seq"
 
-          git add version.properties
+          git add version.properties compat-matrix.json
           if git diff --cached --quiet; then
-            echo "version.properties already matches release $RELEASE_TAG."
+            echo "version.properties and compat-matrix.json already match release $RELEASE_TAG."
             exit 0
           fi
 
           git diff --cached --check
-          git diff --cached -- version.properties
+          git diff --cached -- version.properties compat-matrix.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: sync plugin version for $RELEASE_TAG"
+          git commit -m "chore: sync plugin version and compat matrix for $RELEASE_TAG"
           git push origin "HEAD:$TARGET_BRANCH"
 
           echo "Persisted VERSION_BUILD=$version_build"
           echo "Persisted VERSION_NAME=$version_name"
+          echo "Persisted PLUGIN_VERSION_NAME=$plugin_version"
+          echo "Persisted PLUGIN_VERSION_BUILD=$plugin_build"
+          echo "Persisted PLUGIN_RELEASE_SEQ=$plugin_seq"
+
+      - name: Record candidate-only result
+        if: ${{ steps.vars.outputs.candidate_only == 'true' }}
+        env:
+          EXPECTED_SOURCE_SHA: ${{ steps.vars.outputs.expected_source_sha }}
+          SOURCE_REPO: ${{ steps.vars.outputs.source_repo }}
+          SOURCE_RUN_ID: ${{ steps.vars.outputs.source_run_id }}
+          SOURCE_TAG: ${{ steps.vars.outputs.tag }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Signed APK Builder candidate"
+            echo
+            echo "- Label: \`$SOURCE_TAG\`"
+            echo "- Runtime Kit source: \`$SOURCE_REPO@$EXPECTED_SOURCE_SHA\` run \`$SOURCE_RUN_ID\`"
+            echo "- Distribution: Actions artifact only (14-day retention)"
+            echo "- GitHub Release created: no"
+            echo "- Compatibility matrix updated: no"
+            echo "- Remote build enabled by default: no"
+          } >> "$GITHUB_STEP_SUMMARY"

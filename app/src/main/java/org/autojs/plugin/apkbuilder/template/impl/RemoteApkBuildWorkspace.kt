@@ -11,14 +11,10 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
 import java.io.SyncFailedException
 import java.security.MessageDigest
 import java.util.concurrent.CancellationException
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
 
 class RemoteApkBuildWorkspace private constructor(
     val root: File,
@@ -67,17 +63,41 @@ class RemoteApkBuildWorkspace private constructor(
             try {
                 ensureActive(cancelSignal)
                 val archiveFile = File(root, "project.zip")
-                copyFdToFile(request.projectArchiveFd ?: throw IOException("Project archive fd is missing."), archiveFile, cancelSignal)
+                validateDeclaredArchiveSize(request.projectArchiveSizeBytes, RemoteZipExtractor.PROJECT_ARCHIVE_LIMITS)
+                copyFdToFile(
+                    fd = request.projectArchiveFd ?: throw IOException("Project archive fd is missing."),
+                    file = archiveFile,
+                    cancelSignal = cancelSignal,
+                    maximumBytes = RemoteZipExtractor.PROJECT_ARCHIVE_LIMITS.maxArchiveBytes,
+                    limitError = "Remote build project archive compressed size exceeds limit: " +
+                        "max=${RemoteZipExtractor.PROJECT_ARCHIVE_LIMITS.maxArchiveBytes}",
+                )
                 verifyFile(archiveFile, request.projectArchiveSizeBytes, request.projectArchiveSha256, "project archive", cancelSignal)
                 ensureActive(cancelSignal)
 
                 val projectRoot = File(root, "unpacked")
-                unzipSafely(archiveFile, projectRoot, cancelSignal)
+                unzipSafely(
+                    archiveFile,
+                    projectRoot,
+                    RemoteBuildStoragePolicy.declaredProjectUncompressedBytes(request.extras),
+                    cancelSignal,
+                )
                 ensureActive(cancelSignal)
 
                 val nativeLibrariesArchiveFile = request.nativeLibrariesArchiveFd?.let { fd ->
                     File(root, "native-libraries.zip").also { file ->
-                        copyFdToFile(fd, file, cancelSignal)
+                        validateDeclaredArchiveSize(
+                            request.nativeLibrariesArchiveSizeBytes,
+                            RemoteZipExtractor.BUILD_INPUT_ARCHIVE_LIMITS,
+                        )
+                        copyFdToFile(
+                            fd = fd,
+                            file = file,
+                            cancelSignal = cancelSignal,
+                            maximumBytes = RemoteZipExtractor.BUILD_INPUT_ARCHIVE_LIMITS.maxArchiveBytes,
+                            limitError = "Remote build native build input archive compressed size exceeds limit: " +
+                                "max=${RemoteZipExtractor.BUILD_INPUT_ARCHIVE_LIMITS.maxArchiveBytes}",
+                        )
                         verifyFile(
                             file = file,
                             expectedSize = request.nativeLibrariesArchiveSizeBytes,
@@ -123,7 +143,15 @@ class RemoteApkBuildWorkspace private constructor(
 
                 val keyStoreFile = request.keyStoreFd?.let { fd ->
                     File(root, "keystore.bin").also { file ->
-                        copyFdToFile(fd, file, cancelSignal)
+                        validateDeclaredKeyStoreSize(request.keyStoreSizeBytes)
+                        copyFdToFile(
+                            fd = fd,
+                            file = file,
+                            cancelSignal = cancelSignal,
+                            maximumBytes = RemoteApkBuildRequestPolicy.MAX_KEYSTORE_BYTES,
+                            limitError = "Remote build keystore size exceeds limit: " +
+                                "max=${RemoteApkBuildRequestPolicy.MAX_KEYSTORE_BYTES}",
+                        )
                         verifyFile(file, request.keyStoreSizeBytes, request.keyStoreSha256, "keystore", cancelSignal)
                     }
                 }
@@ -147,13 +175,45 @@ class RemoteApkBuildWorkspace private constructor(
             fd: ParcelFileDescriptor,
             file: File,
             cancelSignal: AtomicBoolean?,
+            maximumBytes: Long,
+            limitError: String,
         ) {
             ParcelFileDescriptor.AutoCloseInputStream(fd).use { input ->
                 FileOutputStream(file, false).use { output ->
-                    copyStreamWithCancel(input, output, cancelSignal)
+                    RemoteBoundedStreamCopier.copy(
+                        input = input,
+                        output = output,
+                        maximumBytes = maximumBytes,
+                        limitError = limitError,
+                        checkActive = { ensureActive(cancelSignal) },
+                    )
                     output.flush()
                     syncBestEffort(output)
                 }
+            }
+        }
+
+        private fun validateDeclaredArchiveSize(expectedSize: Long, limits: RemoteZipExtractor.Limits) {
+            if (expectedSize < 0L) {
+                throw IOException("Remote build ${limits.label} compressed size must not be negative.")
+            }
+            if (expectedSize > limits.maxArchiveBytes) {
+                throw IOException(
+                    "Remote build ${limits.label} compressed size exceeds limit: " +
+                        "declared=$expectedSize max=${limits.maxArchiveBytes}",
+                )
+            }
+        }
+
+        private fun validateDeclaredKeyStoreSize(expectedSize: Long) {
+            if (expectedSize < 0L) {
+                throw IOException("Remote build keystore size must not be negative.")
+            }
+            if (expectedSize > RemoteApkBuildRequestPolicy.MAX_KEYSTORE_BYTES) {
+                throw IOException(
+                    "Remote build keystore size exceeds limit: " +
+                        "max=${RemoteApkBuildRequestPolicy.MAX_KEYSTORE_BYTES}",
+                )
             }
         }
 
@@ -210,59 +270,20 @@ class RemoteApkBuildWorkspace private constructor(
         private fun unzipSafely(
             zipFile: File,
             targetDir: File,
+            expectedUncompressedBytes: Long?,
             cancelSignal: AtomicBoolean?,
         ) {
-            if (!targetDir.mkdirs()) {
-                throw IOException("Failed to create project archive target dir: ${targetDir.path}")
-            }
-            val canonicalRoot = targetDir.canonicalFile
-            ZipInputStream(FileInputStream(zipFile).buffered(BUFFER_SIZE)).use { zip ->
-                while (true) {
-                    ensureActive(cancelSignal)
-                    val entry = zip.nextEntry ?: break
-                    extractEntry(zip, entry, canonicalRoot, cancelSignal)
-                    zip.closeEntry()
-                }
-            }
-        }
-
-        private fun extractEntry(
-            zip: ZipInputStream,
-            entry: ZipEntry,
-            root: File,
-            cancelSignal: AtomicBoolean?,
-        ) {
-            ensureActive(cancelSignal)
-            val name = entry.name.replace('\\', '/')
-            if (name.isBlank() || name.startsWith('/') || name.split('/').any { it == ".." }) {
-                throw IOException("Unsafe project archive entry: ${entry.name}")
-            }
-            val out = File(root, name).canonicalFile
-            if (!out.path.startsWith(root.path + File.separator) && out.path != root.path) {
-                throw IOException("Project archive entry escapes target dir: ${entry.name}")
-            }
-            if (entry.isDirectory) {
-                if (!out.exists() && !out.mkdirs()) {
-                    throw IOException("Failed to create archive directory: ${out.path}")
-                }
-                return
-            }
-            out.parentFile?.let { parent ->
-                if (!parent.exists() && !parent.mkdirs()) {
-                    throw IOException("Failed to create archive parent directory: ${parent.path}")
-                }
-            }
-            FileOutputStream(out, false).use { output ->
-                copyStreamWithCancel(zip, output, cancelSignal)
-                output.flush()
-            }
+            RemoteZipExtractor.extract(
+                zipFile = zipFile,
+                targetDir = targetDir,
+                limits = RemoteZipExtractor.PROJECT_ARCHIVE_LIMITS,
+                expectedUncompressedBytes = expectedUncompressedBytes,
+                checkActive = { ensureActive(cancelSignal) },
+            )
         }
 
         private fun resolveInside(root: File, relativePath: String): File {
-            val normalized = relativePath.replace('\\', '/')
-            if (normalized.isBlank() || normalized.startsWith('/') || normalized.split('/').any { it == ".." }) {
-                throw IOException("Unsafe project source path: $relativePath")
-            }
+            val normalized = RemoteZipExtractor.normalizeRelativePath(relativePath, "project source path")
             val canonicalRoot = root.canonicalFile
             val resolved = File(canonicalRoot, normalized).canonicalFile
             if (!resolved.path.startsWith(canonicalRoot.path + File.separator) && resolved.path != canonicalRoot.path) {
@@ -286,22 +307,6 @@ class RemoteApkBuildWorkspace private constructor(
                 }
             }
             return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
-        }
-
-        private fun copyStreamWithCancel(
-            input: InputStream,
-            output: OutputStream,
-            cancelSignal: AtomicBoolean?,
-        ) {
-            val buffer = ByteArray(BUFFER_SIZE)
-            while (true) {
-                ensureActive(cancelSignal)
-                val read = input.read(buffer)
-                if (read < 0) {
-                    break
-                }
-                output.write(buffer, 0, read)
-            }
         }
 
         private fun ensureActive(cancelSignal: AtomicBoolean?) {
