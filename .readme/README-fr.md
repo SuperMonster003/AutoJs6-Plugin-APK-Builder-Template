@@ -245,7 +245,7 @@ Les travaux prévus et leur avancement sont suivis sous forme de liste vérifiab
 
 ###### 2026/09/01
 
-* `Info` Première version de la ligne de version indépendante du plugin; le Centre de plugins utilise compat-matrix.json pour sélectionner une build ABI associée, les téléchargements manuels doivent correspondre au suffixe d'hôte autojs6- et les builds distantes restent désactivées par défaut
+* `Info` Première version officielle de la ligne indépendante du plugin, associée exactement au Runtime Kit d'AutoJs6 v6.8.0 (versionCode 5277); la version composite du plugin est 1.0.0+autojs6-6.8.0 (versionCode 527701), le Centre de plugins sélectionne la build ABI associée via compat-matrix.json et les builds distantes restent désactivées par défaut
 * `Ajout` Ajout du SemVer 1.0.0 du plugin, d'une numérotation de build indépendante, de noms de version composés et de valeurs Android versionCode monotones permettant plusieurs versions du plugin pour un même hôte
 * `Ajout` Ajout des variantes universal, arm64-v8a, armeabi-v7a, x86_64 et x86 avec sélection exacte de l'ABI et repli universal
 * `Ajout` Ajout d'un contrat de plage de compatibilité hôte à échec fermé et d'une matrice de compatibilité faisant autorité afin qu'une plage de correctifs adjacents explicitement validée puisse partager une build du plugin
@@ -256,6 +256,7 @@ Les travaux prévus et leur avancement sont suivis sous forme de liste vérifiab
 * `Correction` Durcissement des limites d'entrée du build distant expérimental: validation stricte des types, tailles et profondeurs de Parcelable/Bundle et project.json, limites pour les magasins de clés, icônes et chemins ZIP, et correction des dépassements de nom de package ARSC et de nom de sortie dérivé
 * `Correction` Le plugin ne pouvait pas être activé depuis le centre de plugins après son installation sur certains systèmes
 * `Amélioration` Unification des règles de validation du Runtime Kit entre Gradle et Python, notamment les résumés, tailles, fichiers obligatoires, entrées APK et la cohérence des cinq variantes
+* `Amélioration` Publication avec les cinq APK d'un manifeste de preuves JSON lisible par machine, liant les empreintes des artefacts, le certificat de signature, les versions plugin/hôte, la plage de compatibilité, les ID Runtime Kit et les versions de protocole
 * `Amélioration` Mise à jour des instructions d'installation, de la FAQ, de la répétition de publication et de la documentation en 10 langues pour les versions associées, la sélection ABI, la récupération après rétrogradation et le versionnement indépendant
 * `Amélioration` Uniformiser la mise en page du README et la gestion des versions de la plateforme Gradle
 

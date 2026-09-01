@@ -184,7 +184,16 @@ jobs:
             apksigner="$(find "${ANDROID_HOME:?}/build-tools" -mindepth 2 -maxdepth 2 -type f -name apksigner -print | sort -V | tail -n 1)"
           fi
           test -x "$apksigner"
+          aapt="$(dirname "$apksigner")/aapt"
+          test -x "$aapt"
           expected_sha256="$(printf '%s' "$SIGNING_CERT_SHA256" | tr '[:upper:]' '[:lower:]' | tr -d ':[:space:]')"
+          plugin_version="$(sed -n 's/^PLUGIN_VERSION_NAME=//p' version.properties | head -n 1)"
+          plugin_seq="$(sed -n 's/^PLUGIN_RELEASE_SEQ=//p' version.properties | head -n 1)"
+          host_version="$(sed -n 's/^VERSION_NAME=//p' version.properties | head -n 1)"
+          host_code="$(sed -n 's/^VERSION_BUILD=//p' version.properties | head -n 1)"
+          host_slug="$(printf '%s' "$host_version" | tr '[:upper:] ' '[:lower:]-')"
+          expected_version_code="$((host_code * 100 + plugin_seq))"
+          expected_version_name="${plugin_version}+autojs6-${host_slug}"
           for apk in "${apks[@]}"; do
             verification="$($apksigner verify --verbose --print-certs "$apk")"
             printf '%s\n' "$verification"
@@ -199,6 +208,11 @@ jobs:
             echo "Expected signer certificate SHA-256: $expected_sha256"
             echo "Actual signer certificate SHA-256:   $actual_sha256"
             test "$actual_sha256" = "$expected_sha256"
+
+            badging="$("$aapt" dump badging "$apk" | head -n 1)"
+            printf '%s\n' "$badging"
+            grep -F "versionCode='$expected_version_code'" <<< "$badging"
+            grep -F "versionName='$expected_version_name'" <<< "$badging"
 
             crc32="$(
               python3 - "$apk" <<'PY'
@@ -238,6 +252,42 @@ jobs:
             fi
           done
 
+      - name: Create release evidence manifest
+        env:
+          SIGNING_CERT_SHA256: ${{ secrets.SIGNING_CERT_SHA256 }}
+        run: |
+          set -euo pipefail
+          plugin_version="$(sed -n 's/^PLUGIN_VERSION_NAME=//p' version.properties | head -n 1)"
+          plugin_seq="$(sed -n 's/^PLUGIN_RELEASE_SEQ=//p' version.properties | head -n 1)"
+          host_version="$(sed -n 's/^VERSION_NAME=//p' version.properties | head -n 1)"
+          host_code="$(sed -n 's/^VERSION_BUILD=//p' version.properties | head -n 1)"
+          host_slug="$(printf '%s' "$host_version" | tr '[:upper:] ' '[:lower:]-')"
+          plugin_version_code="$((host_code * 100 + plugin_seq))"
+          evidence_file="$RUNNER_TEMP/autojs6-apk-builder-template-v${plugin_version}-autojs6-v${host_slug}-vc${plugin_version_code}-release-evidence.json"
+          released_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
+          python3 scripts/create_release_evidence.py \
+            --runtime-kits-manifest "$RUNTIME_KIT_VARIANTS_MANIFEST" \
+            --version-properties version.properties \
+            --apk-dir "$PLUGIN_APK_DIR" \
+            --repository "$GITHUB_REPOSITORY" \
+            --release-tag "${{ steps.vars.outputs.tag }}" \
+            --source-repository "${{ steps.vars.outputs.source_repo }}" \
+            --source-tag "${{ steps.vars.outputs.tag }}" \
+            --signer-certificate-sha256 "$SIGNING_CERT_SHA256" \
+            --released-at "$released_at" \
+            --output "$evidence_file"
+
+          echo "RELEASED_AT=$released_at" >> "$GITHUB_ENV"
+          echo "RELEASE_EVIDENCE_FILE=$evidence_file" >> "$GITHUB_ENV"
+
+      - name: Preserve release evidence as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-builder-template-release-evidence
+          path: ${{ env.RELEASE_EVIDENCE_FILE }}
+          if-no-files-found: error
+
       - name: Remove release signing material
         if: always()
         run: rm -f "$RUNNER_TEMP/autojs6-release-signing.jks"
@@ -254,10 +304,26 @@ jobs:
           release_title="$release_version @ $release_date"
 
           plugin_version="$(sed -n 's/^PLUGIN_VERSION_NAME=//p' version.properties | head -n 1)"
-          release_notes="APK Builder Template v$plugin_version built from AutoJs6 Runtime Kit $tag (universal + ABI-specific variants)"
+          plugin_build="$(sed -n 's/^PLUGIN_VERSION_BUILD=//p' version.properties | head -n 1)"
+          plugin_seq="$(sed -n 's/^PLUGIN_RELEASE_SEQ=//p' version.properties | head -n 1)"
+          host_version="$(sed -n 's/^VERSION_NAME=//p' version.properties | head -n 1)"
+          host_code="$(sed -n 's/^VERSION_BUILD=//p' version.properties | head -n 1)"
+          plugin_version_code="$((host_code * 100 + plugin_seq))"
+          release_notes="$(cat <<EOF
+          APK Builder Template v$plugin_version built from AutoJs6 Runtime Kit $tag.
+
+          - Plugin: $plugin_version (build $plugin_build, Android versionCode $plugin_version_code)
+          - Paired host: AutoJs6 $host_version (versionCode $host_code)
+          - Assets: universal + arm64-v8a + armeabi-v7a + x86_64 + x86
+          - Remote build: experimental and disabled by default
+          - Evidence: $(basename "$RELEASE_EVIDENCE_FILE")
+
+          The APK includes the 10-language changelog and usage documentation.
+          EOF
+          )"
 
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release edit "$tag" --title "$release_title"
+            gh release edit "$tag" --title "$release_title" --notes "$release_notes"
           else
             gh release create "$tag" --title "$release_title" --notes "$release_notes"
           fi
@@ -267,7 +333,7 @@ jobs:
             legacy_asset_name="$(basename "$apk" | sed -E 's/-[0-9a-f]{8}\.apk$/.apk/')"
             gh release delete-asset "$tag" "$legacy_asset_name" --yes >/dev/null 2>&1 || true
           done
-          gh release upload "$tag" "${apks[@]}" --clobber
+          gh release upload "$tag" "${apks[@]}" "$RELEASE_EVIDENCE_FILE" --clobber
 
       - name: Persist released plugin version and compat matrix
         env:
@@ -282,7 +348,7 @@ jobs:
           git reset --hard "origin/$TARGET_BRANCH"
           python3 scripts/sync_version_from_runtime_kit.py "$UNIVERSAL_RUNTIME_KIT_DIR"
 
-          released_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          released_at="${RELEASED_AT:?Release evidence timestamp was not recorded}"
           while IFS=$'\t' read -r variant slug kit_dir; do
             matches=("$PLUGIN_APK_DIR"/*-"$slug"-????????.apk)
             if [ "${#matches[@]}" -ne 1 ]; then

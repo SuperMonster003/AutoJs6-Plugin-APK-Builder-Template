@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/09/01",
       "hint": [
-        "外掛獨立版本線的首個發佈版本; 外掛中心透過 compat-matrix.json 選擇配套 ABI 建置, 手動下載時應核對 autojs6- 宿主後綴, 遠端建置仍預設關閉"
+        "外掛獨立版本線的首個正式發佈, 精確配套 AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; 外掛複合版本為 1.0.0+autojs6-6.8.0 (versionCode 527701), 外掛中心透過 compat-matrix.json 選擇配套 ABI 建置, 遠端建置仍預設關閉"
       ],
       "feature": [
         "導入外掛 SemVer 1.0.0, 獨立建置編號, 複合版本名稱與單調遞增的 Android versionCode, 支援同一宿主發佈多個外掛建置",
@@ -25,6 +25,7 @@
       ],
       "improvement": [
         "統一 Gradle 與 Python 的 Runtime Kit 驗證規則, 涵蓋摘要, 大小, 必要檔案, APK 項目及五變體一致性",
+        "發佈流程隨五個 APK 發佈機器可讀的 JSON 證據清單, 綁定資產摘要, 簽署憑證, 外掛/宿主版本, 相容區間, Runtime Kit ID 與協定版本",
         "更新安裝說明, FAQ, 發佈演練與 10 種語言文件, 說明配套版本, ABI 選擇, 降級復原及獨立版本機制",
         "統一 README 版式與 Gradle 平台版本管理方式"
       ]

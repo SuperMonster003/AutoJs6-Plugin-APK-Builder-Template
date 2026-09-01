@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/09/01",
       "hint": [
-        "First release on the independent plugin version line; Plugin Center uses compat-matrix.json to select a paired ABI build, manual downloads should match the autojs6- host suffix, and remote builds remain disabled by default"
+        "First formal release on the independent plugin version line, paired exactly with the AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; the composite plugin version is 1.0.0+autojs6-6.8.0 (versionCode 527701), Plugin Center selects the paired ABI build through compat-matrix.json, and remote builds remain disabled by default"
       ],
       "feature": [
         "Introduced plugin SemVer 1.0.0, independent build numbering, composite version names, and monotonic Android versionCode values that support multiple plugin releases for the same host",
@@ -25,6 +25,7 @@
       ],
       "improvement": [
         "Unified Runtime Kit validation rules across Gradle and Python, including hashes, sizes, required files, APK entries, and five-variant consistency",
+        "Published a machine-readable JSON evidence manifest beside the five APKs, binding artifact digests, signer certificate, plugin/host versions, compatibility range, Runtime Kit IDs, and protocol versions",
         "Updated installation instructions, FAQ, release drill, and 10-language documentation for paired versions, ABI selection, downgrade recovery, and independent versioning",
         "Standardize the README layout and Gradle platform version management"
       ]

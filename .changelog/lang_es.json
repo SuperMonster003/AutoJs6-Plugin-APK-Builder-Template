@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/09/01",
       "hint": [
-        "Primera versión de la línea independiente del plugin; el Centro de plugins usa compat-matrix.json para seleccionar una compilación ABI compatible, las descargas manuales deben coincidir con el sufijo de host autojs6- y las compilaciones remotas siguen desactivadas de forma predeterminada"
+        "Primera versión formal de la línea independiente del plugin, emparejada exactamente con el Runtime Kit de AutoJs6 v6.8.0 (versionCode 5277); la versión compuesta del plugin es 1.0.0+autojs6-6.8.0 (versionCode 527701), el Centro de plugins selecciona la compilación ABI correspondiente mediante compat-matrix.json y las compilaciones remotas siguen desactivadas de forma predeterminada"
       ],
       "feature": [
         "Introducidos SemVer 1.0.0 para el plugin, numeración de compilación independiente, nombres de versión compuestos y valores Android versionCode monotónicos que permiten varias versiones del plugin para el mismo host",
@@ -25,6 +25,7 @@
       ],
       "improvement": [
         "Unificadas las reglas de validación de Runtime Kit entre Gradle y Python, incluidos resúmenes, tamaños, archivos obligatorios, entradas APK y coherencia de las cinco variantes",
+        "Publicación junto a los cinco APK de un manifiesto de evidencias JSON legible por máquina que vincula hashes de artefactos, certificado de firma, versiones del plugin/host, intervalo de compatibilidad, ID de Runtime Kit y versiones de protocolo",
         "Actualizadas las instrucciones de instalación, las preguntas frecuentes, el ensayo de publicación y la documentación en 10 idiomas para versiones compatibles, selección ABI, recuperación tras una degradación y versionado independiente",
         "Unificar el diseño del README y la gestión de versiones de la plataforma Gradle"
       ]

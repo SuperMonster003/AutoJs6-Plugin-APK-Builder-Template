@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/09/01",
       "hint": [
-        "插件独立版本线的首个发布版本; 插件中心通过 compat-matrix.json 选择配套 ABI 构建, 手动下载时应核对 autojs6- 宿主后缀, 远程构建仍默认关闭"
+        "插件独立版本线的首个正式发布, 精确配套 AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; 插件复合版本为 1.0.0+autojs6-6.8.0 (versionCode 527701), 插件中心通过 compat-matrix.json 选择配套 ABI 构建, 远程构建仍默认关闭"
       ],
       "feature": [
         "引入插件 SemVer 1.0.0, 独立构建号, 复合版本名与单调递增的 Android versionCode, 支持同一宿主发布多个插件构建",
@@ -25,6 +25,7 @@
       ],
       "improvement": [
         "统一 Gradle 与 Python 的 Runtime Kit 校验规则, 覆盖摘要, 大小, 必需文件, APK 条目及五变体一致性",
+        "发布流水线随五个 APK 发布机器可读的 JSON 证据清单, 绑定资产摘要, 签名证书, 插件/宿主版本, 兼容区间, Runtime Kit ID 与协议版本",
         "更新安装说明, FAQ, 发布演练与 10 语言文档, 说明配套版本, ABI 选择, 降级恢复及独立版本机制",
         "统一 README 版式与 Gradle 平台版本管理方式"
       ]
