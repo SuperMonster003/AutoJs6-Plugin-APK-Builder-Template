@@ -36,10 +36,62 @@ class ReleaseEvidenceTest(unittest.TestCase):
             self.assertFalse(evidence["plugin"]["remoteBuildEnabledByDefault"])
             self.assertEqual(5277, evidence["host"]["minCompatibleVersionCode"])
             self.assertEqual(3, evidence["protocol"]["remoteBuildProtocolVersion"])
+            self.assertFalse(evidence["publication"]["candidateOnly"])
+            self.assertEqual("github-release", evidence["publication"]["channel"])
+            self.assertEqual("https://github.com/example/plugin/releases/tag/v6.8.0", evidence["releaseUrl"])
             self.assertEqual(list(VARIANT_ORDER), [item["variant"] for item in evidence["runtimeKits"]])
             self.assertEqual(5, len(evidence["artifacts"]))
             self.assertTrue(all(len(item["sha256"]) == 64 for item in evidence["artifacts"]))
             self.assertTrue(all(item["fileName"].endswith(f"-{item['crc32']}.apk") for item in evidence["artifacts"]))
+            self.assertTrue(all(item["downloadUrl"] for item in evidence["artifacts"]))
+
+    def test_candidate_assets_have_actions_provenance_without_release_urls(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            manifest, properties, apk_dir = create_fixture(root)
+
+            evidence = build_release_evidence(
+                runtime_kits_manifest=manifest,
+                version_properties=properties,
+                apk_dir=apk_dir,
+                repository="example/plugin",
+                release_tag="v6.8.0-rc1",
+                source_repository="example/host",
+                source_tag="v6.8.0-rc1",
+                signer_certificate_sha256="ab" * 32,
+                released_at="2026-09-01T00:00:00Z",
+                candidate_only=True,
+                workflow_run_url="https://github.com/example/plugin/actions/runs/1001",
+                source_workflow_run_url="https://github.com/example/host/actions/runs/1000",
+            )
+
+            self.assertTrue(evidence["publication"]["candidateOnly"])
+            self.assertEqual("actions-artifact", evidence["publication"]["channel"])
+            self.assertEqual("https://github.com/example/plugin/actions/runs/1001", evidence["publication"]["workflowRunUrl"])
+            self.assertIsNone(evidence["releaseUrl"])
+            self.assertEqual("actions-artifact", evidence["source"]["channel"])
+            self.assertEqual("https://github.com/example/host/actions/runs/1000", evidence["source"]["workflowRunUrl"])
+            self.assertTrue(all(item["downloadUrl"] is None for item in evidence["artifacts"]))
+
+    def test_candidate_evidence_requires_both_actions_run_urls(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            manifest, properties, apk_dir = create_fixture(root)
+
+            with self.assertRaises(SystemExit):
+                build_release_evidence(
+                    runtime_kits_manifest=manifest,
+                    version_properties=properties,
+                    apk_dir=apk_dir,
+                    repository="example/plugin",
+                    release_tag="v6.8.0-rc1",
+                    source_repository="example/host",
+                    source_tag="v6.8.0-rc1",
+                    signer_certificate_sha256="ab" * 32,
+                    released_at="2026-09-01T00:00:00Z",
+                    candidate_only=True,
+                    workflow_run_url="https://github.com/example/plugin/actions/runs/1001",
+                )
 
     def test_crc32_filename_mismatch_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

@@ -1,10 +1,27 @@
 # E2E Release Drill
 
-Use a temporary test tag before the first production tag.
+Use the isolated signed-candidate path before the first production tag. Candidate mode must not create a GitHub Release,
+move a tag, update `compat-matrix.json`, or advance the tracked plugin release sequence.
 
-## CI Checks
+## Isolated Signed Candidate
 
-1. Run the AutoJs6 main repository `release-runtime-kit.yml` workflow with a test tag.
+1. Push the reviewed AutoJs6 candidate to a non-default branch. Run `release-runtime-kit.yml` from that branch with an RC
+   label, `candidate_only=true`, and `source_ref` set to the exact 40-character candidate commit.
+2. Confirm the host run checks out that exact commit and retains `autojs6-runtime-kit` only as a 14-day Actions artifact.
+   Confirm that it creates no Release and sends no downstream dispatch.
+3. Run this repository's `build-from-runtime-kit.yml` from the reviewed release branch with the same RC label,
+   `candidate_only=true`, the private host repository, host run ID, artifact name, and `expected_source_sha`.
+4. Confirm Runtime Kit set validation rejects any source SHA other than `expected_source_sha`, then confirm all five APKs
+   pass version, signature certificate, embedded asset, and CRC32 checks.
+5. Download `apk-builder-template-signed-candidate`. Its evidence manifest must report `candidateOnly=true`, use
+   `actions-artifact` for both publication channels, bind both Actions run URLs, expose no Release/APK download URL, and
+   retain `remoteBuildEnabledByDefault=false`.
+6. Confirm this repository still has no RC/GA Release for that label and that tracked `version.properties` and
+   `compat-matrix.json` are unchanged. Only after device acceptance and an explicit GA decision may the formal path run.
+
+## Production CI Checks
+
+1. Run the AutoJs6 main repository `release-runtime-kit.yml` workflow with the production tag and `candidate_only=false`.
 2. Confirm the main repository Release contains exactly one Runtime Kit ZIP for each of `universal`, `arm64-v8a`,
    `armeabi-v7a`, `x86_64`, and `x86`.
 3. Confirm `repository_dispatch` triggers this repository's `build-from-runtime-kit.yml`.

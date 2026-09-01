@@ -18,6 +18,7 @@
 * `Fix` Hardened experimental remote builds by rejecting unlisted TypeScript staging ciphertext and loading custom BKS keystores after workspace filename normalization
 * `Fix` Tightened experimental remote-build input boundaries with strict Parcelable/Bundle and project.json type, size, and nesting checks; bounded keystores, icons, and ZIP path depth/segments; and fixed ARSC package-name and derived-output filename overflows
 * `Fix` The plugin could not be activated from Plugin Center after installation on some systems
+* `Improvement` Trusted release workflow now supports an isolated candidate mode that builds five production-signed APKs and evidence from a pinned host Actions artifact without creating a Release or updating the authoritative compatibility matrix
 * `Improvement` Unified Runtime Kit validation rules across Gradle and Python, including hashes, sizes, required files, APK entries, and five-variant consistency
 * `Improvement` Published a machine-readable JSON evidence manifest beside the five APKs, binding artifact digests, signer certificate, plugin/host versions, compatibility range, Runtime Kit IDs, and protocol versions
 * `Improvement` Updated installation instructions, FAQ, release drill, and 10-language documentation for paired versions, ABI selection, downgrade recovery, and independent versioning
