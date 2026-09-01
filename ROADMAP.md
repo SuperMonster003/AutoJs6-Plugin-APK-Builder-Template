@@ -44,7 +44,7 @@
 | M4 | 体积与兼容性 | 自主 | 已完成 |
 | M5 | 校验与安全强化 | 自主 | 已完成 |
 | M6 | 插件独立版本机制与兼容矩阵 | 自主 | 进行中 (M6-1 至 M6-5 已完成; M6-6 待 M7 提供发布端点) |
-| **M7** | **首个正式发布 v1.0.0** | 自主 | **进行中 (M7-1 与 M7-2 已完成) —— 当前唯一的发布关键路径** |
+| **M7** | **首个正式发布 v1.0.0** | 自主 | **阻断 (M7-1 与 M7-2 已完成; 首轮签名候选在装机验收中被拒绝)** |
 | M8 | 远程构建默认启用 (GA) | 外部 | 未开始 (长期目标, 不阻塞发布) |
 
 **当前 "具备发布条件" 的判定只取决于 M7。** M6-6 依赖 M7 产出的首个正式发布端点; M8 全部条目在发布之后继续推进。
@@ -179,6 +179,11 @@
 > 范围声明: 本次发布**包含**模板分发 (M1), 多语言文档 (M2), 五 ABI 变体 (M4-1), 补丁级兼容 (M4-2),
 > 设备端签名门禁 (M5), 独立版本与兼容矩阵 (M6-1—M6-5); **远程构建随包提供但默认关闭**, 且在 10 语言文案中
 > 明确标注为实验性。M8 的任何条目都不是本里程碑的前置。
+>
+> 2026/09/01 候选审计结论: 上述范围在当前宿主架构中尚不可同时满足。AutoJs6 `b2fd2b6ae` 已移除完整的宿主
+> 本地构建器, 而候选 `71e684b8d` 又按 R0 规则默认关闭远程总开关; 官方插件也上报 `supportsRemoteBuild=false`。
+> 因此普通打包入口没有可执行路径。首轮签名候选已按失败关闭原则拒绝, 在重新建立非实验性打包路径并完成新候选装机
+> 验收前, **禁止运行正式发布路径**。完整证据见 `docs/v1.0.0-rc1-candidate-audit-2026-09-01.md`。
 
 - [x] [P] **M7-1 整理未提交实现为可审阅提交**
   - 内容: 将此前两个工作树中的实现 (远程构建加固, 输出复核, 脱敏审计, 协议门禁, 文档语料等) 固定为可定位, 可复核的提交。
@@ -187,16 +192,17 @@
 - [x] [P] **M7-2 全量门禁绿灯**
   - 内容: 在整理后的提交上跑通全部既有门禁。
   - 验收: `docs-consistency.yml` (含 `.python/generate_markdown.py` + `git diff --exit-code`), `scripts/verify_remote_build_protocol_docs.py` 73/73, Python 回归全绿, `:app:verifyApkBuilderRuntimeKit` 通过, 插件 app / API 单测与 Release Kotlin 编译通过。
-  - 证据: 2026/09/01 在插件发布候选上重生成文档后差异为 0, 协议真源覆盖 73/73, Python 回归 23/23 (含 Release evidence 三类失败关闭用例); Gradle Runtime Kit 门禁, app/API 单测与 `:app:compileReleaseKotlin` 强制重跑 166/166 任务通过。PR #5 的 push/PR 文档门禁 ([33477042749](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477042749), [33477047543](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477047543)) 与签名配置门禁 ([33477047547](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477047547)) 全绿。
+  - 证据: 2026/09/01 在插件发布候选上重生成文档后差异为 0, 协议真源覆盖 73/73, Python 回归 25/25 (含 Release evidence 与候选隔离失败关闭用例); Gradle Runtime Kit 门禁, app/API 单测与 `:app:compileReleaseKotlin` 强制重跑 166/166 任务通过。PR #5 的 push/PR 文档门禁 ([33477042749](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477042749), [33477047543](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477047543)) 与签名配置门禁 ([33477047547](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477047547)) 全绿。
 - [ ] [P] **M7-3 版本定档**
   - 内容: 确定首发版本三元组 —— `PLUGIN_VERSION_NAME=1.0.0`, `PLUGIN_VERSION_BUILD`, `PLUGIN_RELEASE_SEQ`, 以及由 `hostVersionCode * 100 + 序号` 推出的 versionCode 与复合 versionName。确认配对宿主版本与兼容区间。
   - 验收: `version.properties` 与生成的 APK 元数据一致; versionCode 相对既有装机 (5201) 保持单调递增; 复合 versionName 与双版本文件名符合 `docs/versioning.md`。
-  - 当前候选: 配对 AutoJs6 `6.8.0 / 5277`, 精确兼容区间 `5277..5277`, 首发三元组 `1.0.0 / build 1 / seq 1`, 推导 Android versionCode `527701` 与复合 versionName `1.0.0+autojs6-6.8.0`; 尚待选择并固定正式 `v6.8.0` Runtime Kit 的公开或私有受信发布端点。
+  - 首轮候选: 已将 AutoJs6 源提交精确固定为 `71e684b8dc1a59783293e0ad282638e3a88e37b6`, 配对 `6.8.0 / 5277`, 精确兼容区间 `5277..5277`, 首发三元组 `1.0.0 / build 1 / seq 1`, 推导 Android versionCode `527701` 与复合 versionName `1.0.0+autojs6-6.8.0`; 私有 Actions artifact 端点完成来源绑定与签名构建。该源候选因 M7-6 装机阻断被拒绝, 所以本条保持未完成; 替代候选必须修复非实验性打包路径并重新固定新的精确源 SHA。
 - [ ] [P] **M7-4 受信流水线产出五 ABI 签名资产**
   - 内容: 用 `build-from-runtime-kit.yml` 的 `workflow_dispatch` (输入 AutoJs6 tag) 从确定提交产出 universal + 四个 ABI 的**正式签名** APK。本地 unsigned / debug 产物不计。
   - 验收: 五个资产齐全, `SIGNING_CERT_SHA256` 证书指纹校验通过, 逐个记录文件名, 大小, SHA-256, 签名证书摘要, 插件版本, 宿主范围, Runtime Kit ID 与协议版本。
   - 发布前接线: `scripts/create_release_evidence.py` 将上述字段绑定为机器可读 JSON, 同时保留为 Actions artifact 并随五个 APK 上传到同名 Release; 三类失败关闭回归覆盖五变体完整性, CRC32 文件名与版本/Runtime Kit 身份一致性。
   - 本地发布预演: 2026/09/01 从宿主 `71e684b8d` 生成 AutoJs6 `6.8.0 / 5277` 的五套 Runtime Kit, 在隔离工作树实际构建五个 `527701 / 1.0.0+autojs6-6.8.0` Release APK; Runtime Kit 集合校验, APK 资产校验, `aapt` 版本复核, CRC32 文件名和五资产 evidence JSON 生成均通过。该轮为未签名结构预演, 不代替本条所需的受信签名证据。
+  - 隔离签名候选: 宿主候选运行 [33492382374](https://github.com/SuperMonster003/AutoJs6-Private/actions/runs/33492382374) 从精确源 `71e684b8d` 产出五套 Runtime Kit; 插件运行 [33493666040](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33493666040) 以生产证书签名五个 APK, 并通过 `apksigner`, `aapt`, CRC32, 内嵌资产与 evidence 复核。两侧只保留 14 天 Actions artifact, 未创建 Release/tag, 未改 `version.properties` 或 `compat-matrix.json`。由于装机验收失败, 这些资产是**被拒绝的候选证据**, 不计作本条正式资产。
 - [ ] [P] **M7-5 首条兼容矩阵记录**
   - 内容: 由流水线把首个条目写入 `compat-matrix.json` (当前 `entries` 为空), 含五个 ABI `artifacts` 与顶层 `apk*` 投影。
   - 验收: `scripts/update_compat_matrix.py resolve --abi <各架构>` 对配对 hostVersionCode 均能确定性解析到该版本, 缺失架构正确回退 universal; 旧 tag 通道并存不受影响。
@@ -204,7 +210,7 @@
 - [ ] [H+P] **M7-6 装机验收**
   - 内容: 在真实设备 / AVD 上走完 `docs/e2e-release-drill.md` 的核心场景: 插件中心按矩阵解析 → 下载匹配版本 → 安装 → 打包应用 → 安装产物并冷启动。
   - 验收: 场景 1 (匹配版本安装) 与场景 7 (兼容区间行为) 通过; 签名门禁对官方资产放行; 远程构建入口保持不可见 / 不可用。
-  - 证据级别: T1。
+  - 首轮候选结果: **失败 / No-Go**。Sony G8441 (Android 9 / API 28 / arm64-v8a) 全新安装精确源宿主与官方签名 arm64 候选后, 插件中心正确识别并启用 `1.0.0+autojs6-6.8.0 / 527701 / inrt-arm64-v8a`, 但打包入口在传输模板前报告插件不可用与远程总开关关闭。源码追踪确认 `TemplateApkResolver` 只解析远程构建候选, `BuildActivity` 只调用 `RemoteApkBuildClient`; 在 `supportsRemoteBuild=false` 与宿主开关默认关闭时无普通打包路径。未生成可安装输出, 因此安装/冷启动阶段不能继续。证据级别 T1, 详见 `docs/v1.0.0-rc1-candidate-audit-2026-09-01.md`。
 - [ ] [P] **M7-7 发行文案定稿**
   - 内容: 10 语言 CHANGELOG 补记 v1.0.0, 写明精确宿主 / 插件 / Runtime Kit 版本与 "远程构建默认关闭"; README 的能力边界与 FAQ 保持 R0 语义, **不提前宣传远程构建**。
   - 验收: 生成器校验通过, `docs-consistency.yml` 绿灯, 10 语言键序与占位符断言无残留。
