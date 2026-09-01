@@ -245,7 +245,7 @@ keyPassword=...
 
 ###### 2026/09/01
 
-* `提示` 外掛程式獨立版本線的首個發佈版本; 外掛程式中心透過 compat-matrix.json 選擇配套 ABI 構建, 手動下載時應核對 autojs6- 宿主後綴, 遠端構建仍預設關閉
+* `提示` 外掛程式獨立版本線的首個正式發佈, 精確配套 AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; 外掛程式複合版本為 1.0.0+autojs6-6.8.0 (versionCode 527701), 外掛程式中心透過 compat-matrix.json 選擇配套 ABI 構建, 遠端構建仍預設關閉
 * `新增` 引入外掛程式 SemVer 1.0.0, 獨立構建號, 複合版本名稱與單調遞增的 Android versionCode, 支援同一宿主發佈多個外掛程式構建
 * `新增` 新增 universal, arm64-v8a, armeabi-v7a, x86_64 與 x86 變體, 支援精確 ABI 選擇及 universal 後備
 * `新增` 新增失敗關閉的宿主兼容區間契約與權威兼容矩陣, 讓經過明確驗證的相鄰修補區間可共用一個外掛程式構建
@@ -256,6 +256,7 @@ keyPassword=...
 * `修復` 收緊實驗性遠端構建輸入邊界: 嚴格驗證 Parcelable/Bundle 與 project.json 的類型, 大小及巢狀深度, 限制金鑰庫, 圖示及 ZIP 路徑深度/段長, 並修正 ARSC 套件名稱和衍生輸出檔名越界
 * `修復` 部分系統安裝後無法透過插件中心激活的問題
 * `優化` 統一 Gradle 與 Python 的 Runtime Kit 驗證規則, 涵蓋摘要, 大小, 必需檔案, APK 項目及五變體一致性
+* `優化` 發佈流水線隨五個 APK 發佈機器可讀的 JSON 證據清單, 綁定資產摘要, 簽署憑證, 外掛程式/宿主版本, 相容區間, Runtime Kit ID 與協定版本
 * `優化` 更新安裝說明, FAQ, 發佈演練與 10 種語言文件, 說明配套版本, ABI 選擇, 降級復原及獨立版本機制
 * `優化` 統一 README 版式與 Gradle 平台版本管理方式
 

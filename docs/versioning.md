@@ -133,8 +133,10 @@ AutoJs6 插件中心现将该目标显示为 "需要重新安装" 而非普通�
 2. 只以 universal Kit 运行一次 `sync_version_from_runtime_kit.py`: 同步宿主配对字段 + 推进
    `PLUGIN_VERSION_BUILD` / `PLUGIN_RELEASE_SEQ` (不触碰 `PLUGIN_VERSION_NAME`)。
 3. 依次构建五个相同 Android 版本的替代 APK, 分别签名、校验证书指纹并以 CRC32 命名。
-4. 将五个 APK 一起上传到宿主 tag 同名 Release。
-5. 持久化: 重置到远程分支 → 重跑一次同步脚本 (同一输入, 结果确定) → 对五个资产执行
+4. 为五个 APK 生成机器可读的 Release evidence manifest, 固定文件名, 大小, SHA-256, CRC32, 签名证书摘要,
+   插件/宿主版本, 兼容区间, 五个 Runtime Kit ID 与协议版本; evidence 同时保留为 Actions artifact。
+5. 将五个 APK 与 evidence manifest 一起上传到宿主 tag 同名 Release。
+6. 持久化: 重置到远程分支 → 重跑一次同步脚本 (同一输入, 结果确定) → 对五个资产执行
    `update_compat_matrix.py add` 并合并为同一矩阵条目的 `artifacts` → 一并提交 `version.properties` 与
    `compat-matrix.json`。
 

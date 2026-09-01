@@ -44,7 +44,7 @@
 | M4 | 体积与兼容性 | 自主 | 已完成 |
 | M5 | 校验与安全强化 | 自主 | 已完成 |
 | M6 | 插件独立版本机制与兼容矩阵 | 自主 | 进行中 (M6-1 至 M6-5 已完成; M6-6 待 M7 提供发布端点) |
-| **M7** | **首个正式发布 v1.0.0** | 自主 | **进行中 —— 当前唯一的发布关键路径** |
+| **M7** | **首个正式发布 v1.0.0** | 自主 | **进行中 (M7-1 与 M7-2 已完成) —— 当前唯一的发布关键路径** |
 | M8 | 远程构建默认启用 (GA) | 外部 | 未开始 (长期目标, 不阻塞发布) |
 
 **当前 "具备发布条件" 的判定只取决于 M7。** M6-6 依赖 M7 产出的首个正式发布端点; M8 全部条目在发布之后继续推进。
@@ -180,18 +180,22 @@
 > 设备端签名门禁 (M5), 独立版本与兼容矩阵 (M6-1—M6-5); **远程构建随包提供但默认关闭**, 且在 10 语言文案中
 > 明确标注为实验性。M8 的任何条目都不是本里程碑的前置。
 
-- [ ] [P] **M7-1 整理未提交实现为可审阅提交**
-  - 内容: 当前两个工作树均含大量未提交实现 (远程构建加固, 输出复核, 脱敏审计, 协议门禁, 文档语料等), 单独的 HEAD 无法唯一固定源码。按主题拆分为可审阅的提交或 PR。
+- [x] [P] **M7-1 整理未提交实现为可审阅提交**
+  - 内容: 将此前两个工作树中的实现 (远程构建加固, 输出复核, 脱敏审计, 协议门禁, 文档语料等) 固定为可定位, 可复核的提交。
   - 验收: `git status` 干净; 每个提交有独立可读的主题; 宿主侧对应改动同步落库。
-- [ ] [P] **M7-2 全量门禁绿灯**
+  - 证据: 插件侧 `e7f4918` (TypeScript 暂存保护) 与 `9587f28` (远程构建/发布流程收口), 宿主侧 `71e684b8d` (插件中心与能力集成); 2026/09/01 两个主工作树均为干净状态。
+- [x] [P] **M7-2 全量门禁绿灯**
   - 内容: 在整理后的提交上跑通全部既有门禁。
   - 验收: `docs-consistency.yml` (含 `.python/generate_markdown.py` + `git diff --exit-code`), `scripts/verify_remote_build_protocol_docs.py` 73/73, Python 回归全绿, `:app:verifyApkBuilderRuntimeKit` 通过, 插件 app / API 单测与 Release Kotlin 编译通过。
+  - 证据: 2026/09/01 在插件发布候选上重生成文档后差异为 0, 协议真源覆盖 73/73, Python 回归 23/23 (含 Release evidence 三类失败关闭用例); Gradle Runtime Kit 门禁, app/API 单测与 `:app:compileReleaseKotlin` 在 166 个任务中全部通过。
 - [ ] [P] **M7-3 版本定档**
   - 内容: 确定首发版本三元组 —— `PLUGIN_VERSION_NAME=1.0.0`, `PLUGIN_VERSION_BUILD`, `PLUGIN_RELEASE_SEQ`, 以及由 `hostVersionCode * 100 + 序号` 推出的 versionCode 与复合 versionName。确认配对宿主版本与兼容区间。
   - 验收: `version.properties` 与生成的 APK 元数据一致; versionCode 相对既有装机 (5201) 保持单调递增; 复合 versionName 与双版本文件名符合 `docs/versioning.md`。
+  - 当前候选: 配对 AutoJs6 `6.8.0 / 5277`, 精确兼容区间 `5277..5277`, 首发三元组 `1.0.0 / build 1 / seq 1`, 推导 Android versionCode `527701` 与复合 versionName `1.0.0+autojs6-6.8.0`; 尚待选择并固定正式 `v6.8.0` Runtime Kit 的公开或私有受信发布端点。
 - [ ] [P] **M7-4 受信流水线产出五 ABI 签名资产**
   - 内容: 用 `build-from-runtime-kit.yml` 的 `workflow_dispatch` (输入 AutoJs6 tag) 从确定提交产出 universal + 四个 ABI 的**正式签名** APK。本地 unsigned / debug 产物不计。
   - 验收: 五个资产齐全, `SIGNING_CERT_SHA256` 证书指纹校验通过, 逐个记录文件名, 大小, SHA-256, 签名证书摘要, 插件版本, 宿主范围, Runtime Kit ID 与协议版本。
+  - 发布前接线: `scripts/create_release_evidence.py` 将上述字段绑定为机器可读 JSON, 同时保留为 Actions artifact 并随五个 APK 上传到同名 Release; 三类失败关闭回归覆盖五变体完整性, CRC32 文件名与版本/Runtime Kit 身份一致性。
 - [ ] [P] **M7-5 首条兼容矩阵记录**
   - 内容: 由流水线把首个条目写入 `compat-matrix.json` (当前 `entries` 为空), 含五个 ABI `artifacts` 与顶层 `apk*` 投影。
   - 验收: `scripts/update_compat_matrix.py resolve --abi <各架构>` 对配对 hostVersionCode 均能确定性解析到该版本, 缺失架构正确回退 universal; 旧 tag 通道并存不受影响。

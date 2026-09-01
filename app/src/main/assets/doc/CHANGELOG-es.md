@@ -8,7 +8,7 @@
 
 ###### 2026/09/01
 
-* `Nota` Primera versión de la línea independiente del plugin; el Centro de plugins usa compat-matrix.json para seleccionar una compilación ABI compatible, las descargas manuales deben coincidir con el sufijo de host autojs6- y las compilaciones remotas siguen desactivadas de forma predeterminada
+* `Nota` Primera versión formal de la línea independiente del plugin, emparejada exactamente con el Runtime Kit de AutoJs6 v6.8.0 (versionCode 5277); la versión compuesta del plugin es 1.0.0+autojs6-6.8.0 (versionCode 527701), el Centro de plugins selecciona la compilación ABI correspondiente mediante compat-matrix.json y las compilaciones remotas siguen desactivadas de forma predeterminada
 * `Nuevo` Introducidos SemVer 1.0.0 para el plugin, numeración de compilación independiente, nombres de versión compuestos y valores Android versionCode monotónicos que permiten varias versiones del plugin para el mismo host
 * `Nuevo` Añadidas variantes universal, arm64-v8a, armeabi-v7a, x86_64 y x86 con selección ABI exacta y respaldo universal
 * `Nuevo` Añadidos un contrato de intervalo de compatibilidad del host con cierre seguro y una matriz de compatibilidad autoritativa para que un intervalo de parches adyacentes validado explícitamente pueda compartir una compilación del plugin
@@ -19,6 +19,7 @@
 * `Corrección` Se restringieron los límites de entrada de la compilación remota experimental con validación estricta de tipos, tamaños y anidación de Parcelable/Bundle y project.json, límites para almacenes de claves, iconos y rutas ZIP, y correcciones de desbordamiento en el paquete ARSC y los nombres de salida derivados
 * `Corrección` El complemento no se podía activar desde el centro de complementos después de instalarlo en algunos sistemas
 * `Mejora` Unificadas las reglas de validación de Runtime Kit entre Gradle y Python, incluidos resúmenes, tamaños, archivos obligatorios, entradas APK y coherencia de las cinco variantes
+* `Mejora` Publicación junto a los cinco APK de un manifiesto de evidencias JSON legible por máquina que vincula hashes de artefactos, certificado de firma, versiones del plugin/host, intervalo de compatibilidad, ID de Runtime Kit y versiones de protocolo
 * `Mejora` Actualizadas las instrucciones de instalación, las preguntas frecuentes, el ensayo de publicación y la documentación en 10 idiomas para versiones compatibles, selección ABI, recuperación tras una degradación y versionado independiente
 * `Mejora` Unificar el diseño del README y la gestión de versiones de la plataforma Gradle
 
