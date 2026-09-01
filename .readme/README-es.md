@@ -41,11 +41,11 @@ El README.md actual admite los siguientes idiomas:
 
 ******
 
-La función "Empaquetar aplicación" de AutoJs6 convierte un script o proyecto en un APK que se instala y ejecuta por sí solo, sin AutoJs6 en el dispositivo de destino. El empaquetado necesita un "APK de plantilla" como esqueleto: una aplicación que ya contiene el entorno de ejecución de scripts completo. Para mantener ligera la aplicación principal, las versiones recientes de AutoJs6 ya no incluyen esta plantilla voluminosa; ahora vive en este plugin y solo la instalan los usuarios que necesitan empaquetar.
+La función "Empaquetar aplicación" de AutoJs6 convierte un script o proyecto en un APK instalable y autónomo. Para mantener ligera la aplicación principal, la plantilla voluminosa y todo el núcleo de empaquetado viven en este plugin.
 
-El plugin no tiene icono ni interfaz. Todo ocurre en segundo plano: al empaquetar, AutoJs6 descubre el plugin, comprueba la compatibilidad de versiones y la integridad de los archivos, y luego lee el APK de plantilla integrado para terminar el trabajo.
+El plugin no tiene icono ni interfaz. AutoJs6 lo descubre y valida, prepara una solicitud acotada y muestra el progreso. El plugin desempaqueta su propia plantilla, escribe el proyecto y los recursos, modifica Manifest/resources, selecciona ABI, gestiona la firma y devuelve un APK candidato. AutoJs6 verifica de forma independiente ese resultado antes de publicarlo.
 
-Guía en una línea: si usas "Empaquetar aplicación", instala la compilación que el Centro de plugins haya seleccionado para tu AutoJs6 según la matriz de compatibilidad; si nunca empaquetas aplicaciones independientes, no lo necesitas.
+Todo se ejecuta en el mismo dispositivo Android mediante Binder y descriptores de archivo. El código fuente del proyecto no se sube a una red ni a un servicio de compilación en la nube.
 
 ******
 
@@ -53,13 +53,13 @@ Guía en una línea: si usas "Empaquetar aplicación", instala la compilación q
 
 ******
 
-Al empaquetar una aplicación independiente, AutoJs6 y este plugin cooperan de la siguiente manera:
+Al empaquetar una aplicación, AutoJs6 y el plugin cooperan así:
 
-1. Descubrimiento: AutoJs6 localiza el plugin de plantilla instalado y lee sus metadatos
-2. Comprobación de compatibilidad: se comparan las versiones, las versiones de protocolo y el nombre del paquete de plantilla; una discrepancia produce una advertencia o bloquea el empaquetado
-3. Comprobación de integridad: se verifica el resumen SHA-256 del APK de plantilla para descartar archivos dañados o manipulados
-4. Transferencia de la plantilla: el APK de plantilla se transmite por una tubería entre procesos, sin copias temporales
-5. Empaquetado: AutoJs6 escribe el script, la configuración y los recursos en la plantilla y produce el APK independiente final
+1. Admisión: AutoJs6 verifica firma oficial, estado habilitado, intervalo del host, ABI, capacidad formal, protocolo y modo de ejecución en el dispositivo
+2. Preparación: AutoJs6 crea entradas acotadas de proyecto/bibliotecas/keystore y fija la identidad esperada del paquete y firmante
+3. Compilación del plugin: valida la solicitud, abre su plantilla Runtime Kit, escribe el proyecto, modifica Manifest/resources, recorta ABI y firma
+4. Resultado: devuelve el APK candidato mediante un descriptor de solo lectura y limpia su espacio privado
+5. Publicación: AutoJs6 vuelve a comprobar tamaño, SHA-256, estructura, firma, firmante, paquete y versión; solo entonces reemplaza atómicamente el destino
 
 ******
 
@@ -67,13 +67,13 @@ Al empaquetar una aplicación independiente, AutoJs6 y este plugin cooperan de l
 
 ******
 
-- Proporciona la plantilla completa de aplicación independiente (Runtime Kit) para la función "Empaquetar aplicación" de AutoJs6; no requiere configuración tras la instalación.
-- Cada compilación del plugin conserva en su nombre el host de AutoJs6 con el que se creó (por ejemplo, 1.0.0+autojs6-6.8.0-alpha5) y puede declarar explícitamente un intervalo cerrado de parches verificado; la coincidencia exacta no avisa, otro host dentro del intervalo muestra una advertencia y cualquier host fuera de él queda bloqueado.
-- Doble protección de integridad: los resúmenes SHA-256 y las entradas requeridas de la plantilla se validan al construir el plugin, y el resumen de la plantilla se informa a AutoJs6 para su re-verificación al empaquetar.
-- La plantilla se transmite a AutoJs6 por una tubería entre procesos, sin copias temporales redundantes.
-- Incluye un almacén de claves predeterminado, de modo que puede producirse un APK instalable incluso sin configurar una clave de firma personalizada.
-- Admite un protocolo experimental de "compilación remota" en el que el proceso del plugin realiza por sí mismo una compilación ligera (desactivado por defecto; ver Límites).
-- Los metadatos del plugin, las instrucciones, el README y el CHANGELOG cubren 10 idiomas: chino simplificado, chino tradicional (Hong Kong/Taiwán), inglés, francés, español, japonés, coreano, ruso y árabe.
+- Posee todo el núcleo de empaquetado en el dispositivo: plantilla, proyecto/recursos, Manifest y resources.arsc, ABI, keystores y firma.
+- Mantiene AutoJs6 ligero: el host aporta UI, admisión de confianza/compatibilidad, preparación, cancelación/progreso y validación independiente, no un segundo compilador.
+- Se ejecuta por completo en el mismo dispositivo mediante Binder/AIDL y ParcelFileDescriptor; no sube el proyecto a Internet ni a la nube.
+- Empareja cada compilación del plugin con un Runtime Kit AutoJs6 validado y admite intervalos cerrados de parches verificados.
+- Ofrece variantes universal, arm64-v8a, armeabi-v7a, x86_64 y x86 con selección ABI exacta y reserva universal.
+- Incluye keystore predeterminado y creación/verificación BKS/JKS propiedad del plugin, además de keystores personalizados.
+- Metadatos, instrucciones, README y CHANGELOG cubren 10 idiomas.
 
 ******
 
@@ -94,11 +94,11 @@ Al empaquetar una aplicación independiente, AutoJs6 y este plugin cooperan de l
 
 Para evitar malentendidos, lo siguiente queda explícitamente fuera del alcance de este plugin:
 
-- El plugin no puede usarse por sí solo: no tiene icono ni interfaz, y solo AutoJs6 lo invoca durante el empaquetado.
-- El plugin no genera el APK de plantilla: la plantilla y el Runtime Kit los construye y publica el repositorio principal de AutoJs6; este plugin solo los verifica, empaqueta y distribuye.
-- El plugin no participa en la escritura ni en la ejecución diaria de scripts: solo la función "Empaquetar aplicación" lo lee.
-- La compilación remota es experimental y está desactivada por defecto: los plugins publicados oficialmente no la activan; solo está disponible en plugins autocompilados con la función activada explícitamente.
-- El plugin no relaja los requisitos de versión: empaquetar con una versión discrepante de AutoJs6 puede bloquearse, y aunque funcione, el resultado no está garantizado.
+- El plugin no funciona por sí solo: no tiene icono ni interfaz y lo invoca un AutoJs6 compatible.
+- La compilación en el dispositivo no es una compilación en la nube: este protocolo no sube el código del proyecto.
+- AutoJs6 no conserva un segundo núcleo de empaquetado en su proceso. Si falta el plugin, está deshabilitado, no es fiable, es incompatible o falla, la solicitud se detiene y se conserva el resultado anterior.
+- El repositorio AutoJs6 sigue generando el Runtime Kit; el plugin lo verifica, empaqueta, distribuye y usa, pero no crea por sí solo una plantilla de runtime.
+- La antigua capacidad de "compilación remota" permanece deshabilitada para hosts heredados. El nombre significaba otro proceso local, no un servicio de Internet, y está separado de la capacidad formal.
 
 ******
 
@@ -110,25 +110,21 @@ Para evitar malentendidos, lo siguiente queda explícitamente fuera del alcance 
 
 R: Las versiones compatibles de AutoJs6 consultan compat-matrix.json con su propio versionCode, seleccionan la compilación con el pluginVersionCode más alto dentro del intervalo compatible y después prefieren el ABI exacto del dispositivo, con respaldo universal. Una entrada solo puede cubrir un intervalo de parches verificado cuando declara explícitamente allowPatchVersionMismatch=true: el host exacto de compilación empaqueta sin aviso, otro host dentro del intervalo reutiliza la misma compilación con una advertencia y un host fuera del intervalo no puede usarla. Si no hay una entrada utilizable en la matriz, se conserva el canal Release/etiqueta existente. Si la versión emparejada del plugin es inferior a la instalada, el Centro de plugins pide desinstalar primero y después instalar la compilación emparejada, porque Android no puede realizar una actualización inversa sobre la aplicación.
 
-**P: ¿Por qué el plugin debe emparejarse con mi versión de AutoJs6?**
+**P: ¿Por qué el plugin debe emparejarse con AutoJs6?**
 
-R: El entorno de ejecución dentro del APK de plantilla se corresponde estrictamente con la API de ejecución de AutoJs6, así que la compatibilidad se determina mediante el contrato versionCode declarado y validado por el plugin, no por su propia versión semántica. La mayoría de las compilaciones se dirigen a un único host exacto; una compilación también puede declarar explícitamente un intervalo cerrado y verificado de versiones de parche. El host de referencia pasa entonces sin aviso, los demás hosts dentro del intervalo reciben una advertencia y los que quedan fuera se bloquean. La versión propia del plugin (como 1.0.0) evoluciona de forma independiente, mientras que el sufijo autojs6- del nombre de versión y la etiqueta de la release indican el host emparejado; en un AutoJs6 antiguo, descarga la compilación del plugin bajo la etiqueta antigua correspondiente (para volver desde un plugin más nuevo, desinstálalo primero; Android no permite instalar una versión anterior sobre otra más reciente).
+R: El runtime de la plantilla debe coincidir con la API del host. El Centro de plugins elige la versión compatible más alta y el mejor ABI; los hosts fuera del intervalo se bloquean.
 
-**P: No encuentro el plugin en mi lanzador. ¿Falló la instalación?**
+**P: No veo el plugin en el lanzador. ¿Falló la instalación?**
 
-R: No. El plugin no tiene icono ni interfaz y solo funciona como servicio en segundo plano para AutoJs6. Puedes confirmarlo en la lista "Ajustes > Aplicaciones" del sistema como APK Builder Template.
+R: No. No tiene icono ni interfaz y solo se ejecuta como servicio de AutoJs6. Compruébalo en Ajustes > Aplicaciones.
 
-**P: El empaquetado informa de un fallo de verificación de la plantilla. ¿Qué hago?**
+**P: ¿Mi proyecto se envía a un servidor remoto?**
 
-R: Normalmente significa que el plugin instalado está incompleto o dañado. Reinstálalo desde el Centro de plugins de AutoJs6 o desde las Releases de este repositorio; si el problema persiste, abre un issue.
+R: No. Host y plugin se comunican entre dos procesos del mismo dispositivo Android. Los nombres históricos dicen "compilación remota" porque Binder cruza un límite de proceso; el modo formal es `on-device-plugin`.
 
-**P: ¿Por qué el plugin es tan grande?**
+**P: ¿Qué ocurre si falla el plugin?**
 
-R: Incluye una plantilla completa de aplicación independiente, con el motor de scripts y las bibliotecas nativas de todas las arquitecturas. Precisamente por eso la plantilla se separó de la aplicación principal: solo los usuarios que empaquetan cargan con este peso.
-
-**P: ¿Qué es la "compilación remota"?**
-
-R: Un protocolo experimental que permite al plugin realizar una compilación ligera en su propio proceso (desempaquetar la plantilla, escribir el script y la configuración, reescribir el nombre del paquete y los recursos, volver a firmar). Los plugins publicados oficialmente la mantienen desactivada; por ahora se dirige a desarrolladores que compilan el plugin por su cuenta.
+R: AutoJs6 detiene la solicitud, muestra un error útil y conserva cualquier APK anterior; no cambia silenciosamente a un segundo compilador del host.
 
 ******
 
@@ -231,7 +227,7 @@ keyPassword=...
 
 ******
 
-El trabajo planificado y su progreso se registran como una lista verificable en ROADMAP.md: estabilización de la compilación remota, variantes de plantilla por arquitectura, compatibilidad a nivel de parche, etc. La discusión está abierta en Issues.
+ROADMAP.md sigue como lista verificable la compilación formal gestionada por el plugin, los candidatos, la entrega por ABI, la compatibilidad, las pruebas de seguridad y las garantías posteriores a GA.
 
 - [Ver ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/ROADMAP.md)
 
@@ -243,9 +239,12 @@ El trabajo planificado y su progreso se registran como una lista verificable en 
 
 # v1.0.0
 
-###### 2026/09/01
+###### 2026/09/02
 
+* `Nota` La ruta normal de Empaquetar aplicación ahora requiere el plugin APK Builder en el dispositivo; el interruptor heredado supportsRemoteBuild sigue desactivado pero ya no desactiva el empaquetado normal
 * `Nota` Primera versión formal de la línea independiente del plugin, emparejada exactamente con el Runtime Kit de AutoJs6 v6.8.0 (versionCode 5277); la versión compuesta del plugin es 1.0.0+autojs6-6.8.0 (versionCode 527701), el Centro de plugins selecciona la compilación ABI correspondiente mediante compat-matrix.json y las compilaciones remotas siguen desactivadas de forma predeterminada
+* `Nuevo` Se promovió el motor del plugin a única ruta formal de empaquetado en el dispositivo; AutoJs6 permanece ligero y valida independientemente cada APK devuelto
+* `Nuevo` La creación y verificación BKS/JKS pasó al plugin mediante una API de keystore versionada y de fallo seguro
 * `Nuevo` Introducidos SemVer 1.0.0 para el plugin, numeración de compilación independiente, nombres de versión compuestos y valores Android versionCode monotónicos que permiten varias versiones del plugin para el mismo host
 * `Nuevo` Añadidas variantes universal, arm64-v8a, armeabi-v7a, x86_64 y x86 con selección ABI exacta y respaldo universal
 * `Nuevo` Añadidos un contrato de intervalo de compatibilidad del host con cierre seguro y una matriz de compatibilidad autoritativa para que un intervalo de parches adyacentes validado explícitamente pueda compartir una compilación del plugin

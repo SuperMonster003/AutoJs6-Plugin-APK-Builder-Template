@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Fail when remote-build AIDL/API symbols are missing from the protocol document.
+"""Fail when plugin-managed APK-build AIDL/API symbols are missing from the protocol document.
 
 This is intentionally a coverage check, not a Kotlin/AIDL compiler. The Android
 build remains authoritative for syntax and types; this script makes additions to
-the public remote-build surface visible to the documentation consistency job.
+the public build and keystore surface visible to the documentation consistency job.
 """
 
 import argparse
@@ -20,11 +20,16 @@ AIDL_PACKAGE = Path(
     "plugin-api/apk-builder-template/src/main/aidl/"
     "org/autojs/plugin/apkbuilder/template"
 )
-REMOTE_CAPABILITY_NAMES = (
+BUILD_CAPABILITY_NAMES = (
+    "SUPPORTS_APK_BUILD",
+    "APK_BUILD_PROTOCOL_VERSION",
+    "APK_BUILD_EXECUTION_MODE",
     "SUPPORTS_REMOTE_BUILD",
     "REMOTE_BUILD_PROTOCOL_VERSION",
     "REMOTE_BUILD_STATUS",
     "REMOTE_BUILD_API_VERSION",
+    "SUPPORTS_KEYSTORE_OPERATIONS",
+    "KEYSTORE_API_VERSION",
 )
 REQUEST_EXTRA_KEY_NAMES = (
     "ARCHIVE_FORMAT_VERSION",
@@ -103,12 +108,17 @@ def collect_required_tokens(repo_root: Path) -> dict[str, list[str]]:
     java_root = repo_root / REMOTE_PACKAGE
     aidl_root = repo_root / AIDL_PACKAGE
     plugin_methods = _aidl_methods(aidl_root / "IApkBuilderTemplatePlugin.aidl")
-    if "openBuildSession" not in plugin_methods:
-        raise ValueError("IApkBuilderTemplatePlugin.openBuildSession was not parsed")
+    required_plugin_methods = ("openBuildSession", "manageKeyStore")
+    missing_plugin_methods = [name for name in required_plugin_methods if name not in plugin_methods]
+    if missing_plugin_methods:
+        raise ValueError(
+            "Required IApkBuilderTemplatePlugin methods were not parsed: "
+            + ", ".join(missing_plugin_methods)
+        )
 
     return {
         "aidlMethods": [
-            "openBuildSession",
+            *required_plugin_methods,
             *_aidl_methods(aidl_root / "IApkBuildSession.aidl"),
             *_aidl_methods(aidl_root / "IApkBuildCallback.aidl"),
         ],
@@ -128,9 +138,17 @@ def collect_required_tokens(repo_root: Path) -> dict[str, list[str]]:
             java_root / "ApkBuildRequestExtraKeys.kt",
             REQUEST_EXTRA_KEY_NAMES,
         ),
-        "remoteCapabilityKeys": _string_constants(
+        "keyStoreRequestFields": _parcelable_fields(
+            java_root / "ApkKeyStoreRequest.kt",
+            "ApkKeyStoreRequest",
+        ),
+        "keyStoreResultFields": _parcelable_fields(
+            java_root / "ApkKeyStoreResult.kt",
+            "ApkKeyStoreResult",
+        ),
+        "buildCapabilityKeys": _string_constants(
             java_root / "ApkBuilderTemplateCapabilityKeys.kt",
-            REMOTE_CAPABILITY_NAMES,
+            BUILD_CAPABILITY_NAMES,
         ),
         "resultStatuses": _numeric_constant_names(
             java_root / "ApkBuildResult.kt",
@@ -140,7 +158,12 @@ def collect_required_tokens(repo_root: Path) -> dict[str, list[str]]:
             java_root / "ApkBuildProgress.kt",
             "STEP_",
         ),
-        "protocolConstants": ["REMOTE_BUILD_VERSION"],
+        "protocolConstants": [
+            "APK_BUILD_VERSION",
+            "APK_BUILD_EXECUTION_MODE_ON_DEVICE_PLUGIN",
+            "REMOTE_BUILD_VERSION",
+            "KEYSTORE_VERSION",
+        ],
     }
 
 

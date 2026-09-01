@@ -41,11 +41,11 @@ Le README.md actuel prend en charge les langues suivantes:
 
 ******
 
-La fonction "Empaqueter l'application" d'AutoJs6 transforme un script ou un projet en un APK qui s'installe et s'exécute de manière autonome, sans AutoJs6 sur l'appareil cible. L'empaquetage a besoin d'un "APK de modèle" comme squelette : une application qui contient déjà l'environnement d'exécution complet des scripts. Pour alléger l'application principale, les versions récentes d'AutoJs6 n'embarquent plus ce modèle volumineux ; il vit désormais dans ce plugin, installé uniquement par les utilisateurs qui empaquettent des applications.
+La fonction "Empaqueter l'application" d'AutoJs6 transforme un script ou un projet en APK autonome. Pour alléger l'application principale, le modèle volumineux et tout le cœur d'empaquetage résident dans ce plugin.
 
-Le plugin n'a ni icône ni interface. Tout se passe en arrière-plan : lors de l'empaquetage, AutoJs6 découvre le plugin, vérifie la compatibilité des versions et l'intégrité des fichiers, puis lit l'APK de modèle intégré pour terminer l'opération.
+Le plugin n'a ni icône ni interface. AutoJs6 le découvre et le valide, prépare une requête bornée et affiche la progression. Le plugin décompresse son propre modèle, écrit le projet et les ressources, modifie Manifest/resources, choisit les ABI, gère la signature et renvoie un APK candidat. AutoJs6 vérifie indépendamment ce résultat avant de le publier.
 
-En une phrase : si vous utilisez "Empaqueter l'application", installez le build que le Centre de plugins a sélectionné pour votre AutoJs6 selon la matrice de compatibilité ; si vous n'empaquetez jamais d'applications autonomes, il ne vous est pas nécessaire.
+Tout s'exécute sur le même appareil Android via Binder et des descripteurs de fichier. Le code source du projet n'est envoyé ni sur le réseau ni vers un service de build cloud.
 
 ******
 
@@ -53,13 +53,13 @@ En une phrase : si vous utilisez "Empaqueter l'application", installez le build 
 
 ******
 
-Lors de l'empaquetage d'une application autonome, AutoJs6 et ce plugin coopèrent comme suit :
+Lors de l'empaquetage, AutoJs6 et le plugin coopèrent ainsi :
 
-1. Découverte : AutoJs6 localise le plugin de modèle installé et lit ses métadonnées
-2. Contrôle de compatibilité : les versions, les versions de protocole et le nom du package de modèle sont comparés ; toute divergence produit un avertissement ou bloque l'empaquetage
-3. Contrôle d'intégrité : l'empreinte SHA-256 de l'APK de modèle est vérifiée pour écarter les fichiers corrompus ou altérés
-4. Transfert du modèle : l'APK de modèle est transmis en flux via un tube inter-processus, sans copie temporaire
-5. Empaquetage : AutoJs6 écrit le script, la configuration et les ressources dans le modèle et produit l'APK autonome final
+1. Admission : AutoJs6 vérifie signature officielle, activation, intervalle d'hôte, ABI, capacité formelle, protocole et exécution sur l'appareil
+2. Préparation : AutoJs6 crée des entrées bornées projet/bibliothèques/keystore et fixe l'identité attendue du package et du signataire
+3. Build du plugin : il valide la requête, ouvre son modèle Runtime Kit, écrit le projet, modifie Manifest/resources, élague les ABI et signe
+4. Résultat : il renvoie l'APK candidat par descripteur en lecture seule et nettoie son espace privé
+5. Publication : AutoJs6 revérifie taille, SHA-256, structure, signature, signataire, package et version, puis remplace atomiquement la cible
 
 ******
 
@@ -67,13 +67,13 @@ Lors de l'empaquetage d'une application autonome, AutoJs6 et ce plugin coopèren
 
 ******
 
-- Fournit le modèle complet d'application autonome (Runtime Kit) pour la fonction "Empaqueter l'application" d'AutoJs6 ; aucune configuration n'est requise après l'installation.
-- Chaque build du plugin conserve dans son nom l'hôte AutoJs6 utilisé pour le créer (par exemple 1.0.0+autojs6-6.8.0-alpha5) et peut déclarer explicitement un intervalle fermé de correctifs vérifié; la correspondance exacte reste silencieuse, un autre hôte dans l'intervalle déclenche un avertissement et tout hôte hors intervalle est bloqué.
-- Double protection d'intégrité : les empreintes SHA-256 et les entrées requises du modèle sont validées à la construction du plugin, et l'empreinte du modèle est communiquée à AutoJs6 pour re-vérification lors de l'empaquetage.
-- Le modèle est transmis à AutoJs6 en flux via un tube inter-processus, sans copies temporaires superflues.
-- Embarque un magasin de clés par défaut : un APK installable peut être produit même sans clé de signature personnalisée.
-- Prend en charge un protocole expérimental de "construction distante" où le processus du plugin réalise lui-même une construction légère (désactivé par défaut ; voir Limites).
-- Les métadonnées du plugin, les instructions, le README et le CHANGELOG couvrent 10 langues : chinois simplifié, chinois traditionnel (Hong Kong/Taïwan), anglais, français, espagnol, japonais, coréen, russe et arabe.
+- Possède tout le cœur d'empaquetage sur l'appareil : modèle, projet/ressources, Manifest et resources.arsc, ABI, keystores et signature.
+- Maintient AutoJs6 léger : l'hôte fournit UI, admission de confiance/compatibilité, préparation, annulation/progression et validation indépendante, pas un second builder.
+- S'exécute entièrement sur le même appareil via Binder/AIDL et ParcelFileDescriptor ; aucun projet n'est envoyé sur Internet ou dans le cloud.
+- Associe chaque build du plugin à un Runtime Kit AutoJs6 validé et prend en charge des intervalles fermés de correctifs vérifiés.
+- Fournit les variantes universal, arm64-v8a, armeabi-v7a, x86_64 et x86 avec sélection ABI précise et repli universal.
+- Inclut un keystore par défaut et la création/vérification BKS/JKS gérée par le plugin, tout en acceptant les keystores personnalisés.
+- Métadonnées, instructions, README et CHANGELOG couvrent 10 langues.
 
 ******
 
@@ -94,11 +94,11 @@ Lors de l'empaquetage d'une application autonome, AutoJs6 et ce plugin coopèren
 
 Pour éviter tout malentendu, les points suivants sont explicitement hors du périmètre de ce plugin:
 
-- Le plugin ne s'utilise pas seul : il n'a ni icône ni interface et n'est invoqué par AutoJs6 que pendant l'empaquetage.
-- Le plugin ne génère pas l'APK de modèle : le modèle et le Runtime Kit sont construits et publiés par le dépôt principal AutoJs6 ; ce plugin ne fait que les vérifier, les empaqueter et les distribuer.
-- Le plugin n'intervient pas dans l'écriture ni l'exécution quotidienne des scripts : seule la fonction "Empaqueter l'application" le lit.
-- La construction distante est expérimentale et désactivée par défaut : les plugins publiés officiellement ne l'activent pas ; elle n'est disponible que dans des plugins auto-construits avec l'option explicitement activée.
-- Le plugin n'assouplit pas les exigences de version : empaqueter avec une version d'AutoJs6 divergente peut être bloqué, et même en cas de succès, le résultat n'est pas garanti.
+- Le plugin ne fonctionne pas seul : il n'a ni icône ni interface et doit être appelé par un AutoJs6 compatible.
+- Le build sur l'appareil n'est pas un build cloud : ce protocole n'envoie pas le code du projet.
+- AutoJs6 ne conserve pas un second cœur d'empaquetage dans son processus. Plugin absent, désactivé, non fiable, incompatible ou en échec : la requête s'arrête et l'ancien résultat est conservé.
+- Le dépôt AutoJs6 génère toujours le Runtime Kit ; le plugin le vérifie, l'empaquette, le distribue et l'utilise sans inventer seul un modèle de runtime.
+- L'ancienne capacité de "construction distante" reste désactivée pour les hôtes historiques. Ce nom désignait un autre processus local, pas un service Internet, et reste distinct de la capacité formelle.
 
 ******
 
@@ -110,25 +110,21 @@ Pour éviter tout malentendu, les points suivants sont explicitement hors du pé
 
 R : Les versions compatibles d'AutoJs6 interrogent compat-matrix.json avec leur propre versionCode, sélectionnent le build ayant le pluginVersionCode le plus élevé dans l'intervalle compatible, puis privilégient l'ABI exact de l'appareil avec repli sur universal. Une entrée ne peut couvrir un intervalle de correctifs vérifié que si allowPatchVersionMismatch=true est explicite: l'hôte exact de construction empaquette sans avertissement, un autre hôte dans l'intervalle réutilise le même build avec un avertissement et un hôte hors intervalle ne peut pas l'utiliser. Si aucune entrée de la matrice n'est exploitable, le canal Release/tag existant reste utilisé. Si la version appariée du plugin est inférieure à celle installée, le Centre de plugins demande de désinstaller d'abord, puis d'installer le build apparié, car Android ne peut pas effectuer une rétrogradation sur place.
 
-**Q : Pourquoi le plugin doit-il être apparié à ma version d'AutoJs6 ?**
+**Q : Pourquoi le plugin doit-il correspondre à AutoJs6 ?**
 
-R : L'environnement d'exécution embarqué dans l'APK de modèle correspond strictement à l'API d'exécution d'AutoJs6 ; la compatibilité est donc déterminée par le contrat versionCode déclaré et validé du plugin, non par sa propre version sémantique. La plupart des builds ciblent un seul hôte exact ; un build peut aussi déclarer explicitement un intervalle fermé de versions correctives vérifié. L'hôte de référence passe alors sans avertissement, les autres hôtes dans l'intervalle en reçoivent un, et tout hôte hors intervalle est bloqué. La version propre du plugin (comme 1.0.0) évolue indépendamment, tandis que le suffixe autojs6- du nom de version et le tag de release indiquent l'hôte apparié ; sur un AutoJs6 plus ancien, téléchargez le build du plugin sous le tag ancien correspondant (pour revenir depuis un plugin plus récent, désinstallez-le d'abord — Android n'autorise pas l'installation en rétrogradation).
+R : Le runtime du modèle doit correspondre à l'API hôte. Le Centre de plugins choisit le build compatible le plus récent et le meilleur ABI ; un hôte hors intervalle est bloqué.
 
-**Q : Je ne trouve pas le plugin sur mon écran d'accueil. L'installation a-t-elle échoué ?**
+**Q : Le plugin n'apparaît pas dans le lanceur. L'installation a-t-elle échoué ?**
 
-R : Non. Le plugin n'a ni icône ni interface et ne fonctionne que comme service d'arrière-plan pour AutoJs6. Vous pouvez le vérifier dans la liste "Paramètres > Applications" du système sous le nom APK Builder Template.
+R : Non. Il n'a volontairement ni icône ni interface et ne fonctionne que comme service AutoJs6. Vérifiez-le dans Paramètres > Applications.
 
-**Q : L'empaquetage signale un échec de vérification du modèle. Que faire ?**
+**Q : Mon projet est-il envoyé à un serveur distant ?**
 
-R : Cela signifie généralement que le plugin installé est incomplet ou corrompu. Réinstallez-le depuis le Centre de plugins AutoJs6 ou les Releases de ce dépôt ; si le problème persiste, ouvrez un ticket.
+R : Non. Hôte et plugin communiquent entre deux processus du même appareil Android. Les anciens noms parlent de "construction distante" parce que Binder traverse une frontière de processus ; le mode formel est `on-device-plugin`.
 
-**Q : Pourquoi le plugin est-il si volumineux ?**
+**Q : Que se passe-t-il si le plugin échoue ?**
 
-R : Il embarque un modèle complet d'application autonome, avec le moteur de scripts et les bibliothèques natives de toutes les architectures. C'est précisément pourquoi le modèle a été extrait de l'application principale : seuls les utilisateurs qui empaquettent portent ce poids.
-
-**Q : Qu'est-ce que la "construction distante" ?**
-
-R : Un protocole expérimental qui permet au plugin de réaliser une construction légère dans son propre processus (décompresser le modèle, écrire le script et la configuration, réécrire le nom de package et les ressources, re-signer). Les plugins publiés officiellement la gardent désactivée ; elle s'adresse pour l'instant aux développeurs qui construisent le plugin eux-mêmes.
+R : AutoJs6 arrête la requête, affiche une erreur exploitable et conserve tout APK existant ; il ne bascule pas silencieusement vers un second builder hôte.
 
 ******
 
@@ -231,7 +227,7 @@ keyPassword=...
 
 ******
 
-Les travaux prévus et leur avancement sont suivis sous forme de liste vérifiable dans ROADMAP.md : stabilisation de la construction distante, variantes de modèle par architecture, compatibilité au niveau des correctifs, etc. La discussion est ouverte dans les Issues.
+ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le plugin, les candidats, la livraison par ABI, la compatibilité, les preuves de sécurité et l'assurance après GA.
 
 - [Voir ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/ROADMAP.md)
 
@@ -243,9 +239,12 @@ Les travaux prévus et leur avancement sont suivis sous forme de liste vérifiab
 
 # v1.0.0
 
-###### 2026/09/01
+###### 2026/09/02
 
+* `Info` La voie normale Empaqueter l'application exige désormais le plugin APK Builder sur l'appareil ; l'ancien commutateur supportsRemoteBuild reste désactivé sans désactiver l'empaquetage normal
 * `Info` Première version officielle de la ligne indépendante du plugin, associée exactement au Runtime Kit d'AutoJs6 v6.8.0 (versionCode 5277); la version composite du plugin est 1.0.0+autojs6-6.8.0 (versionCode 527701), le Centre de plugins sélectionne la build ABI associée via compat-matrix.json et les builds distantes restent désactivées par défaut
+* `Ajout` Le moteur du plugin devient l'unique voie formelle d'empaquetage sur l'appareil ; AutoJs6 reste léger et valide indépendamment chaque APK renvoyé
+* `Ajout` La création et la vérification BKS/JKS sont déplacées dans le plugin via une API de keystore versionnée et à échec fermé
 * `Ajout` Ajout du SemVer 1.0.0 du plugin, d'une numérotation de build indépendante, de noms de version composés et de valeurs Android versionCode monotones permettant plusieurs versions du plugin pour un même hôte
 * `Ajout` Ajout des variantes universal, arm64-v8a, armeabi-v7a, x86_64 et x86 avec sélection exacte de l'ABI et repli universal
 * `Ajout` Ajout d'un contrat de plage de compatibilité hôte à échec fermé et d'une matrice de compatibilité faisant autorité afin qu'une plage de correctifs adjacents explicitement validée puisse partager une build du plugin

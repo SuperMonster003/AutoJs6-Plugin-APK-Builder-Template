@@ -11,4 +11,4 @@
 - `default_key_store.bks`
 - `runtime-kit.json`
 
-دعم البناء عن بعد معطل افتراضيا ولا يمكن تمكينه إلا في البنى التي تم إنشاؤها باستخدام `-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true`.
+يجري التغليف بالكامل داخل عملية المكون على جهاز Android نفسه ولا يرفع مصدر المشروع. يتحقق AutoJs6 من الثقة والتوافق ثم يفحص APK المعاد بصورة مستقلة. يبقى مفتاح `supportsRemoteBuild` القديم معطلا لكنه لا يعطل هذا المسار الرسمي.

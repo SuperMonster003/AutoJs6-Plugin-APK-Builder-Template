@@ -6,11 +6,14 @@
   "changelog_label_dependency": "의존성",
   "$data": {
     "v1.0.0": {
-      "released_date": "2026/09/01",
+      "released_date": "2026/09/02",
       "hint": [
+        "일반 애플리케이션 패키징은 이제 기기 내 APK Builder 플러그인을 정식으로 요구합니다; 이전 supportsRemoteBuild 스위치는 꺼진 채 유지되지만 일반 패키징을 끄지 않습니다",
         "플러그인 독립 버전 계열의 첫 정식 릴리스이며 AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit와 정확히 대응합니다; 복합 플러그인 버전은 1.0.0+autojs6-6.8.0 (versionCode 527701)이고, 플러그인 센터는 compat-matrix.json에서 대응 ABI 빌드를 선택하며, 원격 빌드는 계속 기본적으로 비활성화됩니다"
       ],
       "feature": [
+        "플러그인 엔진을 유일한 정식 기기 내 패키징 경로로 승격; AutoJs6 는 가볍게 유지하며 반환된 APK 를 독립적으로 검증",
+        "버전이 지정된 실패 폐쇄형 키 저장소 API 로 BKS/JKS 생성과 검증을 플러그인으로 이전",
         "플러그인 SemVer 1.0.0, 독립 빌드 번호, 복합 버전 이름, 단조 증가하는 Android versionCode를 도입하여 동일한 호스트용 플러그인을 여러 번 릴리스할 수 있도록 변경",
         "universal, arm64-v8a, armeabi-v7a, x86_64, x86 변형을 추가하고 정확한 ABI 선택과 universal 대체 경로 지원",
         "실패 시 닫히는 호스트 호환 범위 계약과 권위 있는 호환성 매트릭스를 추가하여 명시적으로 검증된 인접 패치 범위가 하나의 플러그인 빌드를 공유하도록 지원"

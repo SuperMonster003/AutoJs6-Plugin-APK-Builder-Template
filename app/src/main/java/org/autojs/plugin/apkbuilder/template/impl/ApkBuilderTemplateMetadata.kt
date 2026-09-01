@@ -53,6 +53,13 @@ object ApkBuilderTemplateMetadata {
         val hostVersionName = host.optStringOrDefault("versionName", BuildConfig.HOST_VERSION_NAME)
         val hostVersionCode = host.optLongOrDefault("versionCode", BuildConfig.HOST_VERSION_CODE)
         val protocolVersion = contract.optIntOrDefault("apkBuilderProtocolVersion", BuildConfig.PROTOCOL_VERSION)
+        val apkBuildProtocolVersion = contract.optIntOrDefault(
+            "apkBuildProtocolVersion",
+            contract.optIntOrDefault(
+                "remoteBuildProtocolVersion",
+                BuildConfig.APK_BUILD_PROTOCOL_VERSION,
+            ),
+        )
         val remoteBuildProtocolVersion = contract.optIntOrDefault(
             "remoteBuildProtocolVersion",
             BuildConfig.REMOTE_BUILD_PROTOCOL_VERSION,
@@ -107,6 +114,12 @@ object ApkBuilderTemplateMetadata {
                 putString(ApkBuilderTemplateCapabilityKeys.RESOURCES_CONTRACT_HASH, contract.optStringOrNull("resourcesContractHash"))
                 putString(ApkBuilderTemplateCapabilityKeys.NATIVE_LIB_MANIFEST_HASH, contract.optStringOrNull("nativeLibManifestHash"))
                 putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_TEMPLATE_APK, true)
+                putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_APK_BUILD, BuildConfig.ENABLE_APK_BUILD)
+                putInt(ApkBuilderTemplateCapabilityKeys.APK_BUILD_PROTOCOL_VERSION, apkBuildProtocolVersion)
+                putString(
+                    ApkBuilderTemplateCapabilityKeys.APK_BUILD_EXECUTION_MODE,
+                    ApkBuilderTemplateProtocol.APK_BUILD_EXECUTION_MODE_ON_DEVICE_PLUGIN,
+                )
                 putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD, BuildConfig.ENABLE_REMOTE_BUILD)
                 putInt(ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_PROTOCOL_VERSION, remoteBuildProtocolVersion)
                 putString(
@@ -116,6 +129,11 @@ object ApkBuilderTemplateMetadata {
                 putInt(
                     ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_API_VERSION,
                     ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,
+                )
+                putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_KEYSTORE_OPERATIONS, true)
+                putInt(
+                    ApkBuilderTemplateCapabilityKeys.KEYSTORE_API_VERSION,
+                    ApkBuilderTemplateProtocol.KEYSTORE_VERSION,
                 )
             },
         )

@@ -65,6 +65,11 @@ def shared_runtime_kit_identity(metadata: dict) -> dict:
         "maxHostVersionCode": int(compatibility.get("maxHostVersionCode") or 0),
         "allowPatchVersionMismatch": compatibility.get("allowPatchVersionMismatch"),
         "apkBuilderProtocolVersion": int(contract.get("apkBuilderProtocolVersion") or 0),
+        "apkBuildProtocolVersion": int(
+            contract.get("apkBuildProtocolVersion")
+            or contract.get("remoteBuildProtocolVersion")
+            or 0
+        ),
         "remoteBuildProtocolVersion": int(contract.get("remoteBuildProtocolVersion") or 0),
         "runtimeApiLevel": int(contract.get("runtimeApiLevel") or 0),
         "runtimeApiHash": str(contract.get("runtimeApiHash") or "").strip(),
@@ -88,7 +93,12 @@ def validate_shared_identity(identity: dict) -> None:
         raise SystemExit("Runtime Kit compatibility.allowPatchVersionMismatch must be a boolean")
     if minimum != maximum and not allow_patch:
         raise SystemExit("A widened Runtime Kit host range requires allowPatchVersionMismatch=true")
-    for field in ("apkBuilderProtocolVersion", "remoteBuildProtocolVersion", "runtimeApiLevel"):
+    for field in (
+        "apkBuilderProtocolVersion",
+        "apkBuildProtocolVersion",
+        "remoteBuildProtocolVersion",
+        "runtimeApiLevel",
+    ):
         if int(identity[field]) <= 0:
             raise SystemExit(f"Runtime Kit {field} must be positive")
     for field in ("runtimeApiHash", "scriptEngineHash", "resourcesContractHash"):
@@ -258,6 +268,8 @@ def build_release_evidence(
             "versionCode": plugin_version_code,
             "versionBuild": plugin_version_build,
             "releaseSequence": plugin_release_seq,
+            "apkBuildEnabledByDefault": True,
+            "apkBuildExecutionMode": "on-device-plugin",
             "remoteBuildEnabledByDefault": False,
         },
         "host": {
@@ -269,6 +281,7 @@ def build_release_evidence(
         },
         "protocol": {
             "apkBuilderProtocolVersion": baseline_identity["apkBuilderProtocolVersion"],
+            "apkBuildProtocolVersion": baseline_identity["apkBuildProtocolVersion"],
             "remoteBuildProtocolVersion": baseline_identity["remoteBuildProtocolVersion"],
             "runtimeApiLevel": baseline_identity["runtimeApiLevel"],
             "runtimeApiHash": baseline_identity["runtimeApiHash"],

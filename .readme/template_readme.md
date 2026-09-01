@@ -32,7 +32,7 @@
 
 ******
 
-{{ p_introduction }}
+{{ p_introduction_plugin_managed }}
 
 ******
 
@@ -40,7 +40,7 @@
 
 ******
 
-{{ p_how_it_works }}
+{{ p_how_it_works_plugin_managed }}
 
 ******
 
@@ -79,7 +79,7 @@
 
 {{ p_matrix_faq }}
 
-{{ p_faq }}
+{{ p_faq_plugin_managed }}
 
 ******
 
@@ -161,7 +161,7 @@ keyPassword=...
 
 ******
 
-{{ p_roadmap }}
+{{ p_roadmap_plugin_managed }}
 
 - [{{ text_link_roadmap }}]({{ repo_url }}/blob/master/ROADMAP.md)
 

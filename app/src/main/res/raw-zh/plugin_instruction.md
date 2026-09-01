@@ -11,4 +11,4 @@ Runtime Kit 可显式覆盖经验证的补丁区间. 实际构建所用宿主可
 - `default_key_store.bks`
 - `runtime-kit.json`
 
-远程构建默认关闭, 只能在使用 `-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true` 构建的插件中启用.
+打包完全在同一台 Android 设备的插件进程内完成, 不上传项目源码. AutoJs6 负责信任与兼容准入, 并独立复核插件返回的 APK. 旧 `supportsRemoteBuild` 开关继续保持关闭, 但不关闭这条正式路径.

@@ -18,6 +18,7 @@ import org.autojs.plugin.apkbuilder.template.ApkBuildResult
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCapabilityKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateProtocol
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateResult
+import org.autojs.plugin.apkbuilder.template.ApkKeyStoreRequest
 import org.autojs.plugin.apkbuilder.template.IApkBuildCallback
 import org.autojs.plugin.apkbuilder.template.TypeScriptBuildStagingCipher
 import org.json.JSONArray
@@ -80,6 +81,97 @@ class RemoteApkBuildSessionInstrumentedTest {
         executor.awaitTermination(10, TimeUnit.SECONDS)
         fixtureRoot.deleteRecursively()
     }
+
+    @Test
+    fun metadataAdvertisesTheFormalPluginManagedBuildContract() {
+        val capabilities = requireNotNull(ApkBuilderTemplateMetadata.pluginInfo(context).capabilities)
+
+        assertTrue(capabilities.getBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_APK_BUILD))
+        assertEquals(
+            ApkBuilderTemplateProtocol.APK_BUILD_VERSION,
+            capabilities.getInt(ApkBuilderTemplateCapabilityKeys.APK_BUILD_PROTOCOL_VERSION),
+        )
+        assertEquals(
+            ApkBuilderTemplateProtocol.APK_BUILD_EXECUTION_MODE_ON_DEVICE_PLUGIN,
+            capabilities.getString(ApkBuilderTemplateCapabilityKeys.APK_BUILD_EXECUTION_MODE),
+        )
+        assertEquals(
+            BuildConfig.ENABLE_REMOTE_BUILD,
+            capabilities.getBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD),
+        )
+        assertTrue(capabilities.getBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_KEYSTORE_OPERATIONS))
+        assertEquals(
+            ApkBuilderTemplateProtocol.KEYSTORE_VERSION,
+            capabilities.getInt(ApkBuilderTemplateCapabilityKeys.KEYSTORE_API_VERSION),
+        )
+    }
+
+    @Test
+    fun pluginKeyStoreManagerCreatesAndVerifiesBksAndJks() {
+        listOf(ApkKeyStoreRequest.TYPE_BKS, ApkKeyStoreRequest.TYPE_JKS).forEach { type ->
+            val keyStore = File(fixtureRoot, "plugin-keystore.${type.lowercase()}")
+            val createResult = PluginKeyStoreManager.execute(
+                context,
+                keyStoreRequest(
+                    operation = ApkKeyStoreRequest.OPERATION_CREATE,
+                    type = type,
+                    keyStoreFd = ParcelFileDescriptor.open(
+                        keyStore,
+                        ParcelFileDescriptor.MODE_CREATE or
+                            ParcelFileDescriptor.MODE_TRUNCATE or
+                            ParcelFileDescriptor.MODE_READ_WRITE,
+                    ),
+                ),
+            )
+
+            assertTrue("Create $type failed: ${createResult.message}", createResult.isSuccess)
+            assertTrue("Created $type keystore is empty.", keyStore.length() > 0L)
+
+            val verifyResult = PluginKeyStoreManager.execute(
+                context,
+                keyStoreRequest(
+                    operation = ApkKeyStoreRequest.OPERATION_VERIFY,
+                    type = type,
+                    keyStoreFd = ParcelFileDescriptor.open(
+                        keyStore,
+                        ParcelFileDescriptor.MODE_READ_ONLY,
+                    ),
+                ),
+            )
+            assertTrue("Verify $type failed: ${verifyResult.message}", verifyResult.isSuccess)
+
+            val wrongAliasResult = PluginKeyStoreManager.execute(
+                context,
+                keyStoreRequest(
+                    operation = ApkKeyStoreRequest.OPERATION_VERIFY,
+                    type = type,
+                    keyStoreFd = ParcelFileDescriptor.open(
+                        keyStore,
+                        ParcelFileDescriptor.MODE_READ_ONLY,
+                    ),
+                ).apply {
+                    keyAlias = "missing-alias"
+                },
+            )
+            assertFalse("Unknown $type alias must fail closed.", wrongAliasResult.isSuccess)
+        }
+    }
+
+    private fun keyStoreRequest(
+        operation: Int,
+        type: String,
+        keyStoreFd: ParcelFileDescriptor,
+    ) = ApkKeyStoreRequest(
+        operation = operation,
+        keyStoreFd = keyStoreFd,
+        keyStoreType = type,
+        keyStorePassword = DEFAULT_KEY_STORE_PASSWORD,
+        keyAlias = DEFAULT_KEY_ALIAS,
+        keyAliasPassword = DEFAULT_KEY_ALIAS_PASSWORD,
+        commonName = "AutoJs6 Plugin Test",
+        organization = "AutoJs6",
+        country = "CN",
+    )
 
     @Test
     fun directorySourceWithRiskyHostNameMismatchCompletesWithWarning() {
@@ -203,14 +295,16 @@ class RemoteApkBuildSessionInstrumentedTest {
     }
 
     @Test
-    fun customKeyStoreV2IconNativeCapabilitiesAndAbiPruningComplete() {
-        val selectedAbi = "armeabi-v7a"
+    fun customKeyStoreV2IconAndAbiSelectionComplete() {
+        val selectedAbi = ApkBuilderTemplateMetadata.templateInfo(context)
+            .capabilities
+            ?.getStringArray(ApkBuilderTemplateCapabilityKeys.TEMPLATE_SUPPORTED_ABIS)
+            ?.firstOrNull()
+            ?: error("Runtime Kit does not declare a supported ABI.")
         val requiredNativeLibraries = listOf(
             "libjackpal-androidterm5.so",
             "libjackpal-termexec2.so",
             "libc++_shared.so",
-            "libopencv_java4.so",
-            "libpngquant_bridge.so",
         )
         val iconWidth = 19
         val iconHeight = 17
@@ -220,7 +314,7 @@ class RemoteApkBuildSessionInstrumentedTest {
             binaryEntries = mapOf("icon.png" to iconBytes),
             projectConfig = createProjectConfig(
                 abis = listOf(selectedAbi),
-                libs = listOf("OpenCV", "Image Quantization"),
+                libs = emptyList(),
                 permissions = listOf("android.permission.INTERNET", "android.permission.WAKE_LOCK"),
                 signatureScheme = "V2",
             ),
@@ -764,7 +858,7 @@ class RemoteApkBuildSessionInstrumentedTest {
         assertTrue(observation.result.warnings.isEmpty())
         assertTrue(
             observation.result.errors.any { error ->
-                error.contains("Host requires newer remote build protocol")
+                error.contains("Host requires newer APK build protocol")
             },
         )
         assertNoOutput(observation)
@@ -979,7 +1073,10 @@ class RemoteApkBuildSessionInstrumentedTest {
             }
         }
         val request = createRequest().apply {
-            replaceProjectArchive(malformedArchive)
+            replaceProjectArchive(
+                malformedArchive,
+                uncompressedSizeBytes = malformedArchive.length(),
+            )
         }
 
         val observation = execute(request, remoteBuildEnabled = true)
@@ -1667,14 +1764,17 @@ class RemoteApkBuildSessionInstrumentedTest {
         )
     }
 
-    private fun ApkBuildRequest.replaceProjectArchive(archive: File) {
+    private fun ApkBuildRequest.replaceProjectArchive(
+        archive: File,
+        uncompressedSizeBytes: Long = zipUncompressedSizeBytes(archive),
+    ) {
         projectArchiveFd?.close()
         projectArchiveFd = ParcelFileDescriptor.open(archive, ParcelFileDescriptor.MODE_READ_ONLY)
         projectArchiveSizeBytes = archive.length()
         projectArchiveSha256 = sha256(archive)
         extras?.putLong(
             ApkBuildRequestExtraKeys.PROJECT_ARCHIVE_UNCOMPRESSED_SIZE_BYTES,
-            zipUncompressedSizeBytes(archive),
+            uncompressedSizeBytes,
         )
     }
 

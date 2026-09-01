@@ -15,7 +15,8 @@ move a tag, update `compat-matrix.json`, or advance the tracked plugin release s
    pass version, signature certificate, embedded asset, and CRC32 checks.
 5. Download `apk-builder-template-signed-candidate`. Its evidence manifest must report `candidateOnly=true`, use
    `actions-artifact` for both publication channels, bind both Actions run URLs, expose no Release/APK download URL, and
-   retain `remoteBuildEnabledByDefault=false`.
+   report `apkBuildEnabledByDefault=true`, `apkBuildExecutionMode=on-device-plugin`,
+   `apkBuildProtocolVersion=3`, while retaining the legacy `remoteBuildEnabledByDefault=false` marker.
 6. Confirm this repository still has no RC/GA Release for that label and that tracked `version.properties` and
    `compat-matrix.json` are unchanged. Only after device acceptance and an explicit GA decision may the formal path run.
 

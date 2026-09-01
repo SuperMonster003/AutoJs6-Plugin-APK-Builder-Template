@@ -23,7 +23,7 @@ class RemoteApkBuildSession(
     private val request: ApkBuildRequest,
     private val callback: IApkBuildCallback?,
     private val executor: Executor,
-    private val remoteBuildEnabled: Boolean = BuildConfig.ENABLE_REMOTE_BUILD,
+    private val remoteBuildEnabled: Boolean = BuildConfig.ENABLE_APK_BUILD,
     private val usableSpaceProvider: (File) -> Long = { directory -> directory.usableSpace },
 ) : IApkBuildSession.Stub() {
 
@@ -72,7 +72,7 @@ class RemoteApkBuildSession(
     private fun runSession() {
         var keepWorkspaceForResult = false
         val requestWarnings = arrayListOf<String>()
-        notifyStarted(updateProgress(ApkBuildProgress.STEP_PREPARE, "Preparing remote build workspace", null))
+        notifyStarted(updateProgress(ApkBuildProgress.STEP_PREPARE, "Preparing APK build workspace", null))
         runCatching {
             ensureActive()
             ensureRemoteBuildEnabled()
@@ -91,14 +91,14 @@ class RemoteApkBuildSession(
                 availableBytes = usableSpaceProvider(appContext.cacheDir),
                 estimate = storageEstimate,
             )
-            notifyProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Reading remote build request", request.outputFileName))
+            notifyProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Reading APK build request", request.outputFileName))
 
             val preparedWorkspace = RemoteApkBuildWorkspace.prepare(appContext, request, cancelled)
             synchronized(workspaceLifecycleLock) {
                 workspace = preparedWorkspace
             }
             RemoteEmbeddedNodePackagingPolicy.validateProjectSource(projectConfig, preparedWorkspace.sourcePath)
-            notifyProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "Remote build request validated", preparedWorkspace.sourcePath.path))
+            notifyProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "APK build request validated", preparedWorkspace.sourcePath.path))
 
             ensureActive()
             val output = RemoteApkLightweightBuilder(
@@ -169,7 +169,7 @@ class RemoteApkBuildSession(
             clearSensitiveRequestData()
             finishWorkspaceLifecycle(keepWorkspaceForResult)
             if (!closed.get()) {
-                progress = updateProgress(ApkBuildProgress.STEP_FINISH, "Remote build session finished", null)
+                progress = updateProgress(ApkBuildProgress.STEP_FINISH, "APK build session finished", null)
             }
         }
     }
@@ -178,7 +178,7 @@ class RemoteApkBuildSession(
         synchronized(workspaceLifecycleLock) {
             workerFinished = true
             if (!keepWorkspaceForResult || closed.get()) {
-                notifyProgress(updateProgress(ApkBuildProgress.STEP_CLEAN, "Cleaning remote build workspace", null))
+                notifyProgress(updateProgress(ApkBuildProgress.STEP_CLEAN, "Cleaning APK build workspace", null))
                 closeWorkspaceLocked()
             }
         }
@@ -296,9 +296,9 @@ class RemoteApkBuildSession(
 
     private fun validateHostRequest(info: ApkBuilderTemplateInfo): List<String> {
         val warnings = arrayListOf<String>()
-        if (request.requiredProtocolVersion > ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION) {
+        if (request.requiredProtocolVersion > ApkBuilderTemplateProtocol.APK_BUILD_VERSION) {
             throw IllegalStateException(
-                "Host requires newer remote build protocol: host=${request.requiredProtocolVersion}, plugin=${ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION}"
+                "Host requires newer APK build protocol: host=${request.requiredProtocolVersion}, plugin=${ApkBuilderTemplateProtocol.APK_BUILD_VERSION}"
             )
         }
         val compatibilityDecision = request.hostVersionCode
@@ -329,7 +329,7 @@ class RemoteApkBuildSession(
     private fun ensureRemoteBuildEnabled() {
         if (!remoteBuildEnabled) {
             throw RemoteApkBuildUnsupportedException(
-                "Remote APK build is disabled in this plugin build."
+                "APK build is disabled in this plugin build."
             )
         }
     }

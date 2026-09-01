@@ -6,9 +6,12 @@
 
 # v1.0.0
 
-###### 2026/09/01
+###### 2026/09/02
 
+* `Hint` The ordinary Package Application path now requires the on-device APK Builder plugin; the legacy supportsRemoteBuild switch remains disabled but no longer disables normal packaging
 * `Hint` First formal release on the independent plugin version line, paired exactly with the AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; the composite plugin version is 1.0.0+autojs6-6.8.0 (versionCode 527701), Plugin Center selects the paired ABI build through compat-matrix.json, and remote builds remain disabled by default
+* `Feature` Promoted the plugin-side engine to the only formal on-device packaging path; AutoJs6 stays lean and independently validates every returned APK
+* `Feature` Moved BKS/JKS creation and verification into the plugin through a versioned, fail-closed keystore API
 * `Feature` Introduced plugin SemVer 1.0.0, independent build numbering, composite version names, and monotonic Android versionCode values that support multiple plugin releases for the same host
 * `Feature` Added universal, arm64-v8a, armeabi-v7a, x86_64, and x86 variants with exact-ABI selection and universal fallback
 * `Feature` Added a fail-closed host compatibility range contract and an authoritative compatibility matrix so one explicitly validated adjacent patch range can share a plugin build

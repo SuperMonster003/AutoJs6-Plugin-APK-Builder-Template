@@ -41,11 +41,11 @@ The current README.md supports the following languages:
 
 ******
 
-The AutoJs6 "Package Application" feature turns a script or project into an APK that installs and runs on its own, without AutoJs6 on the target device. Packaging needs a "template APK" as the skeleton: an app that already contains the complete script runtime. To keep the main app slim, recent versions of AutoJs6 no longer bundle this rather large template; it now lives in this plugin and is installed only by users who need packaging.
+The AutoJs6 "Package Application" feature turns a script or project into an APK that installs and runs independently. The large template and all packaging machinery live in this plugin so the AutoJs6 app can stay lean.
 
-The plugin has no icon and no user interface. Everything happens in the background: when packaging, AutoJs6 discovers the plugin, checks version compatibility and file integrity, then reads the built-in template APK to finish the job.
+The plugin has no icon or UI. AutoJs6 discovers and validates it, prepares a bounded request, and shows progress. The plugin then unpacks its own template, writes the project and resources, changes the manifest/resources, selects ABIs, manages signing, and returns a candidate APK. AutoJs6 independently verifies that output before publishing it.
 
-One-line decision guide: if you use "Package Application", install the build selected for your AutoJs6 by Plugin Center from the compatibility matrix; if you never package standalone apps, you do not need it.
+Everything runs on the same Android device through Binder and file descriptors. This feature does not upload project source to a network or cloud build service.
 
 ******
 
@@ -55,11 +55,11 @@ One-line decision guide: if you use "Package Application", install the build sel
 
 When packaging a standalone application, AutoJs6 and this plugin cooperate as follows:
 
-1. Discovery: AutoJs6 locates the installed template plugin and reads its metadata
-2. Compatibility check: versions, protocol versions, and the template package name are compared; mismatches produce a warning or block packaging
-3. Integrity check: the SHA-256 digest of the template APK is verified to rule out corrupted or tampered files
-4. Template transfer: the template APK is streamed through an inter-process pipe, without temporary copies
-5. Packaging: AutoJs6 writes the script, configuration, and resources into the template and produces the final standalone APK
+1. Admission: AutoJs6 checks the official signature, enabled state, host version interval, ABI, formal build capability, protocol, and on-device execution mode
+2. Request preparation: AutoJs6 creates bounded project/native/keystore inputs and fixes the expected package and signer identity
+3. Plugin build: the plugin validates the request, unpacks its own Runtime Kit template, writes the project, changes Manifest/resources, trims ABIs, and signs the APK
+4. Result transfer: the plugin returns the candidate APK through a read-only file descriptor and cleans its private workspace
+5. Host publication: AutoJs6 rechecks size, SHA-256, APK structure, signature, signer, package name, and version, then atomically replaces the target only if every check passes
 
 ******
 
@@ -67,13 +67,13 @@ When packaging a standalone application, AutoJs6 and this plugin cooperate as fo
 
 ******
 
-- Supplies the complete standalone application template (Runtime Kit) for the AutoJs6 "Package Application" feature; no configuration is needed after installation.
-- Every plugin build keeps one built-for AutoJs6 host in its version name (such as 1.0.0+autojs6-6.8.0-alpha5) and may explicitly declare a verified closed patch interval; exact matches are silent, non-exact hosts inside that interval warn, and hosts outside it are blocked.
-- Dual integrity protection: SHA-256 digests and required template entries are validated when the plugin is built, and the template digest is reported to AutoJs6 for re-verification when packaging.
-- The template is streamed to AutoJs6 through an inter-process pipe without redundant temporary copies.
-- Ships a default keystore, so an installable APK can be produced even before a custom signing key is configured.
-- Supports an experimental "remote build" protocol in which the plugin process performs a lightweight build on its own (disabled by default; see Boundaries).
-- Plugin metadata, usage instructions, README, and CHANGELOG cover 10 languages: Simplified Chinese, Traditional Chinese (Hong Kong/Taiwan), English, French, Spanish, Japanese, Korean, Russian, and Arabic.
+- Owns the complete on-device packaging core for AutoJs6, including template processing, project/resource injection, Manifest and resources.arsc changes, ABI selection, keystore operations, and signing.
+- Keeps AutoJs6 lean: the host provides UI, trust and compatibility admission, request preparation, cancellation/progress, and independent output validation rather than a second builder.
+- Runs entirely on the same Android device through Binder/AIDL and ParcelFileDescriptor; project source is not uploaded to a network or cloud service.
+- Pairs every plugin build with a validated AutoJs6 Runtime Kit and can declare an explicitly verified closed patch interval.
+- Provides universal, arm64-v8a, armeabi-v7a, x86_64, and x86 variants with exact-ABI selection and universal fallback.
+- Ships a default keystore and supports plugin-owned BKS/JKS creation and verification, while custom keystores remain supported.
+- Plugin metadata, usage instructions, README, and CHANGELOG cover 10 languages.
 
 ******
 
@@ -94,11 +94,11 @@ When packaging a standalone application, AutoJs6 and this plugin cooperate as fo
 
 To avoid misunderstandings, the following are explicitly outside the scope of this plugin:
 
-- The plugin cannot be used on its own: it has no icon and no UI, and is only invoked by AutoJs6 during packaging.
-- The plugin does not generate the template APK: the template and Runtime Kit are built and released by the AutoJs6 main repository; this plugin only verifies, packages, and distributes them.
-- The plugin plays no part in writing or running scripts day to day: only the "Package Application" feature reads it.
-- Remote build is experimental and disabled by default: officially released plugins do not enable it; it is only available in self-built plugins with the feature explicitly turned on.
-- The plugin does not relax version requirements: packaging with a mismatched AutoJs6 version may be blocked, and even if it goes through, the output is not guaranteed to work.
+- The plugin cannot be used on its own: it has no icon or UI and is invoked by a compatible AutoJs6 host.
+- The device build path is not a cloud build: no project source is uploaded by this protocol.
+- AutoJs6 does not retain a second in-process packaging core. If the plugin is missing, disabled, untrusted, incompatible, or fails, that build stops and any previous output is preserved.
+- The AutoJs6 repository still generates the Runtime Kit; the plugin verifies, packages, distributes, and uses that kit but does not invent a runtime template independently.
+- The old "remote build" capability remains disabled for legacy hosts. Its name meant another on-device app process, not an Internet service, and it is separate from the formal plugin-managed capability.
 
 ******
 
@@ -112,23 +112,19 @@ A: Supported AutoJs6 versions query compat-matrix.json with their own versionCod
 
 **Q: Why must the plugin pair with my AutoJs6 version?**
 
-A: The script runtime inside the template APK corresponds strictly to the AutoJs6 runtime API, so compatibility is determined by the plugin's declared and validated versionCode contract, not by its own semantic version. Most builds target one exact host; a build may also explicitly declare a verified closed patch-version interval. The built-for host then passes silently, other hosts inside the interval receive a warning, and hosts outside it are blocked. The plugin's own version (such as 1.0.0) evolves independently, while the autojs6- suffix in the version name and the release tag mark the paired host; on an older AutoJs6, download the plugin build under the matching older tag (to move back from a newer plugin, uninstall it first — Android does not allow downgrade installs).
+A: The runtime inside the template must match the host API. Plugin Center selects the highest compatible plugin build and the best ABI asset from the compatibility matrix; hosts outside the declared interval are blocked.
 
-**Q: I cannot find the plugin on my launcher. Did the installation fail?**
+**Q: I cannot find the plugin on my launcher. Did installation fail?**
 
-A: No. The plugin has no icon or UI and only runs as a background service for AutoJs6. You can confirm it under the system "Settings > Apps" list as APK Builder Template.
+A: No. It intentionally has no icon or UI and runs only as a background service for AutoJs6. Check it under system Settings > Apps.
 
-**Q: Packaging reports a template verification failure. What now?**
+**Q: Is my project sent to a remote server?**
 
-A: This usually means the installed plugin is incomplete or corrupted. Reinstall it from the AutoJs6 Plugin Center or this repository's Releases; if the problem persists, please file an issue.
+A: No. The host and plugin communicate between two app processes on the same Android device. Historical source names say "remote build" because Binder calls cross a process boundary; the formal mode is explicitly `on-device-plugin`.
 
-**Q: Why is the plugin so large?**
+**Q: What happens if the plugin fails?**
 
-A: It bundles a complete standalone application template, including the script engine and native libraries for all processor architectures. That is exactly why the template was split out of the AutoJs6 main app: only users who package apps carry this weight.
-
-**Q: What is "remote build"?**
-
-A: An experimental protocol that lets the plugin perform a lightweight build in its own process (unpack the template, write the script and configuration, rewrite the package name and resources, re-sign). Officially released plugins keep it disabled; it currently targets developers building the plugin themselves.
+A: AutoJs6 stops the request, shows an actionable error, and preserves any existing output APK. It does not silently switch to a second host-side builder.
 
 ******
 
@@ -231,7 +227,7 @@ keyPassword=...
 
 ******
 
-Planned work and its progress are tracked as a verifiable checklist in ROADMAP.md, covering remote build stabilization, per-ABI template variants, patch-level version compatibility, and more. Discussion is welcome in Issues.
+ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-ABI delivery, compatibility, security evidence, and post-GA assurance as a verifiable checklist. Discussion is welcome in Issues.
 
 - [View ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/ROADMAP.md)
 
@@ -243,9 +239,12 @@ Planned work and its progress are tracked as a verifiable checklist in ROADMAP.m
 
 # v1.0.0
 
-###### 2026/09/01
+###### 2026/09/02
 
+* `Hint` The ordinary Package Application path now requires the on-device APK Builder plugin; the legacy supportsRemoteBuild switch remains disabled but no longer disables normal packaging
 * `Hint` First formal release on the independent plugin version line, paired exactly with the AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; the composite plugin version is 1.0.0+autojs6-6.8.0 (versionCode 527701), Plugin Center selects the paired ABI build through compat-matrix.json, and remote builds remain disabled by default
+* `Feature` Promoted the plugin-side engine to the only formal on-device packaging path; AutoJs6 stays lean and independently validates every returned APK
+* `Feature` Moved BKS/JKS creation and verification into the plugin through a versioned, fail-closed keystore API
 * `Feature` Introduced plugin SemVer 1.0.0, independent build numbering, composite version names, and monotonic Android versionCode values that support multiple plugin releases for the same host
 * `Feature` Added universal, arm64-v8a, armeabi-v7a, x86_64, and x86 variants with exact-ABI selection and universal fallback
 * `Feature` Added a fail-closed host compatibility range contract and an authoritative compatibility matrix so one explicitly validated adjacent patch range can share a plugin build

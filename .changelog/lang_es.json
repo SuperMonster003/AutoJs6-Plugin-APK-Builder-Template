@@ -6,11 +6,14 @@
   "changelog_label_dependency": "Dependencia",
   "$data": {
     "v1.0.0": {
-      "released_date": "2026/09/01",
+      "released_date": "2026/09/02",
       "hint": [
+        "La ruta normal de Empaquetar aplicación ahora requiere el plugin APK Builder en el dispositivo; el interruptor heredado supportsRemoteBuild sigue desactivado pero ya no desactiva el empaquetado normal",
         "Primera versión formal de la línea independiente del plugin, emparejada exactamente con el Runtime Kit de AutoJs6 v6.8.0 (versionCode 5277); la versión compuesta del plugin es 1.0.0+autojs6-6.8.0 (versionCode 527701), el Centro de plugins selecciona la compilación ABI correspondiente mediante compat-matrix.json y las compilaciones remotas siguen desactivadas de forma predeterminada"
       ],
       "feature": [
+        "Se promovió el motor del plugin a única ruta formal de empaquetado en el dispositivo; AutoJs6 permanece ligero y valida independientemente cada APK devuelto",
+        "La creación y verificación BKS/JKS pasó al plugin mediante una API de keystore versionada y de fallo seguro",
         "Introducidos SemVer 1.0.0 para el plugin, numeración de compilación independiente, nombres de versión compuestos y valores Android versionCode monotónicos que permiten varias versiones del plugin para el mismo host",
         "Añadidas variantes universal, arm64-v8a, armeabi-v7a, x86_64 y x86 con selección ABI exacta y respaldo universal",
         "Añadidos un contrato de intervalo de compatibilidad del host con cierre seguro y una matriz de compatibilidad autoritativa para que un intervalo de parches adyacentes validado explícitamente pueda compartir una compilación del plugin"

@@ -11,4 +11,4 @@ El Runtime Kit empaquetado incluye:
 - `default_key_store.bks`
 - `runtime-kit.json`
 
-El soporte de compilación remota está desactivado de forma predeterminada y solo puede activarse en compilaciones hechas con `-Pautojs.apkBuilder.templatePlugin.enableRemoteBuild=true`.
+El empaquetado se ejecuta por completo dentro del proceso del plugin en el mismo dispositivo Android; el código del proyecto no se sube. AutoJs6 controla la confianza y la compatibilidad y valida de forma independiente el APK devuelto. El interruptor heredado `supportsRemoteBuild` sigue desactivado, pero no desactiva esta ruta formal.
