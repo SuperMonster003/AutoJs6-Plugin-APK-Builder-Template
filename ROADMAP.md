@@ -183,11 +183,11 @@
 - [x] [P] **M7-1 整理未提交实现为可审阅提交**
   - 内容: 将此前两个工作树中的实现 (远程构建加固, 输出复核, 脱敏审计, 协议门禁, 文档语料等) 固定为可定位, 可复核的提交。
   - 验收: `git status` 干净; 每个提交有独立可读的主题; 宿主侧对应改动同步落库。
-  - 证据: 插件侧 `e7f4918` (TypeScript 暂存保护) 与 `9587f28` (远程构建/发布流程收口), 宿主侧 `71e684b8d` (插件中心与能力集成); 2026/09/01 两个主工作树均为干净状态。
+  - 证据: 插件侧 `e7f4918` (TypeScript 暂存保护), `9587f28` (远程构建/发布流程收口) 与 PR [#5](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/pull/5), 宿主侧 `71e684b8d` (插件中心与能力集成); 2026/09/01 两个主工作树均为干净状态。
 - [x] [P] **M7-2 全量门禁绿灯**
   - 内容: 在整理后的提交上跑通全部既有门禁。
   - 验收: `docs-consistency.yml` (含 `.python/generate_markdown.py` + `git diff --exit-code`), `scripts/verify_remote_build_protocol_docs.py` 73/73, Python 回归全绿, `:app:verifyApkBuilderRuntimeKit` 通过, 插件 app / API 单测与 Release Kotlin 编译通过。
-  - 证据: 2026/09/01 在插件发布候选上重生成文档后差异为 0, 协议真源覆盖 73/73, Python 回归 23/23 (含 Release evidence 三类失败关闭用例); Gradle Runtime Kit 门禁, app/API 单测与 `:app:compileReleaseKotlin` 在 166 个任务中全部通过。
+  - 证据: 2026/09/01 在插件发布候选上重生成文档后差异为 0, 协议真源覆盖 73/73, Python 回归 23/23 (含 Release evidence 三类失败关闭用例); Gradle Runtime Kit 门禁, app/API 单测与 `:app:compileReleaseKotlin` 强制重跑 166/166 任务通过。PR #5 的 push/PR 文档门禁 ([33477042749](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477042749), [33477047543](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477047543)) 与签名配置门禁 ([33477047547](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477047547)) 全绿。
 - [ ] [P] **M7-3 版本定档**
   - 内容: 确定首发版本三元组 —— `PLUGIN_VERSION_NAME=1.0.0`, `PLUGIN_VERSION_BUILD`, `PLUGIN_RELEASE_SEQ`, 以及由 `hostVersionCode * 100 + 序号` 推出的 versionCode 与复合 versionName。确认配对宿主版本与兼容区间。
   - 验收: `version.properties` 与生成的 APK 元数据一致; versionCode 相对既有装机 (5201) 保持单调递增; 复合 versionName 与双版本文件名符合 `docs/versioning.md`。
