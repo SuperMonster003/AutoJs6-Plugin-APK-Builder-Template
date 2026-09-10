@@ -19,6 +19,27 @@ class RemoteZipExtractorTest {
     val temporaryFolder = TemporaryFolder()
 
     @Test
+    fun productionBudgetsAcceptLargeProjectsAndHighlyCompressibleResources() {
+        val archive = temporaryFolder.newFile("large-project.zip")
+        ZipOutputStream(archive.outputStream().buffered()).use { zip ->
+            repeat(16_385) { index ->
+                zip.putNextEntry(ZipEntry("assets/resource_$index"))
+                zip.closeEntry()
+            }
+            zip.putNextEntry(ZipEntry("assets/repeated.txt"))
+            zip.write(ByteArray(1024 * 1024) { 'a'.code.toByte() })
+            zip.closeEntry()
+        }
+        listOf(RemoteZipExtractor.PROJECT_ARCHIVE_LIMITS, RemoteZipExtractor.BUILD_INPUT_ARCHIVE_LIMITS)
+            .forEachIndexed { index, limits ->
+                val target = temporaryFolder.newFolder("large-output-$index")
+                RemoteZipExtractor.extract(archive, target, limits)
+                assertTrue(File(target, "assets/resource_16384").isFile)
+                assertEquals(1024L * 1024, File(target, "assets/repeated.txt").length())
+            }
+    }
+
+    @Test
     fun validArchiveExtractsWithinTarget() {
         val archive = createZip(
             "valid.zip",

@@ -42,21 +42,21 @@ internal object RemoteZipExtractor {
 
     internal val PROJECT_ARCHIVE_LIMITS = Limits(
         label = "project archive",
-        maxArchiveBytes = 512L * MEBIBYTE,
-        maxEntries = 16_384,
-        maxEntryUncompressedBytes = 256L * MEBIBYTE,
-        maxTotalUncompressedBytes = 1L * GIBIBYTE,
-        maxCompressionRatio = 250L,
+        maxArchiveBytes = 4L * GIBIBYTE,
+        maxEntries = 262_144,
+        maxEntryUncompressedBytes = 2L * GIBIBYTE,
+        maxTotalUncompressedBytes = 8L * GIBIBYTE,
+        maxCompressionRatio = 2_000L,
         compressionRatioMinimumBytes = 1L * MEBIBYTE,
     )
 
     internal val BUILD_INPUT_ARCHIVE_LIMITS = Limits(
         label = "native build input archive",
-        maxArchiveBytes = 1L * GIBIBYTE,
-        maxEntries = 8_192,
-        maxEntryUncompressedBytes = 512L * MEBIBYTE,
-        maxTotalUncompressedBytes = 2L * GIBIBYTE,
-        maxCompressionRatio = 250L,
+        maxArchiveBytes = 4L * GIBIBYTE,
+        maxEntries = 262_144,
+        maxEntryUncompressedBytes = 2L * GIBIBYTE,
+        maxTotalUncompressedBytes = 8L * GIBIBYTE,
+        maxCompressionRatio = 2_000L,
         compressionRatioMinimumBytes = 1L * MEBIBYTE,
     )
 

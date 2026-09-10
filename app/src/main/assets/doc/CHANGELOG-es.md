@@ -6,7 +6,7 @@
 
 # v1.0.0
 
-###### 2026/09/02
+###### 2026/09/10
 
 * `Nota` La ruta normal de Empaquetar aplicación ahora requiere el plugin APK Builder en el dispositivo; el interruptor heredado supportsRemoteBuild sigue desactivado pero ya no desactiva el empaquetado normal
 * `Nota` Primera versión formal de la línea independiente del plugin, emparejada exactamente con el Runtime Kit de AutoJs6 v6.8.0 (versionCode 5277); la versión compuesta del plugin es 1.0.0+autojs6-6.8.0 (versionCode 527701), el Centro de plugins selecciona la compilación ABI correspondiente mediante compat-matrix.json y las compilaciones remotas siguen desactivadas de forma predeterminada
@@ -21,6 +21,7 @@
 * `Corrección` Reforzadas las compilaciones remotas experimentales: se rechaza el contenido cifrado temporal de TypeScript no declarado en el inventario de rutas y se detectan correctamente los almacenes de claves BKS personalizados tras normalizar el nombre de archivo en el espacio de trabajo
 * `Corrección` Se restringieron los límites de entrada de la compilación remota experimental con validación estricta de tipos, tamaños y anidación de Parcelable/Bundle y project.json, límites para almacenes de claves, iconos y rutas ZIP, y correcciones de desbordamiento en el paquete ARSC y los nombres de salida derivados
 * `Corrección` El complemento no se podía activar desde el centro de complementos después de instalarlo en algunos sistemas
+* `Mejora` Ampliar la comprobación de archivos de proyecto y compilación a 262144 entradas, 4 GiB comprimidos, 2 GiB por entrada, 8 GiB extraídos en total y una relación de compresión de 2000:1
 * `Mejora` El flujo de publicación de confianza admite ahora un modo de candidato aislado que genera cinco APK con firma de producción y evidence desde un artefacto Actions del host fijado, sin crear una Release ni actualizar la matriz de compatibilidad autoritativa
 * `Mejora` Unificadas las reglas de validación de Runtime Kit entre Gradle y Python, incluidos resúmenes, tamaños, archivos obligatorios, entradas APK y coherencia de las cinco variantes
 * `Mejora` Publicación junto a los cinco APK de un manifiesto de evidencias JSON legible por máquina que vincula hashes de artefactos, certificado de firma, versiones del plugin/host, intervalo de compatibilidad, ID de Runtime Kit y versiones de protocolo

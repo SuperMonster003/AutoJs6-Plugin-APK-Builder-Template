@@ -6,7 +6,7 @@
   "changelog_label_dependency": "Dépendance",
   "$data": {
     "v1.0.0": {
-      "released_date": "2026/09/02",
+      "released_date": "2026/09/10",
       "hint": [
         "La voie normale Empaqueter l'application exige désormais le plugin APK Builder sur l'appareil ; l'ancien commutateur supportsRemoteBuild reste désactivé sans désactiver l'empaquetage normal",
         "Première version officielle de la ligne indépendante du plugin, associée exactement au Runtime Kit d'AutoJs6 v6.8.0 (versionCode 5277); la version composite du plugin est 1.0.0+autojs6-6.8.0 (versionCode 527701), le Centre de plugins sélectionne la build ABI associée via compat-matrix.json et les builds distantes restent désactivées par défaut"
@@ -27,6 +27,7 @@
         "Le plugin ne pouvait pas être activé depuis le centre de plugins après son installation sur certains systèmes"
       ],
       "improvement": [
+        "Étendre la vérification des archives de projet et de compilation à 262144 entrées, 4 GiB compressés, 2 GiB par entrée, 8 GiB extraits au total et un rapport de compression de 2000:1",
         "Le workflow de publication de confiance prend désormais en charge un mode candidat isolé qui produit cinq APK signés en production et leur evidence depuis un artefact Actions hôte épinglé, sans créer de Release ni mettre à jour la matrice de compatibilité de référence",
         "Unification des règles de validation du Runtime Kit entre Gradle et Python, notamment les résumés, tailles, fichiers obligatoires, entrées APK et la cohérence des cinq variantes",
         "Publication avec les cinq APK d'un manifeste de preuves JSON lisible par machine, liant les empreintes des artefacts, le certificat de signature, les versions plugin/hôte, la plage de compatibilité, les ID Runtime Kit et les versions de protocole",

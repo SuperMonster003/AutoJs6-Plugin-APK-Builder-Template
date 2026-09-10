@@ -6,7 +6,7 @@
   "changelog_label_dependency": "依赖",
   "$data": {
     "v1.0.0": {
-      "released_date": "2026/09/02",
+      "released_date": "2026/09/10",
       "hint": [
         "普通打包应用现正式依赖设备内 APK Builder 插件; 旧 supportsRemoteBuild 开关继续关闭, 但不再关闭普通打包",
         "插件独立版本线的首个正式发布, 精确配套 AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; 插件复合版本为 1.0.0+autojs6-6.8.0 (versionCode 527701), 插件中心通过 compat-matrix.json 选择配套 ABI 构建, 远程构建仍默认关闭"
@@ -27,6 +27,7 @@
         "部分系统安装后无法通过插件中心激活的问题"
       ],
       "improvement": [
+        "工程与构建输入归档预检支持 262144 个条目, 4 GiB 压缩包, 2 GiB 单条目, 8 GiB 解压总量与 2000:1 压缩比",
         "受信发布工作流新增候选隔离模式, 从绑定的宿主 Actions 构件生成五个正式签名 APK 与 evidence, 但不创建 Release 或写入权威兼容矩阵",
         "统一 Gradle 与 Python 的 Runtime Kit 校验规则, 覆盖摘要, 大小, 必需文件, APK 条目及五变体一致性",
         "发布流水线随五个 APK 发布机器可读的 JSON 证据清单, 绑定资产摘要, 签名证书, 插件/宿主版本, 兼容区间, Runtime Kit ID 与协议版本",

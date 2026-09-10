@@ -245,3 +245,12 @@
 - [ ] [H+P] **M8-4 将来真正的离设备构建另立 ADR**
   - 内容: 如未来需要云端/局域网构建，使用全新能力键、认证、隐私、传输和威胁模型，不复用 `on-device-plugin` 或旧 remote 语义。
   - 验收: 明确用户授权、源码数据边界、端到端加密、服务身份、失败回收与本地插件路径关系后，才允许进入实现。
+
+
+## 归档预检容量调整 (2026-09-10)
+
+- [x] [P] 工程归档与构建输入归档的条目上限统一提高到 262144 (原为 16384 / 8192), 压缩大小统一为 4 GiB, 单条目解压大小为 2 GiB, 总解压大小为 8 GiB, 压缩比为 2000:1.
+- [x] [P] 请求大小验证, 缓存规划和实际解压继续读取 `RemoteZipExtractor` 的同一组生产预算; 路径, 重名冲突, 字节计数和取消检查保持一致.
+- [x] [P] `RemoteZipExtractorTest.productionBudgetsAcceptLargeProjectsAndHighlyCompressibleResources` 使用 16385 个资源条目与高压缩比文本, 验证两类归档均可完成预检和解压; 请求与存储策略回归同时通过.
+
+证据: `app/build/inspection-fixes/build.log`. 本项仅调整已有归档路径的容量, 不改变构建入口的启用状态或 Runtime Kit 配对协议.

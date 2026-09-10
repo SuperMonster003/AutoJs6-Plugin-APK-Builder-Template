@@ -239,7 +239,7 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 # v1.0.0
 
-###### 2026/09/02
+###### 2026/09/10
 
 * `Hint` The ordinary Package Application path now requires the on-device APK Builder plugin; the legacy supportsRemoteBuild switch remains disabled but no longer disables normal packaging
 * `Hint` First formal release on the independent plugin version line, paired exactly with the AutoJs6 v6.8.0 (versionCode 5277) Runtime Kit; the composite plugin version is 1.0.0+autojs6-6.8.0 (versionCode 527701), Plugin Center selects the paired ABI build through compat-matrix.json, and remote builds remain disabled by default
@@ -254,6 +254,7 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 * `Fix` Hardened experimental remote builds by rejecting unlisted TypeScript staging ciphertext and loading custom BKS keystores after workspace filename normalization
 * `Fix` Tightened experimental remote-build input boundaries with strict Parcelable/Bundle and project.json type, size, and nesting checks; bounded keystores, icons, and ZIP path depth/segments; and fixed ARSC package-name and derived-output filename overflows
 * `Fix` The plugin could not be activated from Plugin Center after installation on some systems
+* `Improvement` Expand project and build-input archive preflight to 262144 entries, 4 GiB compressed archives, 2 GiB per entry, 8 GiB extracted totals, and a 2000:1 compression ratio
 * `Improvement` Trusted release workflow now supports an isolated candidate mode that builds five production-signed APKs and evidence from a pinned host Actions artifact without creating a Release or updating the authoritative compatibility matrix
 * `Improvement` Unified Runtime Kit validation rules across Gradle and Python, including hashes, sizes, required files, APK entries, and five-variant consistency
 * `Improvement` Published a machine-readable JSON evidence manifest beside the five APKs, binding artifact digests, signer certificate, plugin/host versions, compatibility range, Runtime Kit IDs, and protocol versions

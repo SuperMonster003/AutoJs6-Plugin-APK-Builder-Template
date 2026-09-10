@@ -6,7 +6,7 @@
 
 # v1.0.0
 
-###### 2026/09/02
+###### 2026/09/10
 
 * `Info` La voie normale Empaqueter l'application exige désormais le plugin APK Builder sur l'appareil ; l'ancien commutateur supportsRemoteBuild reste désactivé sans désactiver l'empaquetage normal
 * `Info` Première version officielle de la ligne indépendante du plugin, associée exactement au Runtime Kit d'AutoJs6 v6.8.0 (versionCode 5277); la version composite du plugin est 1.0.0+autojs6-6.8.0 (versionCode 527701), le Centre de plugins sélectionne la build ABI associée via compat-matrix.json et les builds distantes restent désactivées par défaut
@@ -21,6 +21,7 @@
 * `Correction` Renforcement des builds distantes expérimentales: rejet des données chiffrées de transit TypeScript absentes de l'inventaire des chemins et détection correcte des magasins de clés BKS personnalisés après normalisation du nom de fichier dans l'espace de travail
 * `Correction` Durcissement des limites d'entrée du build distant expérimental: validation stricte des types, tailles et profondeurs de Parcelable/Bundle et project.json, limites pour les magasins de clés, icônes et chemins ZIP, et correction des dépassements de nom de package ARSC et de nom de sortie dérivé
 * `Correction` Le plugin ne pouvait pas être activé depuis le centre de plugins après son installation sur certains systèmes
+* `Amélioration` Étendre la vérification des archives de projet et de compilation à 262144 entrées, 4 GiB compressés, 2 GiB par entrée, 8 GiB extraits au total et un rapport de compression de 2000:1
 * `Amélioration` Le workflow de publication de confiance prend désormais en charge un mode candidat isolé qui produit cinq APK signés en production et leur evidence depuis un artefact Actions hôte épinglé, sans créer de Release ni mettre à jour la matrice de compatibilité de référence
 * `Amélioration` Unification des règles de validation du Runtime Kit entre Gradle et Python, notamment les résumés, tailles, fichiers obligatoires, entrées APK et la cohérence des cinq variantes
 * `Amélioration` Publication avec les cinq APK d'un manifeste de preuves JSON lisible par machine, liant les empreintes des artefacts, le certificat de signature, les versions plugin/hôte, la plage de compatibilité, les ID Runtime Kit et les versions de protocole
