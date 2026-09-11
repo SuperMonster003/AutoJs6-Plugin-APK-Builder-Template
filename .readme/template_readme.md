@@ -212,3 +212,6 @@ app/src/main/assets/doc/CHANGELOG-*.md
 
 - {{ text_link_autojs6_repo }}: {{ autojs6_repo_url }}
 - {{ text_link_autojs6_docs }}: {{ autojs6_docs_url }}
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/docs/16kb.md)

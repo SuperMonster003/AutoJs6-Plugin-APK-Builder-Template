@@ -4,11 +4,15 @@ import java.util.zip.ZipFile
 import org.gradle.api.provider.Property
 
 plugins {
+    id("io.github.supermonster003.autojs6-native-alignment")
     id("org.autojs.build.versions")
     id("org.autojs.build.signs")
     id("org.autojs.build.jvm-convention")
     id("com.android.application")
 }
+
+// The template APK is an embedded native payload even though the builder itself is JVM-only.
+nativeAlignment { scanEmbeddedPayloads.set(true) }
 
 val buildTypeRelease = "release"
 val apkFileExtension = "apk"
@@ -511,6 +515,15 @@ val verifyApkBuilderRuntimeKit = tasks.register("verifyApkBuilderRuntimeKit") {
             runtimeKitValidationRules,
             remoteBuildTemplateExpansionMultiplier,
         )
+        val templateApk = runtimeKitDir.resolve("template.apk")
+        val entries = org.autojs.build.alignment.NativeAlignmentScanner().scanApk(templateApk)
+        val failures = entries.filter { it.reasons.isNotEmpty() }
+        require(failures.isEmpty()) { "Runtime Kit native alignment failed: $failures" }
+        val report = layout.buildDirectory.file("reports/native-alignment/runtime-kit.json").get().asFile
+        report.parentFile.mkdirs()
+        report.writeText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(
+            mapOf("file" to templateApk.absolutePath, "entries" to entries.map { it.report() }, "ok" to true),
+        )) + "\n")
         logger.lifecycle("Runtime Kit verified with shared rules: $runtimeKitValidationRules")
     }
 }

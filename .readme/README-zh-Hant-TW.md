@@ -237,6 +237,12 @@ ROADMAP.md 以可核查清單追蹤正式外掛託管建置, 發布候選, 分 A
 
 ******
 
+# v6.8.0
+
+###### 2026/09/11
+
+* `最佳化` 建置階段校驗 64 位原生函式庫的 16 KB 頁面大小對齊, 檢查 manifest 契約並輸出 JSON 報告
+
 # v1.0.0
 
 ###### 2026/09/10
@@ -273,14 +279,6 @@ ROADMAP.md 以可核查清單追蹤正式外掛託管建置, 發布候選, 分 A
 * `新增` 實驗性遠端建置協定: 可由外掛處理程序獨立完成輕量封裝 (預設關閉, 需建置時明確開啟)
 * `新增` 接入自動化發布流程: AutoJs6 主儲存庫發版時自動建置外掛, 使用受信任金鑰簽章並驗證憑證指紋後發布配套 APK
 * `新增` 外掛資訊, 使用說明, README 與 CHANGELOG 覆蓋簡體中文, 香港繁體, 台灣繁體, 英文, 法文, 西班牙文, 日文, 韓文, 俄文與阿拉伯文共 10 種語言
-
-# v6.7.1 Alpha4
-
-###### 2026/07/09
-
-* `提示` 首個公開發布版本, 需搭配同版本 AutoJs6 (v6.7.1 Alpha4) 使用
-* `新增` 從 AutoJs6 主儲存庫拆分為獨立外掛儲存庫, 提供範本 APK 外掛服務的初始實作
-* `新增` 建立由 AutoJs6 主儲存庫觸發的 Runtime Kit 取得, 驗證與外掛建置發布流水線
 
 ##### 更多發行歷史可參閱
 
@@ -321,3 +319,6 @@ app/src/main/assets/doc/CHANGELOG-*.md
 
 - AutoJs6 主專案: https://github.com/SuperMonster003/AutoJs6
 - AutoJs6 文件: https://docs.autojs6.com
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/docs/16kb.md)

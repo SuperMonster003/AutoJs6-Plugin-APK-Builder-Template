@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v6.8.0
+
+###### 2026/09/11
+
+* `Mejora` Verificación de compilación de la alineación de páginas de 16 KB en bibliotecas nativas de 64 bits, con controles del contrato manifest e informes JSON
+
 # v1.0.0
 
 ###### 2026/09/10
@@ -273,14 +279,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 * `Nuevo` Añadido un protocolo experimental de compilación remota que realiza una compilación ligera dentro del proceso del plugin (desactivado por defecto, debe activarse explícitamente al compilar)
 * `Nuevo` Conectado el flujo de publicación automatizado: cuando el repositorio principal de AutoJs6 publica una versión, se construye un APK de plugin emparejado, se firma con la clave de confianza, se verifica la huella del certificado y se publica
 * `Nuevo` Cubiertos 10 idiomas en los metadatos del plugin, las instrucciones, el README y el CHANGELOG: chino simplificado, chino tradicional (Hong Kong/Taiwán), inglés, francés, español, japonés, coreano, ruso y árabe
-
-# v6.7.1 Alpha4
-
-###### 2026/07/09
-
-* `Nota` Primera versión pública; se empareja con AutoJs6 de la misma versión (v6.7.1 Alpha4)
-* `Nuevo` Separado del repositorio principal de AutoJs6 como repositorio de plugin independiente, con la implementación inicial del servicio de plugin de APK de plantilla
-* `Nuevo` Establecida la canalización basada en el Runtime Kit, activada por el repositorio principal de AutoJs6, que obtiene, verifica, construye y publica el plugin
 
 ##### Para más historial
 
@@ -321,3 +319,6 @@ app/src/main/assets/doc/CHANGELOG-*.md
 
 - Proyecto principal AutoJs6: https://github.com/SuperMonster003/AutoJs6
 - Documentación de AutoJs6: https://docs.autojs6.com
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/docs/16kb.md)

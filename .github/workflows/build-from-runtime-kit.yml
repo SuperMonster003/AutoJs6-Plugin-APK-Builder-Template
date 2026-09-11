@@ -283,6 +283,13 @@ jobs:
             rm -rf app/build/outputs/apk/release
             ./gradlew :app:assembleRelease \
               "-Pautojs.apkBuilder.templatePlugin.runtimeKitDir=$kit_dir"
+            report_dir="build/reports/native-alignment/$variant"
+            mkdir -p "$report_dir"
+            cp app/build/reports/native-alignment/*.json "$report_dir/"
+            zipalign="$(find "${ANDROID_HOME:?}/build-tools" -mindepth 2 -maxdepth 2 -type f -name zipalign -print | sort -V | tail -n 1)"
+            test -x "$zipalign"
+            # The ELF/ZIP gate above is authoritative. Record the SDK's second opinion.
+            "$zipalign" -c -P 16 -v 4 "$kit_dir/template.apk" > "$report_dir/zipalign.txt" 2>&1 || true
             outputs=(app/build/outputs/apk/release/*.apk)
             if [ "${#outputs[@]}" -ne 1 ]; then
               printf 'Expected one APK for %s, found %d.\n' "$variant" "${#outputs[@]}" >&2
@@ -303,6 +310,15 @@ jobs:
           staged=("$apk_dir"/*.apk)
           test "${#staged[@]}" -eq "$expected_count"
           echo "PLUGIN_APK_DIR=$apk_dir" >> "$GITHUB_ENV"
+
+      - name: Upload native alignment verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-alignment
+          path: |
+            build/reports/native-alignment/
+            app/build/reports/native-alignment/
 
       - name: Verify release APK signatures and add CRC32 suffixes
         env:

@@ -237,6 +237,12 @@ ROADMAP.md 에서 정식 플러그인 관리 빌드, 후보, ABI 별 배포, 호
 
 ******
 
+# v6.8.0
+
+###### 2026/09/11
+
+* `개선` 64비트 네이티브 라이브러리의 16 KB 페이지 정렬을 빌드 시 검증, manifest 계약 검사 및 JSON 보고서 지원
+
 # v1.0.0
 
 ###### 2026/09/10
@@ -273,14 +279,6 @@ ROADMAP.md 에서 정식 플러그인 관리 빌드, 후보, ABI 별 배포, 호
 * `추가` 플러그인 프로세스 안에서 경량 빌드를 수행하는 실험적 원격 빌드 프로토콜을 도입했습니다 (기본 비활성, 빌드 시 명시적으로 켜야 함)
 * `추가` 자동 릴리스 흐름 구축: AutoJs6 메인 저장소가 릴리스를 발행하면 짝을 이루는 플러그인 APK 를 자동으로 빌드하고, 신뢰된 키로 서명하며 인증서 지문을 검증한 뒤 배포합니다
 * `추가` 플러그인 정보, 사용 설명, README, CHANGELOG 를 10개 언어 (중국어 간체, 중국어 번체 (홍콩/대만), 영어, 프랑스어, 스페인어, 일본어, 한국어, 러시아어, 아랍어) 로 제공합니다
-
-# v6.7.1 Alpha4
-
-###### 2026/07/09
-
-* `안내` 첫 공개 릴리스이며, 같은 버전의 AutoJs6 (v6.7.1 Alpha4) 와 함께 사용해야 합니다
-* `추가` AutoJs6 메인 저장소에서 독립 플러그인 저장소로 분리하고 템플릿 APK 플러그인 서비스의 초기 구현을 제공했습니다
-* `추가` AutoJs6 메인 저장소가 트리거하는 Runtime Kit 획득, 검증, 빌드, 배포 파이프라인을 구축했습니다
 
 ##### 더 많은 릴리스 기록
 
@@ -321,3 +319,6 @@ app/src/main/assets/doc/CHANGELOG-*.md
 
 - AutoJs6 메인 프로젝트: https://github.com/SuperMonster003/AutoJs6
 - AutoJs6 문서: https://docs.autojs6.com
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/docs/16kb.md)

@@ -237,6 +237,12 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 
 ******
 
+# v6.8.0
+
+###### 2026/09/11
+
+* `优化` 构建阶段校验 64 位原生库的 16 KB 页大小对齐, 检查 manifest 契约并输出 JSON 报告
+
 # v1.0.0
 
 ###### 2026/09/10
@@ -273,14 +279,6 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 * `新增` 实验性远程构建协议: 可由插件进程独立完成轻量打包 (默认关闭, 需构建时显式开启)
 * `新增` 接入自动化发布流程: AutoJs6 主仓库发版时自动构建插件, 使用受信任密钥签名并校验证书指纹后发布配套 APK
 * `新增` 插件信息, 使用说明, README 与 CHANGELOG 覆盖简体中文, 香港繁体, 台湾繁体, 英语, 法语, 西班牙语, 日语, 韩语, 俄语与阿拉伯语共 10 种语言
-
-# v6.7.1 Alpha4
-
-###### 2026/07/09
-
-* `提示` 首个公开发布版本, 需搭配同版本 AutoJs6 (v6.7.1 Alpha4) 使用
-* `新增` 从 AutoJs6 主仓库拆分为独立插件仓库, 提供模板 APK 插件服务的初始实现
-* `新增` 建立由 AutoJs6 主仓库触发的 Runtime Kit 获取, 校验与插件构建发布流水线
 
 ##### 更多发行历史可参阅
 
@@ -321,3 +319,6 @@ app/src/main/assets/doc/CHANGELOG-*.md
 
 - AutoJs6 主项目: https://github.com/SuperMonster003/AutoJs6
 - AutoJs6 文档: https://docs.autojs6.com
+
+
+[16 KB page alignment and build verification](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/blob/master/docs/16kb.md)
