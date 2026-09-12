@@ -36,7 +36,6 @@ class Versions @JvmOverloads constructor(
 
     val sdkVersionMin = bp.requireInt("MIN_SDK_VERSION")
     val sdkVersionTarget = bp.requireInt("TARGET_SDK_VERSION")
-    val sdkVersionTargetInrt = bp.requireInt("TARGET_SDK_VERSION_INRT")
     val sdkVersionCompile = bp.requireInt("COMPILE_SDK_VERSION")
     // VERSION_NAME / VERSION_BUILD carry the paired AutoJs6 host version (kept under
     // their historical names for compatibility); the plugin's own version line lives
