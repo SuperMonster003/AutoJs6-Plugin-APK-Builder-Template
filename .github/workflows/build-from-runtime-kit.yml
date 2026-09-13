@@ -41,6 +41,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - name: Checkout plugin repository
         uses: actions/checkout@v7
@@ -240,8 +241,52 @@ jobs:
           echo "RUNTIME_KIT_VARIANTS_MANIFEST=$manifest" >> "$GITHUB_ENV"
           echo "UNIVERSAL_RUNTIME_KIT_DIR=$universal_kit" >> "$GITHUB_ENV"
 
+      - name: Verify source and generated documentation
+        run: |
+          python3 .python/check_repository.py
+          python3 .python/generate_markdown.py --check
+          python3 -m unittest discover -s .python -p 'test_*.py'
+          python3 -m unittest discover -s scripts/tests -p 'test_*.py'
+
       - name: Sync plugin version
         run: python3 scripts/sync_version_from_runtime_kit.py "$UNIVERSAL_RUNTIME_KIT_DIR"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build and validate Android tests with the verified universal kit
+        run: >-
+          ./gradlew --no-daemon --max-workers=2
+          :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug
+          :app:verifyDebugNativePageAlignment
+          "-Pautojs.apkBuilder.templatePlugin.runtimeKitDir=$UNIVERSAL_RUNTIME_KIT_DIR"
+          --stacktrace
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Execute Binder contract on 4096 byte pages
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          avd-name: template-4096
+          disable-animations: true
+          script: bash .github/scripts/verify-binder.sh 4096
+
+      - name: Execute Binder contract on 16384 byte pages
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis_ps16k
+          avd-name: template-16384
+          disable-animations: true
+          script: bash .github/scripts/verify-binder.sh 16384
 
       - name: Prepare release signing keystore
         env:
@@ -262,9 +307,6 @@ jobs:
           test -s "$keystore"
           keytool -list -keystore "$keystore" -storepass:env SIGNING_KEY_STORE_PASSWORD -alias "$SIGNING_KEY_ALIAS" >/dev/null
           echo "SIGNING_KEY_STORE_FILE=$keystore" >> "$GITHUB_ENV"
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
 
       - name: Build signed plugin APK variants
         env:
@@ -313,7 +355,7 @@ jobs:
 
       - name: Upload native alignment verification
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: native-alignment
           path: |
@@ -445,7 +487,7 @@ jobs:
 
       - name: Preserve release evidence as workflow artifact
         if: ${{ steps.vars.outputs.candidate_only != 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: apk-builder-template-release-evidence
           path: ${{ env.RELEASE_EVIDENCE_FILE }}
@@ -453,7 +495,7 @@ jobs:
 
       - name: Preserve signed candidate bundle
         if: ${{ steps.vars.outputs.candidate_only == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: apk-builder-template-signed-candidate
           path: |

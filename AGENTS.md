@@ -19,6 +19,8 @@ These repository-specific rules apply the AutoJs6 new plugin repository referenc
 
 - Runtime Kit identity and the existing composite Android version stay compatible. HOST_VERSION_NAME/BUILD describe the paired host; VERSION_NAME/BUILD describe this repository. PLUGIN_* aliases are kept for release receipts. A single kit produces one ABI variant; publish only the complete validated kit matrix.
 
+- A fresh checkout has no Runtime Kit. The push/PR workflow checks source and documentation; build-from-runtime-kit.yml must first validate the complete external kit matrix, then run Android builds, JVM/lint, real 4 KB/16 KB Binder tests and all signed ABI variants before publication. Never replace a missing kit with a synthetic fixture or call source-only CI a complete release gate. A successful discovery test does not validate APK Builder host workflows or the generated application.
+
 ## Validation
 
 ```powershell
