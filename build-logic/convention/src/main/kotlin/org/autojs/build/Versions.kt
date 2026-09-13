@@ -37,14 +37,20 @@ class Versions @JvmOverloads constructor(
     val sdkVersionMin = bp.requireInt("MIN_SDK_VERSION")
     val sdkVersionTarget = bp.requireInt("TARGET_SDK_VERSION")
     val sdkVersionCompile = bp.requireInt("COMPILE_SDK_VERSION")
-    // VERSION_NAME / VERSION_BUILD carry the paired AutoJs6 host version (kept under
-    // their historical names for compatibility); the plugin's own version line lives
-    // in the PLUGIN_* properties. See docs/versioning.md.
-    val appVersionName = bp.requireString("VERSION_NAME")
-    val appVersionCode = bp.requireInt("VERSION_BUILD")
-    val pluginVersionName = bp.requireString("PLUGIN_VERSION_NAME")
-    val pluginVersionBuild = bp.requireInt("PLUGIN_VERSION_BUILD")
+    // Host pairing is independent from this repository's semantic version and Git count.
+    // These accessors keep the existing composite Android identity and Binder contract.
+    val appVersionName = bp.requireString("HOST_VERSION_NAME")
+    val appVersionCode = bp.requireInt("HOST_VERSION_BUILD")
+    val pluginVersionName = bp.requireString("VERSION_NAME")
+    val pluginVersionBuild = bp.requireInt("VERSION_BUILD")
     val pluginReleaseSeq = bp.getIntOrNull("PLUGIN_RELEASE_SEQ") ?: 0
+
+    init {
+        require(pluginVersionName == bp.requireString("PLUGIN_VERSION_NAME") &&
+            pluginVersionBuild == bp.requireInt("PLUGIN_VERSION_BUILD")) {
+            "PLUGIN_VERSION_NAME/BUILD receipt aliases must match VERSION_NAME/BUILD"
+        }
+    }
 
     val javaVersion: JavaVersion
         get() = JavaVersion.toVersion(javaVersionInt)
@@ -61,7 +67,7 @@ class Versions @JvmOverloads constructor(
 
         val infoPluginVer = "Plugin version: $pluginVersionName [build $pluginVersionBuild / seq $pluginReleaseSeq]"
         val infoVerName = "Paired host version name: $appVersionName"
-        val infoVerCode = "Paired host version code: ${if (wasBuildNumberAutoIncremented) "${appVersionCode + 1} [auto-incremented]" else appVersionCode}"
+        val infoVerCode = "Paired host version code: $appVersionCode"
         val infoVerSdk = "SDK versions: min [$sdkVersionMin] / target [$sdkVersionTarget] / compile [$sdkVersionCompile]"
         val infoVerJdk = "JDK versions: min [$javaVersionMinSupported] / select [$javaVersionInt] / current [$javaVersionCurrentInt] / max [$javaVersionMaxSupported]"
         val infoVerJava = "Java version: $javaVersion${
@@ -126,7 +132,8 @@ class Versions @JvmOverloads constructor(
                 it.contains(Regex("^(:?app:)?assemble(app|inrt)release", IGNORE_CASE))
             }
             if (!isBuildAppRelease) {
-                props["VERSION_BUILD"] = "${appVersionCode + 1}"
+                props["VERSION_BUILD"] = "${pluginVersionBuild + 1}"
+                props["PLUGIN_VERSION_BUILD"] = "${pluginVersionBuild + 1}"
                 wasBuildNumberAutoIncremented = true
                 hasChanged = true
             }

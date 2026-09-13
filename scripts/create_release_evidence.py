@@ -138,8 +138,8 @@ def build_release_evidence(
     plugin_version_name = properties.get("PLUGIN_VERSION_NAME", "").strip()
     plugin_version_build = int(properties.get("PLUGIN_VERSION_BUILD") or 0)
     plugin_release_seq = int(properties.get("PLUGIN_RELEASE_SEQ") or 0)
-    paired_host_name = properties.get("VERSION_NAME", "").strip()
-    paired_host_code = int(properties.get("VERSION_BUILD") or 0)
+    paired_host_name = properties.get("HOST_VERSION_NAME", properties.get("VERSION_NAME", "")).strip()
+    paired_host_code = int(properties.get("HOST_VERSION_BUILD", properties.get("VERSION_BUILD")) or 0)
     if not plugin_version_name or plugin_version_build <= 0 or not 1 <= plugin_release_seq <= 99:
         raise SystemExit("Release version properties must contain a published plugin version/build/sequence")
 

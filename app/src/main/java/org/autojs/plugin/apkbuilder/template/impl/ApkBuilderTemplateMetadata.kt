@@ -1,6 +1,7 @@
 package org.autojs.plugin.apkbuilder.template.impl
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateCapabilityKeys
 import org.autojs.plugin.apkbuilder.template.ApkBuilderTemplateInfo
@@ -29,9 +30,9 @@ object ApkBuilderTemplateMetadata {
                 ?: context.getString(R.string.plugin_instruction),
             author = "SuperMonster003",
             collaborators = null,
-            versionName = BuildConfig.VERSION_NAME,
-            versionCode = BuildConfig.VERSION_CODE.toLong(),
-            versionDate = null,
+            versionName = templateInfo.versionName,
+            versionCode = templateInfo.versionCode,
+            versionDate = templateInfo.versionDate,
             id = ApkBuilderTemplatePluginIds.ID,
             engine = ApkBuilderTemplatePluginIds.ENGINE,
             variant = templateInfo.capabilities?.getString(ApkBuilderTemplateCapabilityKeys.TEMPLATE_KIND)
@@ -44,6 +45,9 @@ object ApkBuilderTemplateMetadata {
     }
 
     fun templateInfo(context: Context): ApkBuilderTemplateInfo {
+        val installed = context.packageManager.getPackageInfo(context.packageName, 0)
+        @Suppress("DEPRECATION")
+        val installedCode = if (Build.VERSION.SDK_INT >= 28) installed.longVersionCode else installed.versionCode.toLong()
         val kit = loadRuntimeKitOrNull(context)
         val host = kit?.optJSONObject("host")
         val template = kit?.optJSONObject("template")
@@ -82,9 +86,9 @@ object ApkBuilderTemplateMetadata {
             name = context.getString(R.string.plugin_name),
             description = context.getString(R.string.plugin_description),
             author = "SuperMonster003",
-            versionName = BuildConfig.VERSION_NAME,
-            versionCode = BuildConfig.VERSION_CODE.toLong(),
-            versionDate = null,
+            versionName = requireNotNull(installed.versionName),
+            versionCode = installedCode,
+            versionDate = context.getString(R.string.plugin_version_date),
             protocolVersion = protocolVersion,
             hostPackageName = host.optStringOrDefault("packageName", BuildConfig.HOST_PACKAGE_NAME),
             hostVersionName = hostVersionName,
@@ -95,7 +99,7 @@ object ApkBuilderTemplateMetadata {
             capabilities = Bundle().apply {
                 putLong(PluginCapabilityKeys.REQUIRES_HOST_VERSION, minHostVersionCode)
                 putString(ApkBuilderTemplateCapabilityKeys.PLUGIN_VERSION_NAME, BuildConfig.PLUGIN_VERSION_NAME)
-                putLong(ApkBuilderTemplateCapabilityKeys.PLUGIN_VERSION_CODE, BuildConfig.VERSION_CODE.toLong())
+                putLong(ApkBuilderTemplateCapabilityKeys.PLUGIN_VERSION_CODE, installedCode)
                 putInt(ApkBuilderTemplateCapabilityKeys.PLUGIN_VERSION_BUILD, BuildConfig.PLUGIN_VERSION_BUILD)
                 putString(ApkBuilderTemplateCapabilityKeys.BUILT_FOR_HOST_VERSION_NAME, hostVersionName)
                 putLong(ApkBuilderTemplateCapabilityKeys.BUILT_FOR_HOST_VERSION_CODE, hostVersionCode)

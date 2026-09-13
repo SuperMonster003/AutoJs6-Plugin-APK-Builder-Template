@@ -2,8 +2,8 @@
 """Sync host-pairing fields from a Runtime Kit and advance the plugin's own release counters.
 
 Writes into version.properties (see docs/versioning.md):
-  - VERSION_NAME / VERSION_BUILD: paired host version, taken from the Runtime Kit.
-  - PLUGIN_VERSION_BUILD: global build counter, previous value + 1.
+  - HOST_VERSION_NAME / HOST_VERSION_BUILD: paired host identity from the Runtime Kit.
+  - VERSION_BUILD / PLUGIN_VERSION_BUILD: the next Git commit count.
   - PLUGIN_RELEASE_SEQ: per-host release sequence (1..99), derived from compat-matrix.json
     entries for the same host (authoritative) and the previous snapshot as fallback.
   - PLUGIN_VERSION_NAME is never touched; it is maintained manually.
@@ -12,6 +12,7 @@ Writes into version.properties (see docs/versioning.md):
 import json
 import re
 import sys
+import subprocess
 from pathlib import Path
 
 SEQ_MAX = 99
@@ -87,7 +88,10 @@ def main() -> None:
     if not plugin_version_name:
         raise SystemExit("version.properties must declare PLUGIN_VERSION_NAME (never synced from the Runtime Kit)")
 
-    previous_host_code = get_int_property(text, "VERSION_BUILD")
+    has_separate_host_identity = bool(get_property(text, "HOST_VERSION_BUILD"))
+    if has_separate_host_identity and get_property(text, "VERSION_NAME") != plugin_version_name:
+        raise SystemExit("VERSION_NAME and PLUGIN_VERSION_NAME must agree before syncing a Runtime Kit")
+    previous_host_code = get_int_property(text, "HOST_VERSION_BUILD" if has_separate_host_identity else "VERSION_BUILD")
     previous_seq = get_int_property(text, "PLUGIN_RELEASE_SEQ")
     previous_build = get_int_property(text, "PLUGIN_VERSION_BUILD")
 
@@ -98,9 +102,13 @@ def main() -> None:
     if release_seq > SEQ_MAX:
         raise SystemExit(f"PLUGIN_RELEASE_SEQ exhausted for host {host_code} (max {SEQ_MAX})")
     plugin_build = previous_build + 1
+    if has_separate_host_identity:
+        plugin_build = int(subprocess.check_output(["git", "rev-list", "--count", "HEAD"], text=True).strip()) + 1
 
-    text = put_property(text, "VERSION_NAME", host_version_name)
-    text = put_property(text, "VERSION_BUILD", host_version_code)
+    text = put_property(text, "HOST_VERSION_NAME" if has_separate_host_identity else "VERSION_NAME", host_version_name)
+    text = put_property(text, "HOST_VERSION_BUILD" if has_separate_host_identity else "VERSION_BUILD", host_version_code)
+    if has_separate_host_identity:
+        text = put_property(text, "VERSION_BUILD", str(plugin_build))
     text = put_property(text, "PLUGIN_VERSION_BUILD", str(plugin_build))
     text = put_property(text, "PLUGIN_RELEASE_SEQ", str(release_seq))
     version_properties.write_text(text, "utf-8")

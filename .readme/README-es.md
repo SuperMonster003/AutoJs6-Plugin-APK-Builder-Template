@@ -237,48 +237,24 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.0.2
+
+###### 2026/09/13
+
+* `Corrección` Mantener la fecha de versión del complemento en inglés sin depender del idioma del equipo de compilación
+* `Mejora` Recursos traducidos coherentes, activación explícita del complemento y validación de los paquetes de publicación
+
+# v1.0.1
+
+###### 2026/09/13
+
+* `Mejora` Recursos traducidos coherentes, activación explícita del complemento y validación de los paquetes de publicación
+
 # v6.8.0
 
 ###### 2026/09/11
 
 * `Mejora` Verificación de compilación de la alineación de páginas de 16 KB en bibliotecas nativas de 64 bits, con controles del contrato manifest e informes JSON
-
-# v1.0.0
-
-###### 2026/09/10
-
-* `Nota` La ruta normal de Empaquetar aplicación ahora requiere el plugin APK Builder en el dispositivo; el interruptor heredado supportsRemoteBuild sigue desactivado pero ya no desactiva el empaquetado normal
-* `Nota` Primera versión formal de la línea independiente del plugin, emparejada exactamente con el Runtime Kit de AutoJs6 v6.8.0 (versionCode 5277); la versión compuesta del plugin es 1.0.0+autojs6-6.8.0 (versionCode 527701), el Centro de plugins selecciona la compilación ABI correspondiente mediante compat-matrix.json y las compilaciones remotas siguen desactivadas de forma predeterminada
-* `Nuevo` Se promovió el motor del plugin a única ruta formal de empaquetado en el dispositivo; AutoJs6 permanece ligero y valida independientemente cada APK devuelto
-* `Nuevo` La creación y verificación BKS/JKS pasó al plugin mediante una API de keystore versionada y de fallo seguro
-* `Nuevo` Introducidos SemVer 1.0.0 para el plugin, numeración de compilación independiente, nombres de versión compuestos y valores Android versionCode monotónicos que permiten varias versiones del plugin para el mismo host
-* `Nuevo` Añadidas variantes universal, arm64-v8a, armeabi-v7a, x86_64 y x86 con selección ABI exacta y respaldo universal
-* `Nuevo` Añadidos un contrato de intervalo de compatibilidad del host con cierre seguro y una matriz de compatibilidad autoritativa para que un intervalo de parches adyacentes validado explícitamente pueda compartir una compilación del plugin
-* `Corrección` Se alineó la numeración de compilaciones remotas experimentales de un solo archivo con el compilador heredado y se añadió una comprobación previa y cerrada ante fallos del espacio de trabajo, basada en tamaños expandidos verificados, un límite de expansión de plantilla validado al compilar y una reserva de 256 MiB
-* `Corrección` Se rechazan los metadatos y las directivas de código heredados para empaquetar Node.js integrado antes de BUILD/SIGN, con orientación para migrar al complemento Runtime externo, y se elimina la inyección obsoleta del servicio Manifest y los permisos de primer plano
-* `Corrección` Se corrigió una carrera entre el cierre y el hilo de compilación en las sesiones remotas experimentales que podía volver a crear un espacio de trabajo eliminado tras cancelar o cerrar; la limpieza ahora espera al worker y no deja archivos residuales
-* `Corrección` Reforzadas las compilaciones remotas experimentales: se rechaza el contenido cifrado temporal de TypeScript no declarado en el inventario de rutas y se detectan correctamente los almacenes de claves BKS personalizados tras normalizar el nombre de archivo en el espacio de trabajo
-* `Corrección` Se restringieron los límites de entrada de la compilación remota experimental con validación estricta de tipos, tamaños y anidación de Parcelable/Bundle y project.json, límites para almacenes de claves, iconos y rutas ZIP, y correcciones de desbordamiento en el paquete ARSC y los nombres de salida derivados
-* `Corrección` El complemento no se podía activar desde el centro de complementos después de instalarlo en algunos sistemas
-* `Mejora` Ampliar la comprobación de archivos de proyecto y compilación a 262144 entradas, 4 GiB comprimidos, 2 GiB por entrada, 8 GiB extraídos en total y una relación de compresión de 2000:1
-* `Mejora` El flujo de publicación de confianza admite ahora un modo de candidato aislado que genera cinco APK con firma de producción y evidence desde un artefacto Actions del host fijado, sin crear una Release ni actualizar la matriz de compatibilidad autoritativa
-* `Mejora` Unificadas las reglas de validación de Runtime Kit entre Gradle y Python, incluidos resúmenes, tamaños, archivos obligatorios, entradas APK y coherencia de las cinco variantes
-* `Mejora` Publicación junto a los cinco APK de un manifiesto de evidencias JSON legible por máquina que vincula hashes de artefactos, certificado de firma, versiones del plugin/host, intervalo de compatibilidad, ID de Runtime Kit y versiones de protocolo
-* `Mejora` Actualizadas las instrucciones de instalación, las preguntas frecuentes, el ensayo de publicación y la documentación en 10 idiomas para versiones compatibles, selección ABI, recuperación tras una degradación y versionado independiente
-* `Mejora` Unificar el diseño del README y la gestión de versiones de la plataforma Gradle
-
-# v6.8.0 Alpha5
-
-###### 2026/07/16
-
-* `Nota` Se empareja con AutoJs6 v6.8.0 Alpha5; las versiones compatibles del Centro de plugins resuelven automáticamente la compilación emparejada, mientras que una instalación manual usa la etiqueta Release o el sufijo autojs6- correspondiente; el plugin no tiene icono ni interfaz y se invoca automáticamente al empaquetar aplicaciones
-* `Nuevo` Permitido que AutoJs6 descubra el plugin y lea automáticamente su plantilla integrada, de modo que "Empaquetar aplicación" ya no depende de un APK de plantilla incluido en la aplicación principal
-* `Nuevo` Incluido el Runtime Kit completo: APK de plantilla, almacén de claves predeterminado, metadatos de ejecución y archivos de contrato
-* `Nuevo` Añadidas comprobaciones automáticas de compatibilidad de versión y protocolo antes de empaquetar, con advertencia o bloqueo ante discrepancias para evitar aplicaciones defectuosas
-* `Nuevo` Validados los resúmenes SHA-256 del Runtime Kit y las entradas requeridas de la plantilla al construir el plugin, e informado el resumen de la plantilla a AutoJs6 para re-verificación en ejecución
-* `Nuevo` Añadido un protocolo experimental de compilación remota que realiza una compilación ligera dentro del proceso del plugin (desactivado por defecto, debe activarse explícitamente al compilar)
-* `Nuevo` Conectado el flujo de publicación automatizado: cuando el repositorio principal de AutoJs6 publica una versión, se construye un APK de plugin emparejado, se firma con la clave de confianza, se verifica la huella del certificado y se publica
-* `Nuevo` Cubiertos 10 idiomas en los metadatos del plugin, las instrucciones, el README y el CHANGELOG: chino simplificado, chino tradicional (Hong Kong/Taiwán), inglés, francés, español, japonés, coreano, ruso y árabe
 
 ##### Para más historial
 
