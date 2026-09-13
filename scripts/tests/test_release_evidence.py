@@ -14,6 +14,31 @@ from update_compat_matrix import ABI_ORDER, VARIANT_ORDER
 
 class ReleaseEvidenceTest(unittest.TestCase):
 
+    def test_repository_count_does_not_change_the_paired_host_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            manifest, properties, apk_dir = create_fixture(root)
+            text = properties.read_text("utf-8")
+            text = text.replace("VERSION_NAME=6.8.0", "VERSION_NAME=1.0.0")
+            text = text.replace("VERSION_BUILD=5277", "VERSION_BUILD=39")
+            text = text.replace("PLUGIN_VERSION_BUILD=1", "PLUGIN_VERSION_BUILD=39")
+            text += "HOST_VERSION_NAME=6.8.0\nHOST_VERSION_BUILD=5277\n"
+            properties.write_text(text, "utf-8")
+            evidence = build_release_evidence(
+                runtime_kits_manifest=manifest,
+                version_properties=properties,
+                apk_dir=apk_dir,
+                repository="example/plugin",
+                release_tag="v1.0.0",
+                source_repository="example/host",
+                source_tag="v6.8.0",
+                signer_certificate_sha256="ab" * 32,
+                released_at="2026-09-13T00:00:00Z",
+            )
+            self.assertEqual(527701, evidence["plugin"]["versionCode"])
+            self.assertEqual("1.0.0+autojs6-6.8.0", evidence["plugin"]["compositeVersionName"])
+            self.assertEqual(5277, evidence["host"]["minCompatibleVersionCode"])
+
     def test_five_signed_assets_are_bound_to_runtime_kits(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

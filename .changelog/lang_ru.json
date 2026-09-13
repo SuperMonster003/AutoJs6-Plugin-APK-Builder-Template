@@ -1,10 +1,25 @@
 {
   "changelog_label_hint": "Подсказка",
-  "changelog_label_feature": "Добавлено",
-  "changelog_label_fix": "Исправлено",
-  "changelog_label_improvement": "Улучшено",
+  "changelog_label_feature": "Функция",
+  "changelog_label_fix": "Исправление",
+  "changelog_label_improvement": "Улучшение",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v1.0.2": {
+      "released_date": "2026/09/13",
+      "improvement": [
+        "Согласованные переводы, явная активация плагина и проверка пакетов выпуска"
+      ],
+      "fix": [
+        "Дата версии плагина всегда на английском независимо от языка среды сборки"
+      ]
+    },
+    "v1.0.1": {
+      "released_date": "2026/09/13",
+      "improvement": [
+        "Согласованные переводы, явная активация плагина и проверка пакетов выпуска"
+      ]
+    },
     "v6.8.0": {
       "released_date": "2026/09/11",
       "improvement": [

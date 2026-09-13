@@ -4,6 +4,19 @@
 
 ******
 
+# v1.0.2
+
+###### 2026/09/13
+
+* `Fix` Keep the plugin version date in English regardless of the build machine locale
+* `Improvement` Consistent localized resources, explicit plugin activation and validated release preparation
+
+# v1.0.1
+
+###### 2026/09/13
+
+* `Improvement` Consistent localized resources, explicit plugin activation and validated release preparation
+
 # v6.8.0
 
 ###### 2026/09/11

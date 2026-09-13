@@ -22,7 +22,7 @@
 
 | 层 | 承载物 | 职责 |
 |---|---|---|
-| ① 插件自身版本 | `PLUGIN_VERSION_NAME` (SemVer) + `PLUGIN_VERSION_BUILD` (自增构建号) | 表达插件自身演进与成熟度 |
+| ① 插件自身版本 | `VERSION_NAME` (SemVer) + `VERSION_BUILD` (当前分支可达提交数); `PLUGIN_*` 保留为同值别名 | 表达插件自身演进与成熟度 |
 | ② 配对元数据 | `BUILT_FOR_HOST_*`, 显式兼容区间, `REQUIRES_HOST_VERSION`, `runtimeApiLevel`, `hostVersionName/Code` 等能力与协议字段 | 唯一兼容契约; 默认精确匹配, 经显式授权才可放宽补丁区间 |
 | ③ 分发端解析 | `compat-matrix.json` (仓库根, 随发布由 CI 追加) | 让任意宿主版本确定性解析到配套插件构建 |
 
@@ -32,8 +32,8 @@
 
 - `PLUGIN_VERSION_NAME` 采用 SemVer, 起始 `1.0.0`。理由: 核心能力 (模板分发 + 兼容检查 + 自动发布) 已随两个宿主版本
   (v6.7.1 Alpha4, v6.8.0 Alpha5) 稳定发布并被宿主正式集成, 不属于 0.x 探索期。
-- `PLUGIN_VERSION_BUILD` 为全局自增构建号, 首个新机制发布为 `1`。由同步脚本在每次发布时自动 +1, 无需人工维护;
-  `version.properties` 中保存的是 "最近一次已发布" 的值 (`0` 表示新机制下尚未发布)。
+- `VERSION_BUILD` 等于当前分支可达提交数, `PLUGIN_VERSION_BUILD` 是同值回执别名。提交前设为 HEAD 提交数 + 1,
+  提交后核对相等。同步脚本为下一次持久化提交准备这个值, 普通 assemble 不递增。
 - `PLUGIN_VERSION_NAME` 由维护者在语义变化时手动调整 (修复 → patch, 新能力 → minor, 破坏性调整 → major),
   同步脚本与 CI 永不覆写该字段。
 
@@ -120,9 +120,10 @@ AutoJs6 插件中心现将该目标显示为 "需要重新安装" 而非普通�
 
 | 字段 | 含义 | 写入方 |
 |---|---|---|
-| `VERSION_NAME` / `VERSION_BUILD` | 配对宿主的 versionName / versionCode (沿用旧字段名以保持 build-logic 兼容) | 同步脚本 (来自 Runtime Kit) |
-| `PLUGIN_VERSION_NAME` | 插件自身 SemVer | 维护者手动 |
-| `PLUGIN_VERSION_BUILD` | 最近一次已发布的全局构建号 (0 = 新机制下尚未发布) | 同步脚本自动 +1 |
+| `HOST_VERSION_NAME` / `HOST_VERSION_BUILD` | 配对宿主的 versionName / versionCode | 同步脚本 (来自 Runtime Kit) |
+| `VERSION_NAME` / `VERSION_BUILD` | 插件 SemVer / 当前分支可达提交数 | 提交前按下一笔提交计数维护 |
+| `PLUGIN_VERSION_NAME` | `VERSION_NAME` 的同值回执别名 | 与规范字段同步维护 |
+| `PLUGIN_VERSION_BUILD` | `VERSION_BUILD` 的同值回执别名 | 提交前设为 HEAD 提交数 + 1 |
 | `PLUGIN_RELEASE_SEQ` | 最近一次已发布构建在其配对宿主内的序号 (0 = 该宿主尚无新机制发布) | 同步脚本自动推进 |
 
 本地开发构建直接使用仓库快照值 (序号可能为 0 或上次发布值), 不影响正确性; CI 发布前总是先运行同步脚本推进字段。
@@ -135,8 +136,8 @@ Runtime Kit; 插件工作流再以 `source_run_id` + `expected_source_sha` 绑�
 持久化同步后的版本字段; evidence 中 Release/APK URL 为 `null`, 分发通道明确为 `actions-artifact`。
 
 1. 下载 universal + 四个单 ABI Runtime Kit; 分别校验内容, 再校验五变体集合齐全且宿主 / API 契约一致。
-2. 只以 universal Kit 运行一次 `sync_version_from_runtime_kit.py`: 同步宿主配对字段 + 推进
-   `PLUGIN_VERSION_BUILD` / `PLUGIN_RELEASE_SEQ` (不触碰 `PLUGIN_VERSION_NAME`)。
+2. 只以 universal Kit 运行一次 `sync_version_from_runtime_kit.py`: 同步 `HOST_*` 配对字段, 准备下一提交的
+   `VERSION_BUILD` / `PLUGIN_VERSION_BUILD`, 推进 `PLUGIN_RELEASE_SEQ` (不触碰插件 SemVer)。
 3. 依次构建五个相同 Android 版本的替代 APK, 分别签名、校验证书指纹并以 CRC32 命名。
 4. 为五个 APK 生成机器可读的 Release evidence manifest, 固定文件名, 大小, SHA-256, CRC32, 签名证书摘要,
    插件/宿主版本, 兼容区间, 五个 Runtime Kit ID 与协议版本; evidence 同时保留为 Actions artifact。
@@ -171,3 +172,7 @@ Runtime Kit; 插件工作流再以 `source_run_id` + `expected_source_sha` 绑�
    将破坏升级连续性且不可回退。否决。
 3. **versionName 纯净 SemVer (不带配对信息)**: 用户在宿主界面与文件管理器中无法辨认配套宿主, 手动安装场景极易装错。
    否决, 配对信息进入 versionName build metadata 与文件名。
+
+## 2026-09-13 repository normalization
+
+The canonical VERSION_NAME/VERSION_BUILD now belong to this plugin repository. HOST_VERSION_NAME/HOST_VERSION_BUILD retain the exact Runtime Kit pairing. PLUGIN_VERSION_NAME/PLUGIN_VERSION_BUILD are matching receipt aliases. The composite Android versionCode still uses hostCode * 100 + PLUGIN_RELEASE_SEQ, so this source metadata migration does not downgrade installed applications. The explicit sync command prepares the next commit count instead of incrementing a release-only counter; historical receipt fixtures remain readable.

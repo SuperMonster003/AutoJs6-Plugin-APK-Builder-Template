@@ -202,7 +202,7 @@
   - 证据: 2026/09/01 在插件发布候选上重生成文档后差异为 0, 协议真源覆盖 73/73, Python 回归 25/25 (含 Release evidence 与候选隔离失败关闭用例); Gradle Runtime Kit 门禁, app/API 单测与 `:app:compileReleaseKotlin` 强制重跑 166/166 任务通过。PR #5 的 push/PR 文档门禁 ([33477042749](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477042749), [33477047543](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477047543)) 与签名配置门禁 ([33477047547](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33477047547)) 全绿。
   - 正式路径复验: 2026/09/02 协议文档扩展为 101/101, Python 回归 25/25, 精确 Runtime Kit 的插件 API/app 单测、Release Kotlin、Runtime Kit 校验与 AndroidTest 编译通过；Sony G8441 上最终 arm64 Debug 设备类 45/45 通过。
 - [ ] [P] **M7-3 版本定档**
-  - 内容: 确定首发版本三元组 —— `PLUGIN_VERSION_NAME=1.0.0`, `PLUGIN_VERSION_BUILD`, `PLUGIN_RELEASE_SEQ`, 以及由 `hostVersionCode * 100 + 序号` 推出的 versionCode 与复合 versionName。确认配对宿主版本与兼容区间。
+  - 内容: 固定当前候选的 `VERSION_NAME` / `VERSION_BUILD` (及同值 `PLUGIN_*` 回执别名), `PLUGIN_RELEASE_SEQ`, 以及由 `HOST_VERSION_BUILD * 100 + 序号` 推出的 versionCode 与复合 versionName。确认配对宿主版本与兼容区间。
   - 验收: `version.properties` 与生成的 APK 元数据一致; versionCode 相对既有装机 (5201) 保持单调递增; 复合 versionName 与双版本文件名符合 `docs/versioning.md`。
   - 首轮候选: 已将 AutoJs6 源提交精确固定为 `71e684b8dc1a59783293e0ad282638e3a88e37b6`, 配对 `6.8.0 / 5277`, 精确兼容区间 `5277..5277`, 首发三元组 `1.0.0 / build 1 / seq 1`, 推导 Android versionCode `527701` 与复合 versionName `1.0.0+autojs6-6.8.0`; 私有 Actions artifact 端点完成来源绑定与签名构建。该源候选因 M7-6 装机阻断被拒绝, 所以本条保持未完成; 替代候选必须修复非实验性打包路径并重新固定新的精确源 SHA。
   - 替代候选: 保持 `6.8.0 / 5277` 与首发插件三元组不变；包含正式插件托管构建能力的新 AutoJs6 精确 SHA 已固定为 `18e6b28b469ec8192a129945cebf87b090590425`。五套本地 Runtime Kit 均绑定该 SHA，正式协议为 3；维护者确认该 SHA 前不得运行候选专用受信工作流，且本阶段不创建公开 Release。
@@ -226,6 +226,14 @@
   - 内容: 10 语言 CHANGELOG 补记 v1.0.0, 写明精确宿主 / 插件 / Runtime Kit 版本与“构建核心完全由设备内插件承担”；README 与插件说明明确不上传项目、不再存在宿主内第二构建器，并把“远程构建”解释为旧兼容名称。
   - 验收: 生成器校验通过, `docs-consistency.yml` 绿灯, 10 语言键序与占位符断言无残留。
   - 证据: 2026/09/02 十语言 CHANGELOG、README 与 11 套插件说明均已迁移到唯一 `on-device-plugin` 正式路径；明确项目不上传、宿主不存在第二构建器、旧 remote 名称只作兼容保留。生成器、JSON 解析、占位符与协议文档 101/101 校验通过。证据级别 T3。
+
+### 当前规范化候选 (2026/09/13)
+
+- 当前插件源码候选为 `1.0.2`, 配对宿主 `6.8.0 / 5279`, `PLUGIN_RELEASE_SEQ=2`, Android 身份为 `1.0.2+autojs6-6.8.0 / 527902`.
+- `VERSION_BUILD` 现在按本仓库可达提交数维护; `HOST_*` 独立保存 Runtime Kit 配对身份, assemble 不再改变版本计数. 具体迁移见 `docs/versioning.md`.
+- 已接入本地受信签名和严格 `appendDigestToReleasedFiles` 归档器, 从真实 AGP 输出验证签名、APK 内部版本、ABI、摘要和 native 对齐. 本地标准任务只归集当前选定的 Runtime Kit 变体, 不冒充五套 Runtime Kit 的完整受信候选流水线.
+- 本地 Runtime Kit 仍以 `host.gitSha=local` 标记来源. 因此 M7-3 至 M7-6 保持未完成: 需要重新固定真实宿主 SHA, 运行五变体受信候选流程, 再完成插件中心选择/安装、普通打包和生成 APK 安装冷启动.
+- 上述 2026/09/01 失败属于历史候选; 当前已实现的正式插件托管构建路径不能据此判定为缺失. 本轮不运行远程发布工作流、不创建公开 Release, 也不生成虚构的兼容矩阵条目.
 
 ## M8 —— GA 后独立保证与兼容层收敛
 

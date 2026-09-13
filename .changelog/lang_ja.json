@@ -1,10 +1,25 @@
 {
   "changelog_label_hint": "ヒント",
-  "changelog_label_feature": "追加",
+  "changelog_label_feature": "機能",
   "changelog_label_fix": "修正",
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v1.0.2": {
+      "released_date": "2026/09/13",
+      "improvement": [
+        "多言語リソースの統一, プラグイン有効化の明確化, リリース成果物の検証"
+      ],
+      "fix": [
+        "ビルド環境の言語にかかわらずプラグインのバージョン日付を英語で表示"
+      ]
+    },
+    "v1.0.1": {
+      "released_date": "2026/09/13",
+      "improvement": [
+        "多言語リソースの統一, プラグイン有効化の明確化, リリース成果物の検証"
+      ]
+    },
     "v6.8.0": {
       "released_date": "2026/09/11",
       "improvement": [

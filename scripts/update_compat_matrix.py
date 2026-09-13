@@ -185,13 +185,13 @@ def cmd_add(args: argparse.Namespace) -> None:
 
     properties = read_properties(args.version_properties)
     plugin_version_name = properties.get("PLUGIN_VERSION_NAME", "")
-    host_version_name = properties.get("VERSION_NAME", "")
-    host_code = int(properties.get("VERSION_BUILD") or 0)
+    host_version_name = properties.get("HOST_VERSION_NAME", properties.get("VERSION_NAME", ""))
+    host_code = int(properties.get("HOST_VERSION_BUILD", properties.get("VERSION_BUILD")) or 0)
     plugin_build = int(properties.get("PLUGIN_VERSION_BUILD") or 0)
     release_seq = int(properties.get("PLUGIN_RELEASE_SEQ") or 0)
 
     if not plugin_version_name or not host_version_name or host_code <= 0:
-        raise SystemExit("version.properties must declare PLUGIN_VERSION_NAME, VERSION_NAME and VERSION_BUILD")
+        raise SystemExit("version.properties must declare PLUGIN_VERSION_NAME and HOST_VERSION_NAME/HOST_VERSION_BUILD (legacy VERSION_NAME/VERSION_BUILD pairing is also accepted)")
     kit_host = kit.get("host") or {}
     kit_host_name = str(kit_host.get("versionName") or "").strip()
     kit_host_code = int(kit_host.get("versionCode") or 0)

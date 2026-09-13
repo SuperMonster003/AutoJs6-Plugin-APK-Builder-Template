@@ -1,5 +1,10 @@
 import groovy.json.JsonSlurper
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.Properties
+import java.util.TimeZone
 import java.util.zip.ZipFile
 import org.gradle.api.provider.Property
 
@@ -15,6 +20,12 @@ plugins {
 nativeAlignment { scanEmbeddedPayloads.set(true) }
 
 val buildTypeRelease = "release"
+val releaseMetadata = Properties().apply {
+    rootProject.file("version.properties").inputStream().use { load(it) }
+}
+val pluginVersionDate = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).apply {
+    timeZone = TimeZone.getTimeZone("GMT+08:00")
+}.format(Date(releaseMetadata.getProperty("BUILD_TIME").toLong()))
 val apkFileExtension = "apk"
 val enableRemoteBuildProperty = "autojs.apkBuilder.templatePlugin.enableRemoteBuild"
 val runtimeKitDirProperty = "autojs.apkBuilder.templatePlugin.runtimeKitDir"
@@ -109,6 +120,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         versionCode = pluginVersionCode
         versionName = pluginVersionNameFull
+        resValue("string", "plugin_version_date", pluginVersionDate)
+        resValue("string", "plugin_author", "SuperMonster003")
 
         buildConfigField("String", "PLUGIN_ID", "\"autojs6-apk-builder-template\"")
         buildConfigField("String", "PLUGIN_VERSION_NAME", "\"${versions.pluginVersionName}\"")
@@ -156,6 +169,7 @@ android {
     }
 
     buildFeatures {
+        resValues = true
         buildConfig = true
         aidl = true
     }
@@ -556,3 +570,5 @@ tasks.matching {
 }.configureEach {
     dependsOn(prepareApkBuilderTemplateAssets)
 }
+
+apply(from = rootProject.file("gradle/release-archive.gradle"))

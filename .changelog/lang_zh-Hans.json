@@ -5,6 +5,21 @@
   "changelog_label_improvement": "优化",
   "changelog_label_dependency": "依赖",
   "$data": {
+    "v1.0.2": {
+      "released_date": "2026/09/13",
+      "improvement": [
+        "统一多语言资源, 明确插件激活契约并校验发布产物"
+      ],
+      "fix": [
+        "插件版本日期固定使用英文, 不随构建机器的语言变化"
+      ]
+    },
+    "v1.0.1": {
+      "released_date": "2026/09/13",
+      "improvement": [
+        "统一多语言资源, 明确插件激活契约并校验发布产物"
+      ]
+    },
     "v6.8.0": {
       "released_date": "2026/09/11",
       "improvement": [
