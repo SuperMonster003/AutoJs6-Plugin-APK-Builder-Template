@@ -332,6 +332,12 @@ jobs:
             test -x "$zipalign"
             # The ELF/ZIP gate above is authoritative. Record the SDK's second opinion.
             "$zipalign" -c -P 16 -v 4 "$kit_dir/template.apk" > "$report_dir/zipalign.txt" 2>&1 || true
+            # SDK 37 roadmap P5.2: the packaged template must target the level this plugin declares.
+            aapt="$(find "${ANDROID_HOME:?}/build-tools" -mindepth 2 -maxdepth 2 -type f -name aapt -print | sort -V | tail -n 1)"
+            test -x "$aapt"
+            expected_target_sdk="$(sed -n 's/^TARGET_SDK_VERSION=//p' version.properties | head -n 1)"
+            template_badging="$("$aapt" dump badging "$kit_dir/template.apk")"
+            grep -F "targetSdkVersion:'$expected_target_sdk'" <<< "$template_badging"
             outputs=(app/build/outputs/apk/release/*.apk)
             if [ "${#outputs[@]}" -ne 1 ]; then
               printf 'Expected one APK for %s, found %d.\n' "$variant" "${#outputs[@]}" >&2

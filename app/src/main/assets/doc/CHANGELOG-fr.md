@@ -10,6 +10,7 @@
 
 * `Correctif` resources.arsc est stocké non compressé et aligné sur 4 octets dans les APK générés afin que les applications ciblant Android 11 ou plus récent puissent être installées
 * `Amélioration` Suppression du commutateur de compilation `enableRemoteBuild` ; le plugin déclare toujours sa capacité de construction d'APK
+* `Amélioration` compileSdk et targetSdk passent à 37 (Android 17) ; le comportement du plugin ne dépend pas de la nouvelle cible
 
 # v1.0.2
 
