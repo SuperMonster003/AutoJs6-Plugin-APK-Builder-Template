@@ -4,6 +4,12 @@
 
 ******
 
+# v1.0.3
+
+###### 2026/09/15
+
+* `Fix` Store resources.arsc uncompressed and 4-byte aligned in generated APKs so that apps targeting Android 11 or newer can be installed
+
 # v1.0.2
 
 ###### 2026/09/13
