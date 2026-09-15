@@ -243,6 +243,7 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 * `Fix` Store resources.arsc uncompressed and 4-byte aligned in generated APKs so that apps targeting Android 11 or newer can be installed
 * `Improvement` Removed the `enableRemoteBuild` build switch; the plugin always declares its APK build capability
+* `Improvement` Raise compileSdk and targetSdk to 37 (Android 17); the plugin's behavior does not depend on the new target
 
 # v1.0.2
 

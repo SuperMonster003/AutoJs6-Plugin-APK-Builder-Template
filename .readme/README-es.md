@@ -243,6 +243,7 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 * `Corrección` resources.arsc se almacena sin comprimir y alineado a 4 bytes en los APK generados para que las aplicaciones dirigidas a Android 11 o superior puedan instalarse
 * `Mejora` Se eliminó el interruptor de compilación `enableRemoteBuild`; el plugin siempre declara su capacidad de compilación de APK
+* `Mejora` compileSdk y targetSdk suben a 37 (Android 17); el comportamiento del plugin no depende del nuevo objetivo
 
 # v1.0.2
 

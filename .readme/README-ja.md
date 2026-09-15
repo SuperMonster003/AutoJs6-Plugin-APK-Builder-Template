@@ -243,6 +243,7 @@ ROADMAP.md では正式なプラグイン管理ビルド, 候補, ABI 別配布,
 
 * `修正` 生成した APK の resources.arsc を非圧縮かつ 4 バイト境界に配置し, Android 11 以降を対象とするアプリをインストールできるようにした
 * `改善` `enableRemoteBuild` ビルドスイッチを削除し, プラグインが常に APK ビルド機能を宣言するようにした
+* `改善` compileSdk と targetSdk を 37 (Android 17) に引き上げ, プラグインの動作は新しいターゲットの影響を受けない
 
 # v1.0.2
 

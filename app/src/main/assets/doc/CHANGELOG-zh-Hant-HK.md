@@ -10,6 +10,7 @@
 
 * `修復` 產生的 APK 以未壓縮且 4 位元組對齊的方式存放 resources.arsc, 使目標為 Android 11 及以上的應用程式可以安裝
 * `優化` 移除 `enableRemoteBuild` 建置開關, 插件始終宣告 APK 建置能力
+* `優化` 將 compileSdk 與 targetSdk 提升到 37 (Android 17), 插件行為不受新目標版本影響
 
 # v1.0.2
 
