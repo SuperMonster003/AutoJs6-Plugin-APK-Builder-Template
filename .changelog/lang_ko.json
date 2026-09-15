@@ -9,6 +9,9 @@
       "released_date": "2026/09/15",
       "fix": [
         "생성된 APK의 resources.arsc를 비압축 및 4바이트 정렬로 저장하여 Android 11 이상을 대상으로 하는 앱을 설치할 수 있도록 함"
+      ],
+      "improvement": [
+        "`enableRemoteBuild` 빌드 스위치를 제거하고 플러그인이 항상 APK 빌드 기능을 선언하도록 함"
       ]
     },
     "v1.0.2": {

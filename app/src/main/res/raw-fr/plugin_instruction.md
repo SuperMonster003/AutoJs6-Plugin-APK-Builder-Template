@@ -11,4 +11,4 @@ Le Runtime Kit empaqueté contient :
 - `default_key_store.bks`
 - `runtime-kit.json`
 
-L'empaquetage s'exécute entièrement dans le processus du plugin sur le même appareil Android ; le code du projet n'est pas envoyé. AutoJs6 contrôle la confiance et la compatibilité puis valide indépendamment l'APK renvoyé. L'ancien commutateur `supportsRemoteBuild` reste désactivé sans désactiver cette voie formelle.
+L'empaquetage s'exécute entièrement dans le processus du plugin sur le même appareil Android ; le code du projet n'est pas envoyé. AutoJs6 contrôle la confiance et la compatibilité puis valide indépendamment l'APK renvoyé. La capacité héritée `supportsRemoteBuild` est toujours déclarée pour les hôtes qui la lisent encore ; ce n'est plus un commutateur de compilation.

@@ -124,12 +124,9 @@ object ApkBuilderTemplateMetadata {
                     ApkBuilderTemplateCapabilityKeys.APK_BUILD_EXECUTION_MODE,
                     ApkBuilderTemplateProtocol.APK_BUILD_EXECUTION_MODE_ON_DEVICE_PLUGIN,
                 )
-                putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD, BuildConfig.ENABLE_REMOTE_BUILD)
+                putBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD, true)
                 putInt(ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_PROTOCOL_VERSION, remoteBuildProtocolVersion)
-                putString(
-                    ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_STATUS,
-                    if (BuildConfig.ENABLE_REMOTE_BUILD) "experimental" else "disabled",
-                )
+                putString(ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_STATUS, "enabled")
                 putInt(
                     ApkBuilderTemplateCapabilityKeys.REMOTE_BUILD_API_VERSION,
                     ApkBuilderTemplateProtocol.REMOTE_BUILD_VERSION,

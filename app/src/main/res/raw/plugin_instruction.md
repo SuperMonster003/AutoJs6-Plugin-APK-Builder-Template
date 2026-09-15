@@ -11,4 +11,4 @@ The packaged Runtime Kit includes:
 - `default_key_store.bks`
 - `runtime-kit.json`
 
-Packaging runs entirely inside this plugin's process on the same Android device; project source is not uploaded. AutoJs6 performs trust and compatibility admission and independently validates the returned APK. The legacy `supportsRemoteBuild` switch remains off and does not disable this formal path.
+Packaging runs entirely inside this plugin's process on the same Android device; project source is not uploaded. AutoJs6 performs trust and compatibility admission and independently validates the returned APK. The legacy `supportsRemoteBuild` capability is always declared for hosts that still read it; it is no longer a build-time switch.

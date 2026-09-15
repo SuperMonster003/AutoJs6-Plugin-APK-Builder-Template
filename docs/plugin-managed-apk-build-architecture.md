@@ -47,13 +47,15 @@ ABI、正式能力、协议版本和执行模式；任一条件缺失都失败�
 | 旧名称 | 迁移规则 |
 |---|---|
 | `REMOTE_BUILD_VERSION` | 保留为 `APK_BUILD_VERSION` 的数值别名 |
-| `supportsRemoteBuild` | 继续表示旧实验入口是否开放，不解释为正式能力 |
+| `supportsRemoteBuild` | 2026/09/15 起固定为 `true` (构建开关 `enableRemoteBuild` 已移除)，仍不解释为正式能力 |
 | `apkBuilderRemoteBuildProtocolVersion` | 仅供旧实验宿主协商 |
 | `remoteBuildStatus` / `remoteBuildApiVersion` | 仅供旧元数据消费者和审计工具 |
 | `RemoteApkBuild*` 源码类名 | 暂作内部兼容实现名；不代表网络传输，也不形成第二条产品路径 |
 
 官方插件可以同时发布 `supportsApkBuild=true` 与 `supportsRemoteBuild=false`。这不是矛盾：前者启用唯一正式构建路径，后者
 继续关闭旧实验入口。不得通过把旧键直接翻转为 `true` 来完成迁移，因为旧宿主会把它解释为需要开发者开关的实验功能。
+2026/09/15 更新：宿主在任何 6.8.0 发布之前已移除开发者开关，插件同日移除 `enableRemoteBuild` 构建开关并固定发布
+`supportsRemoteBuild=true`；上述顾虑随之消失，正式准入仍以 `supportsApkBuild` 系列键为准。
 
 ## 4. 责任边界
 
@@ -97,7 +99,7 @@ APK 的第二套构建器。此前所谓“本地构建器”如果指 AutoJs6 �
 - 正式路径默认可用不等于降低准入：官方签名、兼容区间、ABI、协议、执行模式和输出复核仍是硬门槛。
 - `allowRiskyBuild` 只允许既有宿主身份警告语义，不得绕过声明区间、协议、摘要、路径、签名或输出身份校验。
 - 不做自动回退或自动重试，避免两套实现漂移、循环和同因失败；用户修复插件后重新发起构建。
-- `supportsRemoteBuild=false` 继续阻止旧实验入口，不再作为正式发布的 No-Go 条件。
+- `supportsRemoteBuild` 自 2026/09/15 起固定为 `true`，不再是发布条件；宿主侧不再有开发者开关。
 - 首轮候选和此前 M3/G1—G7 证据作为实现来源与历史审计保留；凡依赖“双构建器”或“远程默认启用”的旧放量结论均由本 ADR
   取代。
 - 架构迁移、自动化门禁与新候选真实设备“打包→安装→冷启动”通过前，不创建 v6.8.0/v1.0.0 公开 GA Release。

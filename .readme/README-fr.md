@@ -242,6 +242,7 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 ###### 2026/09/15
 
 * `Correctif` resources.arsc est stocké non compressé et aligné sur 4 octets dans les APK générés afin que les applications ciblant Android 11 ou plus récent puissent être installées
+* `Amélioration` Suppression du commutateur de compilation `enableRemoteBuild` ; le plugin déclare toujours sa capacité de construction d'APK
 
 # v1.0.2
 

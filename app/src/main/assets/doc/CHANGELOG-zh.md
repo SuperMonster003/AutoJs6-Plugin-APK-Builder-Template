@@ -9,6 +9,7 @@
 ###### 2026/09/15
 
 * `修复` 生成的 APK 以未压缩且 4 字节对齐的方式存放 resources.arsc, 使目标为 Android 11 及以上的应用可以安装
+* `优化` 移除 `enableRemoteBuild` 构建开关, 插件始终声明 APK 构建能力
 
 # v1.0.2
 
