@@ -5,6 +5,12 @@
   "changelog_label_improvement": "Улучшение",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v1.0.3": {
+      "released_date": "2026/09/15",
+      "fix": [
+        "resources.arsc в создаваемых APK хранится без сжатия с выравниванием по 4 байта, чтобы приложения для Android 11 и новее устанавливались"
+      ]
+    },
     "v1.0.2": {
       "released_date": "2026/09/13",
       "improvement": [

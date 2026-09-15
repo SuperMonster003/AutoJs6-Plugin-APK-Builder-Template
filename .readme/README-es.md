@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.0.3
+
+###### 2026/09/15
+
+* `Corrección` resources.arsc se almacena sin comprimir y alineado a 4 bytes en los APK generados para que las aplicaciones dirigidas a Android 11 o superior puedan instalarse
+
 # v1.0.2
 
 ###### 2026/09/13
@@ -249,12 +255,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/09/13
 
 * `Mejora` Recursos traducidos coherentes, activación explícita del complemento y validación de los paquetes de publicación
-
-# v6.8.0
-
-###### 2026/09/11
-
-* `Mejora` Verificación de compilación de la alineación de páginas de 16 KB en bibliotecas nativas de 64 bits, con controles del contrato manifest e informes JSON
 
 ##### Para más historial
 

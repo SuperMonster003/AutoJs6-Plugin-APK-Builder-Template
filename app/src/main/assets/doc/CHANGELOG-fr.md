@@ -4,6 +4,12 @@
 
 ******
 
+# v1.0.3
+
+###### 2026/09/15
+
+* `Correctif` resources.arsc est stocké non compressé et aligné sur 4 octets dans les APK générés afin que les applications ciblant Android 11 ou plus récent puissent être installées
+
 # v1.0.2
 
 ###### 2026/09/13

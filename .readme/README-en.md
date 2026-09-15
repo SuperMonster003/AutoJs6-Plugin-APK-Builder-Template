@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.0.3
+
+###### 2026/09/15
+
+* `Fix` Store resources.arsc uncompressed and 4-byte aligned in generated APKs so that apps targeting Android 11 or newer can be installed
+
 # v1.0.2
 
 ###### 2026/09/13
@@ -249,12 +255,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/09/13
 
 * `Improvement` Consistent localized resources, explicit plugin activation and validated release preparation
-
-# v6.8.0
-
-###### 2026/09/11
-
-* `Improvement` Build verification of 16 KB page alignment for 64-bit native libraries, including manifest contract checks and JSON reports
 
 ##### For more release history
 

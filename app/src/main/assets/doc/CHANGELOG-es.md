@@ -4,6 +4,12 @@
 
 ******
 
+# v1.0.3
+
+###### 2026/09/15
+
+* `Corrección` resources.arsc se almacena sin comprimir y alineado a 4 bytes en los APK generados para que las aplicaciones dirigidas a Android 11 o superior puedan instalarse
+
 # v1.0.2
 
 ###### 2026/09/13
