@@ -95,10 +95,7 @@ class RemoteApkBuildSessionInstrumentedTest {
             ApkBuilderTemplateProtocol.APK_BUILD_EXECUTION_MODE_ON_DEVICE_PLUGIN,
             capabilities.getString(ApkBuilderTemplateCapabilityKeys.APK_BUILD_EXECUTION_MODE),
         )
-        assertEquals(
-            BuildConfig.ENABLE_REMOTE_BUILD,
-            capabilities.getBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD),
-        )
+        assertTrue(capabilities.getBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_REMOTE_BUILD))
         assertTrue(capabilities.getBoolean(ApkBuilderTemplateCapabilityKeys.SUPPORTS_KEYSTORE_OPERATIONS))
         assertEquals(
             ApkBuilderTemplateProtocol.KEYSTORE_VERSION,

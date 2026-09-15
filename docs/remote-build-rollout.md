@@ -3,6 +3,7 @@
 > 历史文档 (2026/09/02 起被取代): 本文记录旧实验 `supportsRemoteBuild` 路径的 R0—R4 放量设计与资格证据。
 > 项目现采用 `docs/plugin-managed-apk-build-architecture.md`: 设备内插件托管构建是唯一正式路径, 旧实验能力继续关闭;
 > 本文中要求恢复宿主第二构建器后才能默认启用的结论不再是当前 Roadmap 门槛。安全、性能与故障注入证据继续有效。
+> 2026/09/15 更新: `enableRemoteBuild` 构建开关与宿主开发者开关均已移除, 插件固定声明 `supportsRemoteBuild=true`; 下文关于该开关的启用方式仅为历史记录。
 
 - 决策状态: 标准已制定, 尚未达到默认启用条件
 - 当前阶段: R0 (开发者实验)

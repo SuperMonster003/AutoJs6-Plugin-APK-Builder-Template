@@ -27,10 +27,10 @@ Node.js 的运行时所有权与 APK 打包边界由 `docs/remote-build-node-pac
 | `apkBuilderBuildExecutionMode` | String | 当前必须精确为 `on-device-plugin`，其他或缺失值失败关闭 |
 | `supportsKeyStoreOperations` | Boolean | 是否支持插件侧创建/验证签名库 |
 | `apkBuilderKeyStoreApiVersion` | Int | 密钥库接口版本，当前为 `KEYSTORE_VERSION` |
-| `supportsRemoteBuild` | Boolean | 旧实验入口是否开放；官方构建继续为 `false`，不作为正式准入依据 |
+| `supportsRemoteBuild` | Boolean | 旧键，2026/09/15 起固定为 `true` (构建开关已移除)；不作为正式准入依据 |
 | `apkBuilderRemoteBuildProtocolVersion` | Int | 旧实验宿主的配套协议版本 |
 | `remoteBuildApiVersion` | Int | 旧实验代码编译上限，即 `REMOTE_BUILD_VERSION` |
-| `remoteBuildStatus` | String | 旧实验状态，当前为 `disabled` 或 `experimental` |
+| `remoteBuildStatus` | String | 旧键，固定为 `enabled` |
 
 宿主的协商顺序:
 
@@ -42,7 +42,7 @@ Node.js 的运行时所有权与 APK 打包边界由 `docs/remote-build-node-pac
    原因写入 `errors`.
 
 旧宿主仍按 `supportsRemoteBuild`、`apkBuilderRemoteBuildProtocolVersion` 和开发者开关进入实验路径；该路径与正式能力键保持
-区分。官方插件发布 `supportsApkBuild=true`、`supportsRemoteBuild=false`，正式宿主不读取旧实验开关。
+区分。官方插件发布 `supportsApkBuild=true`，并自 2026/09/15 起固定发布 `supportsRemoteBuild=true`（构建开关与宿主开发者开关均已移除）；正式宿主不读取旧实验键。
 
 协议版本只约束插件托管构建, 与模板读取协议 `TEMPLATE_VERSION` 相互独立. v3 在 v2 基础上增加 TypeScript 构建暂存的
 认证加密元数据; 使用这些字段的请求必须声明 `requiredProtocolVersion >= 3`.
@@ -332,7 +332,6 @@ APK 只含公开摘要资产, 不含默认私钥库。44/44 JVM 回归、Release
 | 条件 | status | 信息位置 |
 |---|---|---|
 | 插件构建不提供正式能力 | 会话前拒绝 | 安装与当前 AutoJs6 匹配的官方 APK Builder 插件 |
-| 旧实验入口关闭 `supportsRemoteBuild` | 会话前拒绝 | 只影响旧宿主实验路径 |
 | Node.js 旧库/项目类型/配置/入口/执行模式 | `UNSUPPORTED` | warning: use the external runtime plugin; 无输出 |
 | 缺少必需原生输入或 `.so` | `UNSUPPORTED` | warning: missing build input |
 | 宿主要求更高协议 | `FAILED` | error: newer protocol |

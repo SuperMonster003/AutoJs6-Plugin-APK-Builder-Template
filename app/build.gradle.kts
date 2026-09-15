@@ -27,14 +27,8 @@ val pluginVersionDate = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).apply {
     timeZone = TimeZone.getTimeZone("GMT+08:00")
 }.format(Date(releaseMetadata.getProperty("BUILD_TIME").toLong()))
 val apkFileExtension = "apk"
-val enableRemoteBuildProperty = "autojs.apkBuilder.templatePlugin.enableRemoteBuild"
 val runtimeKitDirProperty = "autojs.apkBuilder.templatePlugin.runtimeKitDir"
 val remoteBuildTemplateExpansionMultiplier = 4L
-val enableRemoteBuild = providers.gradleProperty(enableRemoteBuildProperty)
-    .map { value ->
-        value.trim().lowercase().let { it in setOf("true", "1", "yes", "on") }
-    }
-    .orElse(false)
 
 // Composite plugin identity (docs/versioning.md): the plugin carries its own version line,
 // while versionCode/versionName still encode the paired host so pairing stays readable
@@ -132,7 +126,6 @@ android {
         buildConfigField("int", "PROTOCOL_VERSION", "2")
         buildConfigField("boolean", "ENABLE_APK_BUILD", "true")
         buildConfigField("int", "APK_BUILD_PROTOCOL_VERSION", "3")
-        buildConfigField("boolean", "ENABLE_REMOTE_BUILD", enableRemoteBuild.get().toString())
         buildConfigField("int", "REMOTE_BUILD_PROTOCOL_VERSION", "3")
         buildConfigField(
             "long",
