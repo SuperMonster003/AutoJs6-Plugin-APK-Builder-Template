@@ -6,9 +6,10 @@
   "changelog_label_dependency": "Dependency",
   "$data": {
     "v1.0.3": {
-      "released_date": "2026/09/15",
+      "released_date": "2026/09/19",
       "fix": [
-        "Store resources.arsc uncompressed and 4-byte aligned in generated APKs so that apps targeting Android 11 or newer can be installed"
+        "Store resources.arsc uncompressed and 4-byte aligned in generated APKs so that apps targeting Android 11 or newer can be installed",
+        "SDK XML v4 parsing warnings with AGP 9.1 and APK native alignment checks incorrectly triggered by JVM unit-test assembly tasks, using shared build plugins 1.8.3"
       ],
       "improvement": [
         "Removed the `enableRemoteBuild` build switch; the plugin always declares its APK build capability",
