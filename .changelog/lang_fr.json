@@ -6,14 +6,15 @@
   "changelog_label_dependency": "Dépendance",
   "$data": {
     "v1.0.3": {
-      "released_date": "2026/09/19",
+      "released_date": "2026/09/20",
       "fix": [
         "resources.arsc est stocké non compressé et aligné sur 4 octets dans les APK générés afin que les applications ciblant Android 11 ou plus récent puissent être installées",
         "Avertissements de lecture SDK XML v4 avec AGP 9.1 et contrôles d'alignement natif des APK déclenchés par erreur lors de l'assemblage des tests unitaires JVM, avec les plugins de compilation partagés 1.8.3"
       ],
       "improvement": [
         "Suppression du commutateur de compilation `enableRemoteBuild` ; le plugin déclare toujours sa capacité de construction d'APK",
-        "compileSdk et targetSdk passent à 37 (Android 17) ; le comportement du plugin ne dépend pas de la nouvelle cible"
+        "compileSdk et targetSdk passent à 37 (Android 17) ; le comportement du plugin ne dépend pas de la nouvelle cible",
+        "Reconstruire les cinq variantes ABI du Runtime Kit pour AutoJs6 6.8.0 build 5282 avec une plage de compatibilité hôte explicite"
       ]
     },
     "v1.0.2": {
