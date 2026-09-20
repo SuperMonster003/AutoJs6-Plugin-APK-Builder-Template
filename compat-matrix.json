@@ -1,5 +1,78 @@
 {
   "schemaVersion": 1,
   "docs": "docs/versioning.md",
-  "entries": []
+  "entries": [
+    {
+      "pluginVersionName": "1.0.3",
+      "pluginVersionCode": 528201,
+      "pluginVersionBuild": 47,
+      "hostVersionName": "6.8.0",
+      "hostVersionCode": 5282,
+      "minHostVersionCode": 5282,
+      "maxHostVersionCode": 5282,
+      "allowPatchVersionMismatch": false,
+      "runtimeApiLevel": 5282,
+      "tag": "v1.0.3",
+      "artifacts": [
+        {
+          "variant": "inrt-universal",
+          "supportedAbis": [
+            "arm64-v8a",
+            "armeabi-v7a",
+            "x86_64",
+            "x86"
+          ],
+          "apkName": "autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-universal-6f3df580.apk",
+          "apkUrl": "https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/releases/download/v1.0.3/autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-universal-6f3df580.apk",
+          "apkSha256": "f90a83fb8c61c92067bce230f8466f7b01f8826ba7ac2d72d8ab36af5b47c16f",
+          "apkSizeBytes": 38741120
+        },
+        {
+          "variant": "inrt-arm64-v8a",
+          "supportedAbis": [
+            "arm64-v8a"
+          ],
+          "apkName": "autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-arm64-v8a-511a2e6e.apk",
+          "apkUrl": "https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/releases/download/v1.0.3/autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-arm64-v8a-511a2e6e.apk",
+          "apkSha256": "4fe1c613ca70115917656e44db403866aa05ac2e72fd0d2ae918dbe72c423716",
+          "apkSizeBytes": 37551300
+        },
+        {
+          "variant": "inrt-armeabi-v7a",
+          "supportedAbis": [
+            "armeabi-v7a"
+          ],
+          "apkName": "autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-armeabi-v7a-af2371ca.apk",
+          "apkUrl": "https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/releases/download/v1.0.3/autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-armeabi-v7a-af2371ca.apk",
+          "apkSha256": "21878d09058a7562086c29fa42b66832d58763722ef67bbecc568bb394f91852",
+          "apkSizeBytes": 37498760
+        },
+        {
+          "variant": "inrt-x86_64",
+          "supportedAbis": [
+            "x86_64"
+          ],
+          "apkName": "autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-x86_64-cc8cf5ce.apk",
+          "apkUrl": "https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/releases/download/v1.0.3/autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-x86_64-cc8cf5ce.apk",
+          "apkSha256": "09899f2bd53e8e7dd1aa3477735438ed1e11614bffffd3c585725d57751167c1",
+          "apkSizeBytes": 37566424
+        },
+        {
+          "variant": "inrt-x86",
+          "supportedAbis": [
+            "x86"
+          ],
+          "apkName": "autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-x86-1f73f99b.apk",
+          "apkUrl": "https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/releases/download/v1.0.3/autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-x86-1f73f99b.apk",
+          "apkSha256": "2792a86cd33ace00fd9c69ea4db4e8795e58763352fb6aedfa1f2fea202bf4af",
+          "apkSizeBytes": 37571860
+        }
+      ],
+      "apkName": "autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-universal-6f3df580.apk",
+      "apkUrl": "https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/releases/download/v1.0.3/autojs6-apk-builder-template-v1.0.3-autojs6-v6.8.0-universal-6f3df580.apk",
+      "apkSha256": "f90a83fb8c61c92067bce230f8466f7b01f8826ba7ac2d72d8ab36af5b47c16f",
+      "apkSizeBytes": 38741120,
+      "releasedAt": "2026-09-20T07:50:30Z"
+    }
+  ]
 }
