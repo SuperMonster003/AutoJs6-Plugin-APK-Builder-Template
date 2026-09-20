@@ -10,6 +10,7 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.apksig.ApkVerifier
 import com.reandroid.arsc.chunk.TableBlock
 import org.autojs.plugin.apkbuilder.template.ApkBuildProgress
 import org.autojs.plugin.apkbuilder.template.ApkBuildRequest
@@ -274,7 +275,7 @@ class RemoteApkBuildSessionInstrumentedTest {
 
         val observation = execute(request, remoteBuildEnabled = true)
 
-        assertSuccessfulBuild(observation, "assets/project/main.js")
+        assertSuccessfulBuild(observation, "assets/project/main.js", legacyV1Only = true)
         ZipFile(observation.outputCopy).use { apk ->
             val names = apk.entries().asSequence().map { entry -> entry.name }.toSet()
             assertTrue("V1 APK is missing META-INF/MANIFEST.MF", "META-INF/MANIFEST.MF" in names)
@@ -1024,13 +1025,34 @@ class RemoteApkBuildSessionInstrumentedTest {
 
     @Test
     fun projectArchiveCompressionRatioLimitFailsClosed() {
+        val limits = RemoteZipExtractor.PROJECT_ARCHIVE_LIMITS
         val highExpansionPayload = ByteArray(
-            (RemoteZipExtractor.PROJECT_ARCHIVE_LIMITS.compressionRatioMinimumBytes * 2L).toInt(),
+            (limits.compressionRatioMinimumBytes * 2L).toInt(),
         )
-        val request = createRequest(
-            entries = emptyMap(),
-            binaryEntries = mapOf("source.js" to highExpansionPayload),
+        val archive = createZip(
+            "project-compression-ratio-${UUID.randomUUID()}.zip",
+            mapOf("source.js" to highExpansionPayload),
         )
+        // DEFLATE's actual expansion ratio for zeros is below the policy limit.
+        // A hostile central-directory claim must be rejected during planning,
+        // before the extractor reads or trusts the entry's compressed payload.
+        RandomAccessFile(archive, "rw").use { file ->
+            val endOfCentralDirectory = file.length() - 22L
+            file.seek(endOfCentralDirectory)
+            check(Integer.reverseBytes(file.readInt()) == 0x06054b50)
+            file.seek(endOfCentralDirectory + 16L)
+            val centralDirectory = Integer.reverseBytes(file.readInt()).toLong()
+            file.seek(centralDirectory)
+            check(Integer.reverseBytes(file.readInt()) == 0x02014b50)
+            file.seek(centralDirectory + 20L)
+            file.writeInt(Integer.reverseBytes(512))
+        }
+        ZipFile(archive).use { zip ->
+            val entry = checkNotNull(zip.getEntry("source.js"))
+            assertTrue(entry.size >= limits.compressionRatioMinimumBytes)
+            assertTrue(entry.size.toDouble() / entry.compressedSize > limits.maxCompressionRatio)
+        }
+        val request = createRequest().apply { replaceProjectArchive(archive) }
 
         val observation = execute(request, remoteBuildEnabled = true)
 
@@ -2036,21 +2058,25 @@ class RemoteApkBuildSessionInstrumentedTest {
         expectedPackageName: String = TEST_PACKAGE_NAME,
         expectedVersionName: String = TEST_VERSION_NAME,
         expectedVersionCode: Int = TEST_VERSION_CODE,
+        verifySigningCertificate: Boolean = true,
     ): android.content.pm.PackageInfo {
         val packageManager = context.packageManager
         val packageInfo = checkNotNull(
             packageManager.getPackageArchiveInfo(
                 apkFile.path,
-                PackageManager.GET_PERMISSIONS or PackageManager.GET_SIGNATURES,
+                PackageManager.GET_PERMISSIONS or
+                    (if (verifySigningCertificate) PackageManager.GET_SIGNATURES else 0),
             ),
         ) { "PackageManager could not parse output APK: ${apkFile.path}" }
         assertEquals(expectedPackageName, packageInfo.packageName)
         assertEquals(expectedVersionName, packageInfo.versionName)
         assertEquals(expectedVersionCode, packageInfo.versionCode)
-        assertTrue(
-            "PackageManager did not expose an output signing certificate.",
-            !packageInfo.signatures.isNullOrEmpty(),
-        )
+        if (verifySigningCertificate) {
+            assertTrue(
+                "PackageManager did not expose an output signing certificate.",
+                !packageInfo.signatures.isNullOrEmpty(),
+            )
+        }
         val applicationInfo = checkNotNull(packageInfo.applicationInfo) {
             "Output APK does not contain applicationInfo."
         }.apply {
@@ -2061,7 +2087,11 @@ class RemoteApkBuildSessionInstrumentedTest {
         return packageInfo
     }
 
-    private fun assertSuccessfulBuild(observation: Observation, vararg expectedEntries: String) {
+    private fun assertSuccessfulBuild(
+        observation: Observation,
+        vararg expectedEntries: String,
+        legacyV1Only: Boolean = false,
+    ) {
         assertSuccessfulBuildWithIdentity(
             observation = observation,
             expectedAppName = TEST_APP_NAME,
@@ -2069,6 +2099,7 @@ class RemoteApkBuildSessionInstrumentedTest {
             expectedVersionName = TEST_VERSION_NAME,
             expectedVersionCode = TEST_VERSION_CODE,
             expectedEntries = expectedEntries,
+            legacyV1Only = legacyV1Only,
         )
     }
 
@@ -2079,6 +2110,7 @@ class RemoteApkBuildSessionInstrumentedTest {
         expectedVersionName: String,
         expectedVersionCode: Int,
         expectedEntries: Array<out String>,
+        legacyV1Only: Boolean = false,
     ) {
         val failureDetail = "Remote build errors: ${observation.result.errors}"
         assertEquals(failureDetail, TerminalEvent.COMPLETED, observation.terminalEvent)
@@ -2110,12 +2142,26 @@ class RemoteApkBuildSessionInstrumentedTest {
                 assertTrue("Output APK is missing $entry", apk.getEntry(entry) != null)
             }
         }
+        if (legacyV1Only) {
+            // A target-30+ V1-only APK is intentionally not installable on
+            // modern Android. Verify its signature on the supported legacy
+            // platform range, then parse identity independently of that policy.
+            val verification = ApkVerifier.Builder(observation.outputCopy)
+                .setMinCheckedPlatformVersion(24)
+                .setMaxCheckedPlatformVersion(29)
+                .build()
+                .verify()
+            assertTrue("Invalid V1 signature: ${verification.errors}", verification.isVerified)
+            assertTrue(verification.isVerifiedUsingV1Scheme)
+            assertFalse(verification.isVerifiedUsingV2Scheme)
+        }
         parsePackageArchive(
             apkFile = observation.outputCopy,
             expectedAppName = expectedAppName,
             expectedPackageName = expectedPackageName,
             expectedVersionName = expectedVersionName,
             expectedVersionCode = expectedVersionCode,
+            verifySigningCertificate = !legacyV1Only,
         )
 
         val workspacePath = observation.result.extras?.getString("workspace")
