@@ -19,6 +19,8 @@ def check(root, pending_commit=False):
     props = dict(re.findall(r'^([A-Z_]+)=(.*)$', (root/'version.properties').read_text(encoding='utf-8-sig'), re.M))
     count = int(subprocess.check_output(['git','-C',str(root),'rev-list','--count','HEAD']))
     require(int(props['VERSION_BUILD']) == count + int(pending_commit), 'VERSION_BUILD must match the commit count')
+    require(props.get('PLUGIN_VERSION_BUILD') == props['VERSION_BUILD'], 'PLUGIN_VERSION_BUILD must match VERSION_BUILD')
+    require(props.get('PLUGIN_VERSION_NAME') == props['VERSION_NAME'], 'PLUGIN_VERSION_NAME must match VERSION_NAME')
     settings = (root/'settings.gradle.kts').read_text(encoding='utf-8-sig')
     require('autojs6-platform-versions") version "1.8.3"' in settings, 'Published platform version must be 1.8.3')
     require('mavenLocal(' not in settings and 'autojs.buildPlugins.includeBuild' not in settings, 'Local platform substitution is forbidden')
