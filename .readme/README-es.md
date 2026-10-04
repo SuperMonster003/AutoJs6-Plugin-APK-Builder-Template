@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.0.4
+
+###### 2026/10/04
+
+* `Mejora` Los iconos del centro de plugins usan los tamaños, posiciones, imágenes claras y oscuras y fondos circulares ajustados en Icon Studio, conservando fuentes y parámetros reproducibles
+
 # v1.0.3
 
 ###### 2026/09/20
@@ -252,12 +258,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/09/13
 
 * `Corrección` Mantener la fecha de versión del complemento en inglés sin depender del idioma del equipo de compilación
-* `Mejora` Recursos traducidos coherentes, activación explícita del complemento y validación de los paquetes de publicación
-
-# v1.0.1
-
-###### 2026/09/13
-
 * `Mejora` Recursos traducidos coherentes, activación explícita del complemento y validación de los paquetes de publicación
 
 ##### Para más historial
