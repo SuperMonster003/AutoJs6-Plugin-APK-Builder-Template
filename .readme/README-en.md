@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.0.4
+
+###### 2026/10/04
+
+* `Improvement` Plugin Center icons use the sizes, positions, light and dark artwork, and circular backgrounds adjusted in Icon Studio, retaining reproducible sources and parameters
+
 # v1.0.3
 
 ###### 2026/09/20
@@ -252,12 +258,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/09/13
 
 * `Fix` Keep the plugin version date in English regardless of the build machine locale
-* `Improvement` Consistent localized resources, explicit plugin activation and validated release preparation
-
-# v1.0.1
-
-###### 2026/09/13
-
 * `Improvement` Consistent localized resources, explicit plugin activation and validated release preparation
 
 ##### For more release history
