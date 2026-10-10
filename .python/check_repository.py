@@ -22,14 +22,17 @@ def check(root, pending_commit=False):
     require(props.get('PLUGIN_VERSION_BUILD') == props['VERSION_BUILD'], 'PLUGIN_VERSION_BUILD must match VERSION_BUILD')
     require(props.get('PLUGIN_VERSION_NAME') == props['VERSION_NAME'], 'PLUGIN_VERSION_NAME must match VERSION_NAME')
     settings = (root/'settings.gradle.kts').read_text(encoding='utf-8-sig')
-    require('autojs6-platform-versions") version "1.8.3"' in settings, 'Published platform version must be 1.8.3')
+    # Any published release is accepted; shared plugins declared here must use one version.
+    versions = re.findall(r'autojs6-(platform-versions|native-alignment)"\) version "(\d+\.\d+\.\d+)"', settings)
+    require('platform-versions' in [plugin for plugin, _ in versions], 'platform-versions must come from a published release')
+    require(len({version for _, version in versions}) == 1, 'Shared plugin versions must match')
     require('mavenLocal(' not in settings and 'autojs.buildPlugins.includeBuild' not in settings, 'Local platform substitution is forbidden')
     root_name = re.search(r'rootProject.name\s*=\s*"([^"]+)"', settings)
     require(root_name and re.fullmatch('[a-z0-9-]+', root_name[1]), 'rootProject.name must be lowercase kebab-case')
     require(not (root/'gradle/data').exists(), 'Consumer compatibility overrides must be removed')
-    for relative in ['AGENTS.md','LICENSE','app/src/main/res/mipmap/ic_launcher.png', '.python/check_markdown.bat']:
+    for relative in ['LICENSE','app/src/main/res/mipmap/ic_launcher.png', '.python/check_markdown.bat']:
         require((root/relative).is_file(), 'Missing ' + relative)
-    for relative in ['sign.properties','app/sm003.jks','local.properties','migration.pre-platform-versions.bak']:
+    for relative in ['AGENTS.md','CLAUDE.md','sign.properties','app/sm003.jks','local.properties','migration.pre-platform-versions.bak']:
         require(subprocess.run(['git','-C',str(root),'check-ignore','-q',relative]).returncode == 0, 'Not ignored: ' + relative)
     manifest = ET.parse(root/'app/src/main/AndroidManifest.xml').getroot()
     app = manifest.find('application')
