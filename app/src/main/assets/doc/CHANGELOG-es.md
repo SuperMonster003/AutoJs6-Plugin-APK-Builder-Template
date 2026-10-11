@@ -4,6 +4,12 @@
 
 ******
 
+# v1.1.0
+
+###### 2026/10/11
+
+* `Función` Los proyectos y scripts Node.js se empaquetan como aplicaciones con firma independiente, usan el plugin externo Node.js Runtime y muestran instrucciones de instalación cuando no está disponible
+
 # v1.0.4
 
 ###### 2026/10/05

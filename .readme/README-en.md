@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.1.0
+
+###### 2026/10/11
+
+* `Feature` Packaged Node.js projects and scripts use the external Node.js Runtime plugin, support independently signed applications, and show installation guidance when the runtime is unavailable
+
 # v1.0.4
 
 ###### 2026/10/05
@@ -253,13 +259,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 * `Improvement` Removed the `enableRemoteBuild` build switch; the plugin always declares its APK build capability
 * `Improvement` Raise compileSdk and targetSdk to 37 (Android 17); the plugin's behavior does not depend on the new target
 * `Improvement` Rebuild the complete five-ABI Runtime Kit matrix for AutoJs6 6.8.0 build 5282 with an explicit paired-host compatibility range
-
-# v1.0.2
-
-###### 2026/09/13
-
-* `Fix` Keep the plugin version date in English regardless of the build machine locale
-* `Improvement` Consistent localized resources, explicit plugin activation and validated release preparation
 
 ##### For more release history
 

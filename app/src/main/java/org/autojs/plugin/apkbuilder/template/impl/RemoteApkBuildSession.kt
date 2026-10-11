@@ -80,7 +80,7 @@ class RemoteApkBuildSession(
             val sourceKind = request.extras
                 ?.getString(ApkBuildRequestExtraKeys.SOURCE_KIND)
                 ?: throw IllegalStateException("Validated project source kind is missing.")
-            val projectConfig = RemoteProjectConfigParser.parse(request.projectConfigJson, sourceKind)
+            var projectConfig = RemoteProjectConfigParser.parse(request.projectConfigJson, sourceKind)
             val templateInfo = ApkBuilderTemplateMetadata.templateInfo(appContext)
             requestWarnings += validateHostRequest(templateInfo)
             val storageEstimate = RemoteBuildStoragePolicy.estimate(
@@ -97,7 +97,7 @@ class RemoteApkBuildSession(
             synchronized(workspaceLifecycleLock) {
                 workspace = preparedWorkspace
             }
-            RemoteEmbeddedNodePackagingPolicy.validateProjectSource(projectConfig, preparedWorkspace.sourcePath)
+            projectConfig = RemoteEmbeddedNodePackagingPolicy.prepareProjectSource(projectConfig, preparedWorkspace.sourcePath)
             notifyProgress(updateProgress(ApkBuildProgress.STEP_PREPARE, "APK build request validated", preparedWorkspace.sourcePath.path))
 
             ensureActive()

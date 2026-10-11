@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.1.0
+
+###### 2026/10/11
+
+* `Función` Los proyectos y scripts Node.js se empaquetan como aplicaciones con firma independiente, usan el plugin externo Node.js Runtime y muestran instrucciones de instalación cuando no está disponible
+
 # v1.0.4
 
 ###### 2026/10/05
@@ -253,13 +259,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 * `Mejora` Se eliminó el interruptor de compilación `enableRemoteBuild`; el plugin siempre declara su capacidad de compilación de APK
 * `Mejora` compileSdk y targetSdk suben a 37 (Android 17); el comportamiento del plugin no depende del nuevo objetivo
 * `Mejora` Reconstruir las cinco variantes ABI del Runtime Kit para AutoJs6 6.8.0 compilación 5282 con un rango explícito de compatibilidad del host
-
-# v1.0.2
-
-###### 2026/09/13
-
-* `Corrección` Mantener la fecha de versión del complemento en inglés sin depender del idioma del equipo de compilación
-* `Mejora` Recursos traducidos coherentes, activación explícita del complemento y validación de los paquetes de publicación
 
 ##### Para más historial
 

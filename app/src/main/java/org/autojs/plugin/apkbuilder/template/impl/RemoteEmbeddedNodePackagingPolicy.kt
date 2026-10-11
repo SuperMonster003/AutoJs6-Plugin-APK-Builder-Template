@@ -5,27 +5,16 @@ import java.io.IOException
 import java.io.Reader
 import java.util.Locale
 
-/**
- * Keeps the retired embedded Node runtime outside every plugin-side APK build path.
- *
- * The host performs the same preflight before opening a session. This second boundary is
- * intentional: older or custom AIDL clients must not be able to revive a partially removed
- * runtime by sending legacy project metadata directly to the plugin.
- */
+/** Retires embedded libraries while preparing projects for the external Node runtime. */
 internal object RemoteEmbeddedNodePackagingPolicy {
 
     internal const val MAX_EXECUTION_MODE_PROLOGUE_CHARACTERS = 1024 * 1024
 
     internal const val MIGRATION_MESSAGE =
-        "Embedded Node.js APK packaging is unsupported because Node.js is owned by the external " +
-            "runtime plugin. Remove the Embedded Node.js library from this packaged project and " +
-            "run Node.js scripts from the AutoJs6 host with that runtime plugin installed."
+        "Embedded Node.js packaging was retired. Select Node.js Runtime to use the installed external plugin."
 
     private val NODE_LIBRARY_NAMES = setOf(
         "embedded node.js",
-        "node",
-        "nodejs",
-        "node.js",
         "embedded-node",
         "embedded-nodejs",
         "embedded_nodejs",
@@ -37,29 +26,24 @@ internal object RemoteEmbeddedNodePackagingPolicy {
         hasNodeConfig: Boolean,
         mainScript: String,
     ) {
-        if (
-            selectedLibraries.any { it.trim().lowercase(Locale.ROOT) in NODE_LIBRARY_NAMES } ||
-            projectType?.trim()?.equals("node", ignoreCase = true) == true ||
-            hasNodeConfig ||
-            isNodeEntryName(mainScript)
-        ) {
+        if (selectedLibraries.any { it.trim().lowercase(Locale.ROOT) in NODE_LIBRARY_NAMES }) {
             throw unsupported()
         }
     }
 
-    fun validateProjectSource(projectConfig: RemoteProjectConfig, sourcePath: File) {
-        if (isNodeEntryName(sourcePath.name)) {
-            throw unsupported()
-        }
-        val entry = resolveEntry(projectConfig, sourcePath) ?: return
-        if (isNodeEntryName(entry.name)) {
-            throw unsupported()
-        }
-        entry.reader(Charsets.UTF_8).buffered().use { reader ->
-            if (hasNodeExecutionDirective(reader)) {
-                throw unsupported()
-            }
-        }
+    fun prepareProjectSource(projectConfig: RemoteProjectConfig, sourcePath: File): RemoteProjectConfig {
+        val entry = resolveEntry(projectConfig, sourcePath)
+        val json = projectConfig.json
+        val requiresRuntime = projectConfig.libs.any {
+            it.trim().lowercase(Locale.ROOT) in setOf("node.js runtime", "node", "nodejs", "node.js", "node-runtime", "nodejs-runtime")
+        } || json.optString("projectType", json.optString("type")).trim().equals("node", ignoreCase = true) ||
+            json.optJSONObject("nodeConfig") != null || json.optJSONObject("node") != null ||
+            isNodeEntryName(sourcePath.name) || isNodeEntryName(projectConfig.mainScript) ||
+            (entry?.reader(Charsets.UTF_8)?.buffered()?.use(::hasNodeExecutionDirective) == true)
+        if (!requiresRuntime || projectConfig.permissions == null) return projectConfig
+        val permissions = (projectConfig.permissions + "org.autojs.plugin.nodejs.permission.RUNTIME").distinct()
+        json.put("permissions", org.json.JSONArray(permissions))
+        return projectConfig.copy(permissions = permissions)
     }
 
     internal fun isNodeEntryName(fileName: String?): Boolean {

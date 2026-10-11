@@ -10,12 +10,9 @@ import java.io.StringReader
 class RemoteEmbeddedNodePackagingPolicyTest {
 
     @Test
-    fun legacyLibraryNamesAndStructuredNodeSignalsAreRejected() {
+    fun onlyRetiredEmbeddedLibraryNamesAreRejected() {
         listOf(
             "Embedded Node.js",
-            "node",
-            "nodejs",
-            "node.js",
             "embedded-node",
             "embedded-nodejs",
             "embedded_nodejs",
@@ -25,15 +22,16 @@ class RemoteEmbeddedNodePackagingPolicyTest {
                 validateConfig(selectedLibraries = listOf(library))
             }
         }
-        assertUnsupported { validateConfig(projectType = " NoDe ") }
-        assertUnsupported { validateConfig(hasNodeConfig = true) }
+        validateConfig(projectType = " NoDe ")
+        validateConfig(hasNodeConfig = true)
+        validateConfig(selectedLibraries = listOf("Node.js Runtime", "node", "nodejs", "node.js"))
     }
 
     @Test
-    fun nodeEntryExtensionsAreRejectedWithoutMisclassifyingDeclarations() {
+    fun nodeEntriesAreAcceptedWithoutMisclassifyingDeclarations() {
         listOf("main.mjs", "main.cjs", "main.mts", "main.cts", "main.node.js").forEach { name ->
             assertTrue(name, RemoteEmbeddedNodePackagingPolicy.isNodeEntryName(name))
-            assertUnsupported { validateConfig(mainScript = name) }
+            validateConfig(mainScript = name)
         }
         listOf("main.js", "main.ts", "types.d.ts", "types.d.mts", "types.d.cts").forEach { name ->
             assertFalse(name, RemoteEmbeddedNodePackagingPolicy.isNodeEntryName(name))
@@ -103,6 +101,6 @@ class RemoteEmbeddedNodePackagingPolicyTest {
             error
         }
         if (error == null) fail("Expected embedded Node packaging to be unsupported")
-        assertTrue(error?.message.orEmpty().contains("external runtime plugin"))
+        assertTrue(error?.message.orEmpty().contains("Node.js Runtime"))
     }
 }
