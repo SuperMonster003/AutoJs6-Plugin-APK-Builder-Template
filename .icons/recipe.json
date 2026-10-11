@@ -39,7 +39,7 @@
     },
     "backgrounds": {
       "day": "transparent",
-      "night": "#403417"
+      "night": "transparent"
     }
   },
   "baseline": {
