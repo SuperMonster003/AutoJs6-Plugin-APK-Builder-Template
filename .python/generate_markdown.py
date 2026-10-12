@@ -18,7 +18,6 @@ LANGUAGE_CODES = [
     "ar",
 ]
 LANGUAGE_CODE_DEFAULT = "zh-Hans"
-README_COMPAT_ROOT_LANGUAGES = {"en"}
 ANDROID_CHANGELOG_ALIASES = {
     "zh-Hans": ["zh", "zh-Hans"],
     "zh-Hant-HK": ["zh-rHK", "zh-Hant-HK"],
@@ -200,8 +199,6 @@ def generate_readmes(languages, changelogs):
         write_text(path, output)
         if code == LANGUAGE_CODE_DEFAULT:
             write_text(ROOT / "README.md", output)
-        if code in README_COMPAT_ROOT_LANGUAGES:
-            write_text(ROOT / f"README-{code}.md", output)
 
 
 def generate_changelogs(languages, changelogs):
@@ -218,12 +215,26 @@ def generate_changelogs(languages, changelogs):
             write_text(ANDROID_CHANGELOG_DIR / "CHANGELOG.md", output)
 
 
+def validate_root_documents(root):
+    extras = sorted(
+        path.name for path in root.iterdir()
+        if path.is_file() and path.name != "README.md"
+        and re.fullmatch(r"(?:README|CHANGELOG)(?:[._-].*)?", path.name, re.IGNORECASE)
+    )
+    if extras:
+        raise SystemExit(
+            "Unexpected root documentation: " + ", ".join(extras)
+            + ". Keep only README.md at the root; use .readme/, app/src/main/assets/doc/, or docs/."
+        )
+
+
 def main(argv=None):
     global CHECK_MODE
     parser = argparse.ArgumentParser(description="Generate or verify localized documentation")
     parser.add_argument("--check", action="store_true", help="check generated files without writing")
     CHECK_MODE = parser.parse_args(argv).check
     CHECK_DIFFERENCES.clear()
+    validate_root_documents(ROOT)
     if LANGUAGE_CODE_DEFAULT not in LANGUAGE_CODES:
         raise ValueError(f"Default language code {LANGUAGE_CODE_DEFAULT!r} is not in LANGUAGE_CODES")
     languages, changelogs = load_languages()
