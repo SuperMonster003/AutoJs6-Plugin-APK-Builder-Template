@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.0
+
+###### 2026/10/18
+
+* `Fonctionnalité` APK Builder prend en charge les projets Bun signés indépendamment, avec des capacités hôtes explicites et un Runtime Kit compatible avec Compose
+
 # v1.1.0
 
 ###### 2026/10/11

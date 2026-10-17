@@ -5,6 +5,12 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v1.2.0": {
+      "released_date": "2026/10/18",
+      "feature": [
+        "APK Builder が独自署名の Bun プロジェクトに対応し, ホスト機能の明示的な宣言と対応する Runtime Kit で Compose 連携を提供"
+      ]
+    },
     "v1.1.0": {
       "released_date": "2026/10/11",
       "feature": [

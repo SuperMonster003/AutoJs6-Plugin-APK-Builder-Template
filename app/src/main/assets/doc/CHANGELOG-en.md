@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.0
+
+###### 2026/10/18
+
+* `Feature` APK Builder supports independently signed Bun projects with explicit host capabilities and a matching Runtime Kit for Compose interoperability
+
 # v1.1.0
 
 ###### 2026/10/11

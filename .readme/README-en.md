@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.0
+
+###### 2026/10/18
+
+* `Feature` APK Builder supports independently signed Bun projects with explicit host capabilities and a matching Runtime Kit for Compose interoperability
+
 # v1.1.0
 
 ###### 2026/10/11
@@ -249,16 +255,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 * `Improvement` Plugin Center icons use the sizes, positions, light and dark artwork, and circular backgrounds adjusted in Icon Studio, retaining reproducible sources and parameters
 * `Improvement` Android App info icons share Icon Studio artwork and light/dark backgrounds while preserving transparent Plugin Center artwork and existing launcher choices
-
-# v1.0.3
-
-###### 2026/09/20
-
-* `Fix` Store resources.arsc uncompressed and 4-byte aligned in generated APKs so that apps targeting Android 11 or newer can be installed
-* `Fix` SDK XML v4 parsing warnings with AGP 9.1 and APK native alignment checks incorrectly triggered by JVM unit-test assembly tasks, using shared build plugins 1.8.3
-* `Improvement` Removed the `enableRemoteBuild` build switch; the plugin always declares its APK build capability
-* `Improvement` Raise compileSdk and targetSdk to 37 (Android 17); the plugin's behavior does not depend on the new target
-* `Improvement` Rebuild the complete five-ABI Runtime Kit matrix for AutoJs6 6.8.0 build 5282 with an explicit paired-host compatibility range
 
 ##### For more release history
 

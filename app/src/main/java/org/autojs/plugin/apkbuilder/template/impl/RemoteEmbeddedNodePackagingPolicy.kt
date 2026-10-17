@@ -5,7 +5,7 @@ import java.io.IOException
 import java.io.Reader
 import java.util.Locale
 
-/** Retires embedded libraries while preparing projects for the external Node runtime. */
+/** Retires embedded libraries and declares permissions for external project runtimes. */
 internal object RemoteEmbeddedNodePackagingPolicy {
 
     internal const val MAX_EXECUTION_MODE_PROLOGUE_CHARACTERS = 1024 * 1024
@@ -34,6 +34,14 @@ internal object RemoteEmbeddedNodePackagingPolicy {
     fun prepareProjectSource(projectConfig: RemoteProjectConfig, sourcePath: File): RemoteProjectConfig {
         val entry = resolveEntry(projectConfig, sourcePath)
         val json = projectConfig.json
+        val bun = json.optString("projectType", json.optString("type")).trim().equals("bun", ignoreCase = true) ||
+            json.optJSONObject("bun") != null || isBunEntryName(projectConfig.mainScript) || isBunEntryName(sourcePath.name) ||
+            (entry?.reader(Charsets.UTF_8)?.buffered()?.use(::hasBunExecutionDirective) == true)
+        if (bun) {
+            val permissions = (projectConfig.permissions.orEmpty() + "org.autojs.permission.BUN_PACKAGED_RUNTIME").distinct()
+            json.put("permissions", org.json.JSONArray(permissions))
+            return projectConfig.copy(permissions = permissions)
+        }
         val requiresRuntime = projectConfig.libs.any {
             it.trim().lowercase(Locale.ROOT) in setOf("node.js runtime", "node", "nodejs", "node.js", "node-runtime", "nodejs-runtime")
         } || json.optString("projectType", json.optString("type")).trim().equals("node", ignoreCase = true) ||
@@ -58,9 +66,14 @@ internal object RemoteEmbeddedNodePackagingPolicy {
             name.endsWith(".node.js")
     }
 
+    internal fun isBunEntryName(name: String): Boolean = listOf(".bun.js", ".bun.ts", ".bun.tsx").any { name.endsWith(it, ignoreCase = true) }
+
     internal fun hasNodeExecutionDirective(reader: Reader): Boolean {
         return ExecutionModeDirectiveParser(reader).parse()
     }
+
+    internal fun hasBunExecutionDirective(reader: Reader): Boolean =
+        ExecutionModeDirectiveParser(reader, setOf("bun")).parse()
 
     private fun resolveEntry(projectConfig: RemoteProjectConfig, sourcePath: File): File? {
         if (sourcePath.isFile) return sourcePath
@@ -75,7 +88,7 @@ internal object RemoteEmbeddedNodePackagingPolicy {
 
     private fun unsupported() = RemoteApkBuildUnsupportedException(MIGRATION_MESSAGE)
 
-    private class ExecutionModeDirectiveParser(private val reader: Reader) {
+    private class ExecutionModeDirectiveParser(private val reader: Reader, private val modes: Set<String> = setOf("node", "nodejs")) {
 
         private var pushedCharacter = NO_CHARACTER
         private var consumedCharacters = 0
@@ -91,7 +104,7 @@ internal object RemoteEmbeddedNodePackagingPolicy {
             fun finishModeToken() {
                 if (!tokenTooLong) {
                     val token = modeToken.toString()
-                    if (token.equals("node", ignoreCase = true) || token.equals("nodejs", ignoreCase = true)) {
+                    if (token.lowercase(Locale.ROOT) in modes) {
                         nodeMode = true
                     }
                 }

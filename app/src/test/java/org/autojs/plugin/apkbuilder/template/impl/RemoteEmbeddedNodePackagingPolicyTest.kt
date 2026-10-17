@@ -9,6 +9,15 @@ import java.io.StringReader
 
 class RemoteEmbeddedNodePackagingPolicyTest {
 
+    @Test fun bunDirectiveSelectionDoesNotConfuseNodeOrStrings() {
+        for (name in listOf("main.bun.js", "main.BUN.ts", "main.bun.tsx")) assertTrue(RemoteEmbeddedNodePackagingPolicy.isBunEntryName(name))
+        for (name in listOf("main.mjs", "main.js", "main.ts", "main.bun.d.ts")) assertFalse(RemoteEmbeddedNodePackagingPolicy.isBunEntryName(name))
+        for (source in listOf("/* project */ 'bun';\n", "// comment\n\"ui | BUN\";", "'\\u0062un';"))
+            assertTrue(source, RemoteEmbeddedNodePackagingPolicy.hasBunExecutionDirective(StringReader(source)))
+        for (source in listOf("'node';", "const x='bun';", "'bun' + value;", "'bun'"))
+            assertFalse(source, RemoteEmbeddedNodePackagingPolicy.hasBunExecutionDirective(StringReader(source)))
+    }
+
     @Test
     fun onlyRetiredEmbeddedLibraryNamesAreRejected() {
         listOf(

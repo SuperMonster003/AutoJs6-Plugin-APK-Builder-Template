@@ -5,6 +5,12 @@
   "changelog_label_improvement": "優化",
   "changelog_label_dependency": "依賴",
   "$data": {
+    "v1.2.0": {
+      "released_date": "2026/10/18",
+      "feature": [
+        "APK Builder 支援獨立簽署的 Bun 項目, 使用明確的宿主能力聲明及配套 Runtime Kit 實現 Compose 互操作"
+      ]
+    },
     "v1.1.0": {
       "released_date": "2026/10/11",
       "feature": [

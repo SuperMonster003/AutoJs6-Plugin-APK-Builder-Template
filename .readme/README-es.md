@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.0
+
+###### 2026/10/18
+
+* `Función` APK Builder admite proyectos Bun firmados de forma independiente, con capacidades del host explícitas y un Runtime Kit compatible con Compose
+
 # v1.1.0
 
 ###### 2026/10/11
@@ -249,16 +255,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 * `Mejora` Los iconos del centro de plugins usan los tamaños, posiciones, imágenes claras y oscuras y fondos circulares ajustados en Icon Studio, conservando fuentes y parámetros reproducibles
 * `Mejora` Los iconos de información de la aplicación de Android comparten las imágenes y los fondos claros y oscuros de Icon Studio, conservando las imágenes transparentes del centro de plugins y las opciones del lanzador
-
-# v1.0.3
-
-###### 2026/09/20
-
-* `Corrección` resources.arsc se almacena sin comprimir y alineado a 4 bytes en los APK generados para que las aplicaciones dirigidas a Android 11 o superior puedan instalarse
-* `Corrección` Advertencias de lectura de SDK XML v4 con AGP 9.1 y comprobaciones de alineación nativa de APK activadas por error al ensamblar pruebas unitarias JVM, mediante los plugins de compilación compartidos 1.8.3
-* `Mejora` Se eliminó el interruptor de compilación `enableRemoteBuild`; el plugin siempre declara su capacidad de compilación de APK
-* `Mejora` compileSdk y targetSdk suben a 37 (Android 17); el comportamiento del plugin no depende del nuevo objetivo
-* `Mejora` Reconstruir las cinco variantes ABI del Runtime Kit para AutoJs6 6.8.0 compilación 5282 con un rango explícito de compatibilidad del host
 
 ##### Para más historial
 

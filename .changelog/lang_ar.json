@@ -5,6 +5,12 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "تبعية",
   "$data": {
+    "v1.2.0": {
+      "released_date": "2026/10/18",
+      "feature": [
+        "يدعم APK Builder مشاريع Bun الموقعة بشكل مستقل مع قدرات مضيف صريحة و Runtime Kit متوافق لتكامل Compose"
+      ]
+    },
     "v1.1.0": {
       "released_date": "2026/10/11",
       "feature": [
