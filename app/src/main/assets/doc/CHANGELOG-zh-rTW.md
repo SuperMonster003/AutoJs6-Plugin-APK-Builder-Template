@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.3
+
+###### 2026/10/18
+
+* `新增` Node.js/Bun: WebView HTTP(S) 下載, 系統檔案選擇及非同步 WebViewClient/WebChromeClient 回呼, 支援原生導覽和資源規則
+
 # v1.2.2
 
 ###### 2026/10/18

@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.3
+
+###### 2026/10/18
+
+* `Feature` Node.js/Bun: WebView HTTP(S) downloads, system file selection and asynchronous WebViewClient/WebChromeClient callbacks with native navigation and resource rules
+
 # v1.2.2
 
 ###### 2026/10/18
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/18
 
 * `Feature` Node.js/Bun support common XML form and layout widgets and asynchronous native View property access, including ordered assignments, error recovery and Worker use
-
-# v1.2.0
-
-###### 2026/10/18
-
-* `Feature` APK Builder supports independently signed Bun projects with explicit host capabilities and a matching Runtime Kit for Compose interoperability
 
 ##### For more release history
 

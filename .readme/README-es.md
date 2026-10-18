@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.3
+
+###### 2026/10/18
+
+* `Función` Node.js/Bun: Descargas HTTP(S) de WebView, selección de archivos del sistema y callbacks asíncronos WebViewClient/WebChromeClient con reglas nativas de navegación y recursos
+
 # v1.2.2
 
 ###### 2026/10/18
@@ -248,12 +254,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/10/18
 
 * `Función` Node.js/Bun admiten formularios y diseños XML comunes, propiedades View asíncronas, asignaciones ordenadas, recuperación de errores y Workers
-
-# v1.2.0
-
-###### 2026/10/18
-
-* `Función` APK Builder admite proyectos Bun firmados de forma independiente, con capacidades del host explícitas y un Runtime Kit compatible con Compose
 
 ##### Para más historial
 
