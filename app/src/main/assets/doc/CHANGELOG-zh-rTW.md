@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.6
+
+###### 2026/10/18
+
+* `新增` WebView getUserMedia/MediaRecorder 串流音訊與影片, 支援等待網頁 Promise, 明確申請 Android 媒體權限及 Worker 生命週期管理
+* `修復` 打包應用程式選擇 RECORD_AUDIO 時保留配套的 MODIFY_AUDIO_SETTINGS 權限, 使 WebView 可擷取麥克風
+
 # v1.2.5
 
 ###### 2026/10/18

@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.6
+
+###### 2026/10/18
+
+* `機能` WebView の getUserMedia/MediaRecorder による音声と動画のストリーミング, ページの Promise 待機, Android メディア権限の明示的な要求と Worker のライフサイクル管理
+* `修正` パッケージアプリで RECORD_AUDIO を選択すると MODIFY_AUDIO_SETTINGS を保持し, WebView のマイク収録を有効にする
+
 # v1.2.5
 
 ###### 2026/10/18

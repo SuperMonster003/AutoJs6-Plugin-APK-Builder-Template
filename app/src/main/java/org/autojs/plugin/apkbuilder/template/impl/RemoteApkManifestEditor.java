@@ -52,6 +52,10 @@ class RemoteApkManifestEditor {
 
     RemoteApkManifestEditor setPermissions(Collection<String> permissions) {
         mPermissions = permissions == null ? null : new HashSet<>(permissions);
+        // Chromium requires this normal permission as well as the user's microphone grant.
+        if (mPermissions != null && mPermissions.contains("android.permission.RECORD_AUDIO")) {
+            mPermissions.add("android.permission.MODIFY_AUDIO_SETTINGS");
+        }
         return this;
     }
 

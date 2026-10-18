@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.6
+
+###### 2026/10/18
+
+* `Feature` WebView getUserMedia/MediaRecorder streaming audio and video, awaited page Promises, explicit Android media permission requests and Worker lifecycle support
+* `Fix` Packaged microphone access retains MODIFY_AUDIO_SETTINGS alongside RECORD_AUDIO, allowing WebView audio capture
+
 # v1.2.5
 
 ###### 2026/10/18

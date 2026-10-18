@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.6
+
+###### 2026/10/18
+
+* `新增` WebView getUserMedia/MediaRecorder 流式音视频, 支持等待网页 Promise, 显式申请 Android 媒体权限及 Worker 生命周期管理
+* `修复` 打包应用选择 RECORD_AUDIO 时保留配套的 MODIFY_AUDIO_SETTINGS 权限, 使 WebView 可采集麦克风
+
 # v1.2.5
 
 ###### 2026/10/18

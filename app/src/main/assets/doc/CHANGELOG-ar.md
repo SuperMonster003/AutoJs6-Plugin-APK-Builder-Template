@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.6
+
+###### 2026/10/18
+
+* `ميزة` بث الصوت والفيديو عبر WebView getUserMedia/MediaRecorder, وانتظار Promise للصفحة, وطلب أذونات الوسائط في Android صراحة, وإدارة دورة حياة Worker
+* `إصلاح` الاحتفاظ بإذن MODIFY_AUDIO_SETTINGS مع RECORD_AUDIO في التطبيقات المجمعة لالتقاط الصوت عبر WebView
+
 # v1.2.5
 
 ###### 2026/10/18

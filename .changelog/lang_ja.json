@@ -5,6 +5,15 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v1.2.6": {
+      "released_date": "2026/10/18",
+      "feature": [
+        "WebView の getUserMedia/MediaRecorder による音声と動画のストリーミング, ページの Promise 待機, Android メディア権限の明示的な要求と Worker のライフサイクル管理"
+      ],
+      "fix": [
+        "パッケージアプリで RECORD_AUDIO を選択すると MODIFY_AUDIO_SETTINGS を保持し, WebView のマイク収録を有効にする"
+      ]
+    },
     "v1.2.5": {
       "released_date": "2026/10/18",
       "feature": [

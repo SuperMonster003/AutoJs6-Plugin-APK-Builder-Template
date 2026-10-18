@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.6
+
+###### 2026/10/18
+
+* `Fonctionnalité` Flux audio et video WebView getUserMedia/MediaRecorder, attente des Promise de page, demandes explicites de permissions multimedia Android et cycle de vie des Worker
+* `Correctif` Les applications generees conservent MODIFY_AUDIO_SETTINGS avec RECORD_AUDIO pour la capture audio WebView
+
 # v1.2.5
 
 ###### 2026/10/18

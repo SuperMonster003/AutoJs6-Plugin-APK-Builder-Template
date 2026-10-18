@@ -237,6 +237,13 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.6
+
+###### 2026/10/18
+
+* `Función` Audio y video en directo con WebView getUserMedia/MediaRecorder, espera de Promise de pagina, solicitudes explicitas de permisos multimedia Android y ciclo de vida de Worker
+* `Corrección` Las aplicaciones generadas conservan MODIFY_AUDIO_SETTINGS junto a RECORD_AUDIO para capturar audio en WebView
+
 # v1.2.5
 
 ###### 2026/10/18
@@ -248,12 +255,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/10/18
 
 * `Función` Node.js/Bun: Captura WebView de fotos completas, selección de archivos y directorios, lectura de bytes y descargas blob/data hacia los destinos elegidos
-
-# v1.2.3
-
-###### 2026/10/18
-
-* `Función` Node.js/Bun: Descargas HTTP(S) de WebView, selección de archivos del sistema y callbacks asíncronos WebViewClient/WebChromeClient con reglas nativas de navegación y recursos
 
 ##### Para más historial
 

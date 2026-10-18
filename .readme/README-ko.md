@@ -237,6 +237,13 @@ ROADMAP.md 에서 정식 플러그인 관리 빌드, 후보, ABI 별 배포, 호
 
 ******
 
+# v1.2.6
+
+###### 2026/10/18
+
+* `기능` WebView getUserMedia/MediaRecorder 오디오 및 비디오 스트리밍, 페이지 Promise 대기, 명시적 Android 미디어 권한 요청 및 Worker 수명 주기 관리
+* `수정` 패키지 앱에서 RECORD_AUDIO 선택 시 MODIFY_AUDIO_SETTINGS 권한을 유지하여 WebView 마이크 캡처 지원
+
 # v1.2.5
 
 ###### 2026/10/18
@@ -248,12 +255,6 @@ ROADMAP.md 에서 정식 플러그인 관리 빌드, 후보, ABI 별 배포, 호
 ###### 2026/10/18
 
 * `기능` Node.js/Bun: WebView 원본 크기 사진 촬영, 저장 및 디렉터리 선택, 문서 바이트 읽기, blob/data 분할 다운로드와 선택한 위치로 출력
-
-# v1.2.3
-
-###### 2026/10/18
-
-* `기능` Node.js/Bun: WebView HTTP(S) 다운로드, 시스템 파일 선택, 비동기 WebViewClient/WebChromeClient 콜백 및 네이티브 탐색과 리소스 규칙
 
 ##### 더 많은 릴리스 기록
 

@@ -5,6 +5,15 @@
   "changelog_label_improvement": "Mejora",
   "changelog_label_dependency": "Dependencia",
   "$data": {
+    "v1.2.6": {
+      "released_date": "2026/10/18",
+      "feature": [
+        "Audio y video en directo con WebView getUserMedia/MediaRecorder, espera de Promise de pagina, solicitudes explicitas de permisos multimedia Android y ciclo de vida de Worker"
+      ],
+      "fix": [
+        "Las aplicaciones generadas conservan MODIFY_AUDIO_SETTINGS junto a RECORD_AUDIO para capturar audio en WebView"
+      ]
+    },
     "v1.2.5": {
       "released_date": "2026/10/18",
       "feature": [

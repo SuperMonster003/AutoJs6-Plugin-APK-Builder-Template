@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.6
+
+###### 2026/10/18
+
+* `기능` WebView getUserMedia/MediaRecorder 오디오 및 비디오 스트리밍, 페이지 Promise 대기, 명시적 Android 미디어 권한 요청 및 Worker 수명 주기 관리
+* `수정` 패키지 앱에서 RECORD_AUDIO 선택 시 MODIFY_AUDIO_SETTINGS 권한을 유지하여 WebView 마이크 캡처 지원
+
 # v1.2.5
 
 ###### 2026/10/18

@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.6
+
+###### 2026/10/18
+
+* `Función` Audio y video en directo con WebView getUserMedia/MediaRecorder, espera de Promise de pagina, solicitudes explicitas de permisos multimedia Android y ciclo de vida de Worker
+* `Corrección` Las aplicaciones generadas conservan MODIFY_AUDIO_SETTINGS junto a RECORD_AUDIO para capturar audio en WebView
+
 # v1.2.5
 
 ###### 2026/10/18
