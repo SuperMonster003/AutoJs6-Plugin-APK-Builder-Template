@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.7
+
+###### 2026/10/18
+
+* `Feature` WebView screen sharing adapter, foreground-service audio capture and native background camera recording in Node.js/Bun, including Node Workers
+
 # v1.2.6
 
 ###### 2026/10/18
@@ -249,12 +255,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/18
 
 * `Feature` Node.js/Bun: WebView video capture and foreground AAC/M4A audio recording, with media options, configurable chooser deadlines and temporary-file cleanup
-
-# v1.2.4
-
-###### 2026/10/18
-
-* `Feature` Node.js/Bun: WebView full-size camera capture, save and directory selection, document byte reads, and streamed blob/data downloads with selected output locations
 
 ##### For more release history
 

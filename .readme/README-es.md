@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.7
+
+###### 2026/10/18
+
+* `Función` Adaptador para compartir pantalla WebView, captura de audio mediante servicio en primer plano y grabacion de camara nativa en segundo plano para Node.js/Bun y Node Worker
+
 # v1.2.6
 
 ###### 2026/10/18
@@ -249,12 +255,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/10/18
 
 * `Función` Node.js/Bun: Captura de vídeo WebView y audio AAC/M4A en primer plano, con opciones multimedia, plazos configurables y limpieza de archivos temporales
-
-# v1.2.4
-
-###### 2026/10/18
-
-* `Función` Node.js/Bun: Captura WebView de fotos completas, selección de archivos y directorios, lectura de bytes y descargas blob/data hacia los destinos elegidos
 
 ##### Para más historial
 

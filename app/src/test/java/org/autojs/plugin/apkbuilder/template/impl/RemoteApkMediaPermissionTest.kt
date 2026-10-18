@@ -11,10 +11,12 @@ import java.io.ByteArrayOutputStream
 class RemoteApkMediaPermissionTest {
     @Test fun microphoneSelectionPreservesChromiumAudioPermissionWithoutGrantingCamera() {
         val microphone="android.permission.RECORD_AUDIO";val settings="android.permission.MODIFY_AUDIO_SETTINGS";val camera="android.permission.CAMERA"
-        for ((selected,expected) in listOf(listOf(microphone) to setOf(microphone,settings), emptyList<String>() to emptySet(), listOf(settings) to setOf(settings))) {
+        val service="android.permission.FOREGROUND_SERVICE";val audioService=service+"_MICROPHONE";val cameraService=service+"_CAMERA";val projectionService=service+"_MEDIA_PROJECTION"
+        for ((selected,expected) in listOf(listOf(microphone) to setOf(microphone,settings,service,audioService), emptyList<String>() to emptySet(), listOf(settings) to setOf(settings),
+            listOf(camera) to setOf(camera,service,cameraService),listOf(projectionService) to setOf(projectionService,service))) {
             val writer=AxmlWriter();val manifest=writer.child(null,"manifest")
             manifest.attr(null,"package",-1,NodeVisitor.TYPE_STRING,"org.autojs.fixture")
-            for(permission in listOf(microphone,settings,camera))manifest.child(null,"uses-permission").apply {
+            for(permission in listOf(microphone,settings,camera,service,audioService,cameraService,projectionService))manifest.child(null,"uses-permission").apply {
                 attr("http://schemas.android.com/apk/res/android","name",android.R.attr.name,NodeVisitor.TYPE_STRING,permission);end()
             }
             manifest.end();writer.end()
