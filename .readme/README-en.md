@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.2
+
+###### 2026/10/18
+
+* `Feature` Node.js/Bun: WebView page loading and JavaScript results, Drawer panels, Toolbar navigation and menus, and ViewPager pages with asynchronous native events
+
 # v1.2.1
 
 ###### 2026/10/18
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/18
 
 * `Feature` APK Builder supports independently signed Bun projects with explicit host capabilities and a matching Runtime Kit for Compose interoperability
-
-# v1.1.0
-
-###### 2026/10/11
-
-* `Feature` Packaged Node.js projects and scripts use the external Node.js Runtime plugin, support independently signed applications, and show installation guidance when the runtime is unavailable
 
 ##### For more release history
 

@@ -237,6 +237,12 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 
 ******
 
+# v1.2.2
+
+###### 2026/10/18
+
+* `Fonctionnalité` Node.js/Bun: Chargement WebView et résultats JavaScript, panneaux Drawer, navigation et menus Toolbar, pages ViewPager et événements natifs asynchrones
+
 # v1.2.1
 
 ###### 2026/10/18
@@ -248,12 +254,6 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 ###### 2026/10/18
 
 * `Fonctionnalité` APK Builder prend en charge les projets Bun signés indépendamment, avec des capacités hôtes explicites et un Runtime Kit compatible avec Compose
-
-# v1.1.0
-
-###### 2026/10/11
-
-* `Fonctionnalité` Les projets et scripts Node.js peuvent être empaquetés en applications signées indépendamment, exécutées par le plugin externe Node.js Runtime, avec une aide à l'installation si le runtime est indisponible
 
 ##### Pour plus d'historique
 

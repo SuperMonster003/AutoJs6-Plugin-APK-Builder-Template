@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.2
+
+###### 2026/10/18
+
+* `Función` Node.js/Bun: Carga WebView y resultados JavaScript, paneles Drawer, navegación y menús Toolbar, páginas ViewPager y eventos nativos asíncronos
+
 # v1.2.1
 
 ###### 2026/10/18

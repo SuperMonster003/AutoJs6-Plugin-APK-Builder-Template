@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.2
+
+###### 2026/10/18
+
+* `Feature` Node.js/Bun: WebView page loading and JavaScript results, Drawer panels, Toolbar navigation and menus, and ViewPager pages with asynchronous native events
+
 # v1.2.1
 
 ###### 2026/10/18
