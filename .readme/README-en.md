@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.8
+
+###### 2026/10/19
+
+* `Feature` Bun accessibility, app operations and clipboard APIs aligned with the Node.js interfaces, with independent grants and packaged-app support
+
 # v1.2.7
 
 ###### 2026/10/18
@@ -249,12 +255,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 * `Feature` WebView getUserMedia/MediaRecorder streaming audio and video, awaited page Promises, explicit Android media permission requests and Worker lifecycle support
 * `Fix` Packaged microphone access retains MODIFY_AUDIO_SETTINGS alongside RECORD_AUDIO, allowing WebView audio capture
-
-# v1.2.5
-
-###### 2026/10/18
-
-* `Feature` Node.js/Bun: WebView video capture and foreground AAC/M4A audio recording, with media options, configurable chooser deadlines and temporary-file cleanup
 
 ##### For more release history
 

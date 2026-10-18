@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.8
+
+###### 2026/10/19
+
+* `Feature` Bun accessibility, app operations and clipboard APIs aligned with the Node.js interfaces, with independent grants and packaged-app support
+
 # v1.2.7
 
 ###### 2026/10/18

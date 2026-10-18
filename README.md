@@ -237,6 +237,12 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 
 ******
 
+# v1.2.8
+
+###### 2026/10/19
+
+* `新增` Bun 无障碍, 应用操作与剪贴板 API 对齐 Node.js 对应接口, 支持独立授权和打包应用
+
 # v1.2.7
 
 ###### 2026/10/18
@@ -249,12 +255,6 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 
 * `新增` WebView getUserMedia/MediaRecorder 流式音视频, 支持等待网页 Promise, 显式申请 Android 媒体权限及 Worker 生命周期管理
 * `修复` 打包应用选择 RECORD_AUDIO 时保留配套的 MODIFY_AUDIO_SETTINGS 权限, 使 WebView 可采集麦克风
-
-# v1.2.5
-
-###### 2026/10/18
-
-* `新增` Node.js/Bun: WebView 视频拍摄与前台 AAC/M4A 录音, 支持媒体参数, 可配置选择等待时限和临时文件清理
 
 ##### 更多发行历史可参阅
 

@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.8
+
+###### 2026/10/19
+
+* `Función` API de accesibilidad, aplicaciones y portapapeles de Bun alineadas con Node.js, con permisos independientes y aplicaciones empaquetadas
+
 # v1.2.7
 
 ###### 2026/10/18
@@ -249,12 +255,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 * `Función` Audio y video en directo con WebView getUserMedia/MediaRecorder, espera de Promise de pagina, solicitudes explicitas de permisos multimedia Android y ciclo de vida de Worker
 * `Corrección` Las aplicaciones generadas conservan MODIFY_AUDIO_SETTINGS junto a RECORD_AUDIO para capturar audio en WebView
-
-# v1.2.5
-
-###### 2026/10/18
-
-* `Función` Node.js/Bun: Captura de vídeo WebView y audio AAC/M4A en primer plano, con opciones multimedia, plazos configurables y limpieza de archivos temporales
 
 ##### Para más historial
 
