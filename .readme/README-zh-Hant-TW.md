@@ -237,6 +237,12 @@ ROADMAP.md 以可核查清單追蹤正式外掛託管建置, 發布候選, 分 A
 
 ******
 
+# v1.2.5
+
+###### 2026/10/18
+
+* `新增` Node.js/Bun: WebView 影片拍攝與前景 AAC/M4A 錄音, 支援媒體參數, 可設定選擇等待時限及暫存檔案清理
+
 # v1.2.4
 
 ###### 2026/10/18
@@ -248,12 +254,6 @@ ROADMAP.md 以可核查清單追蹤正式外掛託管建置, 發布候選, 分 A
 ###### 2026/10/18
 
 * `新增` Node.js/Bun: WebView HTTP(S) 下載, 系統檔案選擇及非同步 WebViewClient/WebChromeClient 回呼, 支援原生導覽和資源規則
-
-# v1.2.2
-
-###### 2026/10/18
-
-* `新增` Node.js/Bun: WebView 頁面載入與 JavaScript 回傳值, Drawer 側欄, Toolbar 導覽與選單, ViewPager 頁面及非同步原生事件
 
 ##### 更多發行歷史可參閱
 

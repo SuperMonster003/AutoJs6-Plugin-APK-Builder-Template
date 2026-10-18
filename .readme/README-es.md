@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.5
+
+###### 2026/10/18
+
+* `Función` Node.js/Bun: Captura de vídeo WebView y audio AAC/M4A en primer plano, con opciones multimedia, plazos configurables y limpieza de archivos temporales
+
 # v1.2.4
 
 ###### 2026/10/18
@@ -248,12 +254,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/10/18
 
 * `Función` Node.js/Bun: Descargas HTTP(S) de WebView, selección de archivos del sistema y callbacks asíncronos WebViewClient/WebChromeClient con reglas nativas de navegación y recursos
-
-# v1.2.2
-
-###### 2026/10/18
-
-* `Función` Node.js/Bun: Carga WebView y resultados JavaScript, paneles Drawer, navegación y menús Toolbar, páginas ViewPager y eventos nativos asíncronos
 
 ##### Para más historial
 

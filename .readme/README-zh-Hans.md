@@ -237,6 +237,12 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 
 ******
 
+# v1.2.5
+
+###### 2026/10/18
+
+* `新增` Node.js/Bun: WebView 视频拍摄与前台 AAC/M4A 录音, 支持媒体参数, 可配置选择等待时限和临时文件清理
+
 # v1.2.4
 
 ###### 2026/10/18
@@ -248,12 +254,6 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 ###### 2026/10/18
 
 * `新增` Node.js/Bun: WebView HTTP(S) 下载, 系统文件选择及异步 WebViewClient/WebChromeClient 回调, 支持原生导航和资源规则
-
-# v1.2.2
-
-###### 2026/10/18
-
-* `新增` Node.js/Bun: WebView 页面加载与 JavaScript 返回值, Drawer 侧栏, Toolbar 导航与菜单, ViewPager 页面及异步原生事件
 
 ##### 更多发行历史可参阅
 

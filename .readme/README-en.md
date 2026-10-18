@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.5
+
+###### 2026/10/18
+
+* `Feature` Node.js/Bun: WebView video capture and foreground AAC/M4A audio recording, with media options, configurable chooser deadlines and temporary-file cleanup
+
 # v1.2.4
 
 ###### 2026/10/18
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/18
 
 * `Feature` Node.js/Bun: WebView HTTP(S) downloads, system file selection and asynchronous WebViewClient/WebChromeClient callbacks with native navigation and resource rules
-
-# v1.2.2
-
-###### 2026/10/18
-
-* `Feature` Node.js/Bun: WebView page loading and JavaScript results, Drawer panels, Toolbar navigation and menus, and ViewPager pages with asynchronous native events
 
 ##### For more release history
 
