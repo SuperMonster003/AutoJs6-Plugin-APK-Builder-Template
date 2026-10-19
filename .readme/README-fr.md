@@ -237,6 +237,12 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 
 ******
 
+# v1.2.12
+
+###### 2026/10/19
+
+* `Fonctionnalité` Shell hôte avec flux, autorisation Shizuku et nettoyage des processus pour Bun, Node.js et les Workers
+
 # v1.2.11
 
 ###### 2026/10/19
@@ -248,12 +254,6 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 ###### 2026/10/19
 
 * `Fonctionnalité` API hôtes database/sqlite pour Bun et les Workers Node.js, avec requêtes paramétrées, transactions et persistance
-
-# v1.2.9
-
-###### 2026/10/19
-
-* `Fonctionnalité` API Bun de fichiers et de stockage persistant, avec autorisations distinctes et stockage partagé avec Node.js
 
 ##### Pour plus d'historique
 

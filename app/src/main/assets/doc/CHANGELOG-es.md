@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.12
+
+###### 2026/10/19
+
+* `Función` Shell del anfitrión con flujos, autorización Shizuku y limpieza de procesos para Bun, Node.js y Workers
+
 # v1.2.11
 
 ###### 2026/10/19

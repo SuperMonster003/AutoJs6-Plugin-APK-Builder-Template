@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.12
+
+###### 2026/10/19
+
+* `Feature` Host Shell streaming, Shizuku authorization and process cleanup for Bun, Node.js and Workers
+
 # v1.2.11
 
 ###### 2026/10/19
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/19
 
 * `Feature` Host database/sqlite APIs for Bun and Node.js Workers with parameterized queries, transactions and persistence
-
-# v1.2.9
-
-###### 2026/10/19
-
-* `Feature` Bun file and persistent storage APIs with separate host-file grants and shared Node.js storage
 
 ##### For more release history
 

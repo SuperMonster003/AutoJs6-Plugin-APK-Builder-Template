@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.12
+
+###### 2026/10/19
+
+* `Función` Shell del anfitrión con flujos, autorización Shizuku y limpieza de procesos para Bun, Node.js y Workers
+
 # v1.2.11
 
 ###### 2026/10/19
@@ -248,12 +254,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/10/19
 
 * `Función` API database/sqlite del anfitrión para Bun y Workers de Node.js, con consultas parametrizadas, transacciones y persistencia
-
-# v1.2.9
-
-###### 2026/10/19
-
-* `Función` API de archivos y almacenamiento persistente de Bun, con permisos independientes y almacenamiento compartido con Node.js
 
 ##### Para más historial
 
