@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.14
+
+###### 2026/10/19
+
+* `Feature` Device controls and dialogs for Bun and Node.js Workers, including brightness, volume and independent window cleanup
+
 # v1.2.13
 
 ###### 2026/10/19
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/19
 
 * `Feature` Host Shell streaming, Shizuku authorization and process cleanup for Bun, Node.js and Workers
-
-# v1.2.11
-
-###### 2026/10/19
-
-* `Feature` Sensor sampling and subscriptions for Bun and Node.js Workers with cancellation and automatic listener cleanup
 
 ##### For more release history
 

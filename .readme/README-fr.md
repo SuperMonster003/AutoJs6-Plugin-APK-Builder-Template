@@ -237,6 +237,12 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 
 ******
 
+# v1.2.14
+
+###### 2026/10/19
+
+* `Fonctionnalité` Commandes de périphérique et dialogues pour Bun et les Workers Node.js, avec luminosité, volume et nettoyage indépendant des fenêtres
+
 # v1.2.13
 
 ###### 2026/10/19
@@ -248,12 +254,6 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 ###### 2026/10/19
 
 * `Fonctionnalité` Shell hôte avec flux, autorisation Shizuku et nettoyage des processus pour Bun, Node.js et les Workers
-
-# v1.2.11
-
-###### 2026/10/19
-
-* `Fonctionnalité` Mesures et abonnements aux capteurs pour Bun et les Workers Node.js, avec annulation et libération automatique des écouteurs
 
 ##### Pour plus d'historique
 

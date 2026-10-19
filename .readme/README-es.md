@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.14
+
+###### 2026/10/19
+
+* `Función` Control del dispositivo y diálogos para Bun y Workers de Node.js, con brillo, volumen y limpieza independiente de ventanas
+
 # v1.2.13
 
 ###### 2026/10/19
@@ -248,12 +254,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/10/19
 
 * `Función` Shell del anfitrión con flujos, autorización Shizuku y limpieza de procesos para Bun, Node.js y Workers
-
-# v1.2.11
-
-###### 2026/10/19
-
-* `Función` Muestras y suscripciones de sensores para Bun y Workers de Node.js, con cancelación y liberación automática de escuchas
 
 ##### Para más historial
 
