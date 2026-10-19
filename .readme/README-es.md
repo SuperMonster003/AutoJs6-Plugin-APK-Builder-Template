@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.16
+
+###### 2026/10/20
+
+* `Función` Interoperabilidad Java/Android para Node.js, Bun y Workers, con constructores y miembros públicos, matrices, valores long exactos, sobrecargas explícitas y referencias Context
+
 # v1.2.15
 
 ###### 2026/10/19
@@ -250,12 +256,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/10/19
 
 * `Función` Control del dispositivo y diálogos para Bun y Workers de Node.js, con brillo, volumen y limpieza independiente de ventanas
-
-# v1.2.13
-
-###### 2026/10/19
-
-* `Función` Eventos y notificaciones del anfitrión para Bun y Workers de Node.js, con limpieza independiente de suscripciones y notificaciones
 
 ##### Para más historial
 

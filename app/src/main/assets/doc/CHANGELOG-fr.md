@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.16
+
+###### 2026/10/20
+
+* `Fonctionnalité` Interopérabilité Java/Android pour Node.js, Bun et Workers, avec constructeurs et membres publics, tableaux, valeurs long exactes, surcharges explicites et handles Context
+
 # v1.2.15
 
 ###### 2026/10/19

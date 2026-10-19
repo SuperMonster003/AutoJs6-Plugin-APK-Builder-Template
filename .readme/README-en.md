@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.16
+
+###### 2026/10/20
+
+* `Feature` Java/Android object interop for Node.js, Bun and Workers, including public constructors and members, arrays, exact long values, explicit overloads and application Context handles
+
 # v1.2.15
 
 ###### 2026/10/19
@@ -250,12 +256,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/19
 
 * `Feature` Device controls and dialogs for Bun and Node.js Workers, including brightness, volume and independent window cleanup
-
-# v1.2.13
-
-###### 2026/10/19
-
-* `Feature` Host event observers and notifications for Bun and Node.js Workers, with independent subscription and notification cleanup
 
 ##### For more release history
 

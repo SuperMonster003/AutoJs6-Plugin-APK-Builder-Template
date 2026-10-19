@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.16
+
+###### 2026/10/20
+
+* `Feature` Java/Android object interop for Node.js, Bun and Workers, including public constructors and members, arrays, exact long values, explicit overloads and application Context handles
+
 # v1.2.15
 
 ###### 2026/10/19
