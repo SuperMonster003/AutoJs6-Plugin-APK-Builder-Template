@@ -5,6 +5,15 @@
   "changelog_label_improvement": "Amélioration",
   "changelog_label_dependency": "Dépendance",
   "$data": {
+    "v1.2.17": {
+      "released_date": "2026/10/20",
+      "feature": [
+        "Callbacks Java, sous-classes générées et chargement JAR/DEX pour Node.js, Bun et Workers, avec retours Promise, appels de la superclasse et libération en fin de session"
+      ],
+      "fix": [
+        "Arrêt prématuré de la page de lancement des applications Bun masquées, exposant le processus à la récupération pendant le démarrage à froid"
+      ]
+    },
     "v1.2.16": {
       "released_date": "2026/10/20",
       "feature": [

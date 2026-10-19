@@ -237,6 +237,13 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.17
+
+###### 2026/10/20
+
+* `Función` Callbacks Java, subclases generadas y carga de JAR/DEX para Node.js, Bun y Workers, con resultados Promise, llamadas a la superclase y limpieza al terminar
+* `Corrección` Cierre prematuro de la actividad de inicio en aplicaciones Bun con páginas ocultas, que permite al sistema finalizar el proceso durante el arranque en frío
+
 # v1.2.16
 
 ###### 2026/10/20
@@ -250,12 +257,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 * `Función` Objetos Android para Node.js, Bun y Workers, con Paint, ColorStateList, colores del tema y URI FileProvider
 * `Función` API persistentes de calendario e IntentTask para Node.js y Bun, con tareas diarias, semanales, mensuales, anuales, únicas, de cuenta atrás y de difusión
 * `Corrección` URI FileProvider de aplicaciones generadas que usaban la autoridad de la plantilla en lugar de la del manifiesto real
-
-# v1.2.14
-
-###### 2026/10/19
-
-* `Función` Control del dispositivo y diálogos para Bun y Workers de Node.js, con brillo, volumen y limpieza independiente de ventanas
 
 ##### Para más historial
 

@@ -5,6 +5,15 @@
   "changelog_label_improvement": "개선",
   "changelog_label_dependency": "의존성",
   "$data": {
+    "v1.2.17": {
+      "released_date": "2026/10/20",
+      "feature": [
+        "Node.js/Bun/Worker의 Java 콜백, 하위 클래스 생성 및 JAR/DEX 로드로 Promise 반환값, 부모 클래스 호출 및 실행 종료 정리 지원"
+      ],
+      "fix": [
+        "시작 및 로그 화면을 숨긴 Bun 패키지 앱에서 Activity가 너무 일찍 종료되어 초기화 중 프로세스가 회수되는 문제"
+      ]
+    },
     "v1.2.16": {
       "released_date": "2026/10/20",
       "feature": [

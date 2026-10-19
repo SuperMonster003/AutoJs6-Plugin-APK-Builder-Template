@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.17
+
+###### 2026/10/20
+
+* `Feature` Java callbacks, generated subclasses and JAR/DEX loading for Node.js, Bun and Workers, with Promise results, superclass calls and execution cleanup
+* `Fix` Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization
+
 # v1.2.16
 
 ###### 2026/10/20

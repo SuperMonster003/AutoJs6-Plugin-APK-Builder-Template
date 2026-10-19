@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.17
+
+###### 2026/10/20
+
+* `Función` Callbacks Java, subclases generadas y carga de JAR/DEX para Node.js, Bun y Workers, con resultados Promise, llamadas a la superclase y limpieza al terminar
+* `Corrección` Cierre prematuro de la actividad de inicio en aplicaciones Bun con páginas ocultas, que permite al sistema finalizar el proceso durante el arranque en frío
+
 # v1.2.16
 
 ###### 2026/10/20

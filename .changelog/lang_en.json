@@ -5,6 +5,15 @@
   "changelog_label_improvement": "Improvement",
   "changelog_label_dependency": "Dependency",
   "$data": {
+    "v1.2.17": {
+      "released_date": "2026/10/20",
+      "feature": [
+        "Java callbacks, generated subclasses and JAR/DEX loading for Node.js, Bun and Workers, with Promise results, superclass calls and execution cleanup"
+      ],
+      "fix": [
+        "Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization"
+      ]
+    },
     "v1.2.16": {
       "released_date": "2026/10/20",
       "feature": [

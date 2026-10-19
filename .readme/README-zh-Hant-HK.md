@@ -237,6 +237,13 @@ ROADMAP.md 以可核查清單跟蹤正式插件託管構建, 發布候選, 分 A
 
 ******
 
+# v1.2.17
+
+###### 2026/10/20
+
+* `新增` Node.js/Bun/Worker 的 Java 回調代理, 子類別產生和 JAR/DEX 載入, 支援 Promise 回傳值, 父類別呼叫及執行結束清理
+* `修復` Bun 打包應用程式隱藏啟動畫面和日誌畫面時, 啟動 Activity 過早結束導致冷啟動初始化期間程序被系統回收的問題
+
 # v1.2.16
 
 ###### 2026/10/20
@@ -250,12 +257,6 @@ ROADMAP.md 以可核查清單跟蹤正式插件託管構建, 發布候選, 分 A
 * `新增` Node.js/Bun 的 Android 物件輔助介面及 Worker 封裝, 支援 Paint, ColorStateList, 主題色和 FileProvider URI
 * `新增` Node.js/Bun 的持久日曆與 IntentTask API, 支援每日, 每週, 每月, 每年, 單次, 倒數計時和廣播任務
 * `修復` 打包應用的 FileProvider URI 輔助介面使用範本識別碼而非實際清單識別碼的問題
-
-# v1.2.14
-
-###### 2026/10/19
-
-* `新增` Bun 與 Node.js Worker 的裝置控制及對話框 API, 支援亮度, 音量和獨立視窗清理
 
 ##### 更多發行歷史可參閱
 

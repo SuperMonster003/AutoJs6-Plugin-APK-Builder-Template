@@ -4,6 +4,13 @@
 
 ******
 
+# v1.2.17
+
+###### 2026/10/20
+
+* `Fonctionnalité` Callbacks Java, sous-classes générées et chargement JAR/DEX pour Node.js, Bun et Workers, avec retours Promise, appels de la superclasse et libération en fin de session
+* `Correctif` Arrêt prématuré de la page de lancement des applications Bun masquées, exposant le processus à la récupération pendant le démarrage à froid
+
 # v1.2.16
 
 ###### 2026/10/20
