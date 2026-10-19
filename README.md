@@ -237,6 +237,14 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 
 ******
 
+# v1.2.15
+
+###### 2026/10/19
+
+* `新增` Node.js/Bun 的 Android 对象辅助接口及 Worker 封装, 支持 Paint, ColorStateList, 主题色和 FileProvider URI
+* `新增` Node.js/Bun 的持久日历与 IntentTask API, 支持每日, 每周, 每月, 每年, 一次性, 倒计时和广播任务
+* `修复` 打包应用的 FileProvider URI 辅助接口使用模板标识而非实际清单标识的问题
+
 # v1.2.14
 
 ###### 2026/10/19
@@ -248,12 +256,6 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 ###### 2026/10/19
 
 * `新增` Bun 与 Node.js Worker 的宿主事件和通知 API, 支持独立订阅与通知清理
-
-# v1.2.12
-
-###### 2026/10/19
-
-* `新增` Bun, Node.js 及 Worker 的宿主 Shell API, 支持流式输入输出, Shizuku 授权与进程清理
 
 ##### 更多发行历史可参阅
 

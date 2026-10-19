@@ -237,6 +237,14 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.15
+
+###### 2026/10/19
+
+* `Feature` Android object helpers for Node.js, Bun and Workers, including Paint, ColorStateList, theme colors and FileProvider URIs
+* `Feature` Persistent calendar and IntentTask APIs for Node.js and Bun, with daily, weekly, monthly, yearly, one-shot, countdown and broadcast tasks
+* `Fix` FileProvider URI helpers in built applications using the template authority instead of the actual manifest authority
+
 # v1.2.14
 
 ###### 2026/10/19
@@ -248,12 +256,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/19
 
 * `Feature` Host event observers and notifications for Bun and Node.js Workers, with independent subscription and notification cleanup
-
-# v1.2.12
-
-###### 2026/10/19
-
-* `Feature` Host Shell streaming, Shizuku authorization and process cleanup for Bun, Node.js and Workers
 
 ##### For more release history
 

@@ -5,6 +5,16 @@
   "changelog_label_improvement": "Mejora",
   "changelog_label_dependency": "Dependencia",
   "$data": {
+    "v1.2.15": {
+      "released_date": "2026/10/19",
+      "feature": [
+        "Objetos Android para Node.js, Bun y Workers, con Paint, ColorStateList, colores del tema y URI FileProvider",
+        "API persistentes de calendario e IntentTask para Node.js y Bun, con tareas diarias, semanales, mensuales, anuales, únicas, de cuenta atrás y de difusión"
+      ],
+      "fix": [
+        "URI FileProvider de aplicaciones generadas que usaban la autoridad de la plantilla en lugar de la del manifiesto real"
+      ]
+    },
     "v1.2.14": {
       "released_date": "2026/10/19",
       "feature": [

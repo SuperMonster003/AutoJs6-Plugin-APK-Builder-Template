@@ -237,6 +237,14 @@ ROADMAP.md では正式なプラグイン管理ビルド, 候補, ABI 別配布,
 
 ******
 
+# v1.2.15
+
+###### 2026/10/19
+
+* `機能` Node.js, Bun と Worker の Android オブジェクトヘルパー, Paint, ColorStateList, テーマ色と FileProvider URI
+* `機能` Node.js と Bun の永続的なカレンダーと IntentTask API, 毎日, 毎週, 毎月, 毎年, 単発, カウントダウンとブロードキャストのタスク
+* `修正` ビルドしたアプリの FileProvider URI が実際のマニフェストではなくテンプレートの authority を使用する問題
+
 # v1.2.14
 
 ###### 2026/10/19
@@ -248,12 +256,6 @@ ROADMAP.md では正式なプラグイン管理ビルド, 候補, ABI 別配布,
 ###### 2026/10/19
 
 * `機能` Bun と Node.js Worker のホストイベントと通知 API, 独立した購読と通知の解放
-
-# v1.2.12
-
-###### 2026/10/19
-
-* `機能` Bun, Node.js と Worker のホスト Shell API, ストリーム入出力, Shizuku 許可とプロセス解放
 
 ##### さらに詳しいリリース履歴
 
