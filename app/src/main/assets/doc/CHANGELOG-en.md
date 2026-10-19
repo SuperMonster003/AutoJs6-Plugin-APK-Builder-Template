@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.13
+
+###### 2026/10/19
+
+* `Feature` Host event observers and notifications for Bun and Node.js Workers, with independent subscription and notification cleanup
+
 # v1.2.12
 
 ###### 2026/10/19

@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.13
+
+###### 2026/10/19
+
+* `Feature` Host event observers and notifications for Bun and Node.js Workers, with independent subscription and notification cleanup
+
 # v1.2.12
 
 ###### 2026/10/19
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/19
 
 * `Feature` Sensor sampling and subscriptions for Bun and Node.js Workers with cancellation and automatic listener cleanup
-
-# v1.2.10
-
-###### 2026/10/19
-
-* `Feature` Host database/sqlite APIs for Bun and Node.js Workers with parameterized queries, transactions and persistence
 
 ##### For more release history
 
