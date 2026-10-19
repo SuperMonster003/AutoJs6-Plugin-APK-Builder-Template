@@ -5,6 +5,12 @@
   "changelog_label_improvement": "Улучшение",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v1.2.9": {
+      "released_date": "2026/10/19",
+      "feature": [
+        "API файлов и постоянного хранилища Bun с отдельными разрешениями и общим хранилищем Node.js"
+      ]
+    },
     "v1.2.8": {
       "released_date": "2026/10/19",
       "feature": [

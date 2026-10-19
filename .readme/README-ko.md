@@ -237,6 +237,12 @@ ROADMAP.md 에서 정식 플러그인 관리 빌드, 후보, ABI 별 배포, 호
 
 ******
 
+# v1.2.9
+
+###### 2026/10/19
+
+* `기능` Bun 파일 및 영구 저장소 API, 별도의 호스트 파일 권한과 Node.js 저장소 공유 지원
+
 # v1.2.8
 
 ###### 2026/10/19
@@ -248,13 +254,6 @@ ROADMAP.md 에서 정식 플러그인 관리 빌드, 후보, ABI 별 배포, 호
 ###### 2026/10/18
 
 * `기능` Node.js/Bun WebView 화면 공유 어댑터, 포그라운드 서비스 녹음 및 네이티브 백그라운드 카메라 녹화, Node Worker 지원
-
-# v1.2.6
-
-###### 2026/10/18
-
-* `기능` WebView getUserMedia/MediaRecorder 오디오 및 비디오 스트리밍, 페이지 Promise 대기, 명시적 Android 미디어 권한 요청 및 Worker 수명 주기 관리
-* `수정` 패키지 앱에서 RECORD_AUDIO 선택 시 MODIFY_AUDIO_SETTINGS 권한을 유지하여 WebView 마이크 캡처 지원
 
 ##### 더 많은 릴리스 기록
 

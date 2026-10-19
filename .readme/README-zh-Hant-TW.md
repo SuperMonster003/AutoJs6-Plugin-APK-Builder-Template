@@ -237,6 +237,12 @@ ROADMAP.md 以可核查清單追蹤正式外掛託管建置, 發布候選, 分 A
 
 ******
 
+# v1.2.9
+
+###### 2026/10/19
+
+* `新增` Bun 檔案與持久化儲存 API, 支援獨立授權的宿主檔案讀寫及 Node.js 儲存互通
+
 # v1.2.8
 
 ###### 2026/10/19
@@ -248,13 +254,6 @@ ROADMAP.md 以可核查清單追蹤正式外掛託管建置, 發布候選, 分 A
 ###### 2026/10/18
 
 * `新增` Node.js/Bun 的 WebView 螢幕共享適配, 前景服務背景錄音及原生背景攝影機錄影, 包括 Node Worker 封裝
-
-# v1.2.6
-
-###### 2026/10/18
-
-* `新增` WebView getUserMedia/MediaRecorder 串流音訊與影片, 支援等待網頁 Promise, 明確申請 Android 媒體權限及 Worker 生命週期管理
-* `修復` 打包應用程式選擇 RECORD_AUDIO 時保留配套的 MODIFY_AUDIO_SETTINGS 權限, 使 WebView 可擷取麥克風
 
 ##### 更多發行歷史可參閱
 

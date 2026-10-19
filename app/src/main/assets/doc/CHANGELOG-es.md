@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.9
+
+###### 2026/10/19
+
+* `Función` API de archivos y almacenamiento persistente de Bun, con permisos independientes y almacenamiento compartido con Node.js
+
 # v1.2.8
 
 ###### 2026/10/19

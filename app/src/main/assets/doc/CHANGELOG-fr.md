@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.9
+
+###### 2026/10/19
+
+* `Fonctionnalité` API Bun de fichiers et de stockage persistant, avec autorisations distinctes et stockage partagé avec Node.js
+
 # v1.2.8
 
 ###### 2026/10/19
