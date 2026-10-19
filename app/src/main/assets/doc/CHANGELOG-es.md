@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.10
+
+###### 2026/10/19
+
+* `Función` API database/sqlite del anfitrión para Bun y Workers de Node.js, con consultas parametrizadas, transacciones y persistencia
+
 # v1.2.9
 
 ###### 2026/10/19

@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.10
+
+###### 2026/10/19
+
+* `Feature` Host database/sqlite APIs for Bun and Node.js Workers with parameterized queries, transactions and persistence
+
 # v1.2.9
 
 ###### 2026/10/19
