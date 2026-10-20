@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.20
+
+###### 2026/10/21
+
+* `Improvement` Runtime Kit - Node.js/Bun/Worker: EPUB book reading, resource export, search and reader sessions with events
+
 # v1.2.19
 
 ###### 2026/10/20

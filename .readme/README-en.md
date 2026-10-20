@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.20
+
+###### 2026/10/21
+
+* `Improvement` Runtime Kit - Node.js/Bun/Worker: EPUB book reading, resource export, search and reader sessions with events
+
 # v1.2.19
 
 ###### 2026/10/20
@@ -248,13 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/20
 
 * `Feature` Text-to-speech APIs for Node.js, Bun and Workers, with engine and voice queries, speech, silence, audio file synthesis and task events
-
-# v1.2.17
-
-###### 2026/10/20
-
-* `Feature` Java callbacks, generated subclasses and JAR/DEX loading for Node.js, Bun and Workers, with Promise results, superclass calls and execution cleanup
-* `Fix` Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization
 
 ##### For more release history
 
