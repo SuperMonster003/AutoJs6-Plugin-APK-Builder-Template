@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.18
+
+###### 2026/10/20
+
+* `Función` API de síntesis de voz para Node.js, Bun y Workers con consultas de motores y voces, lectura, silencio, archivos de audio y eventos de tareas
+
 # v1.2.17
 
 ###### 2026/10/20
@@ -249,14 +255,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/10/20
 
 * `Función` Interoperabilidad Java/Android para Node.js, Bun y Workers, con constructores y miembros públicos, matrices, valores long exactos, sobrecargas explícitas y referencias Context
-
-# v1.2.15
-
-###### 2026/10/19
-
-* `Función` Objetos Android para Node.js, Bun y Workers, con Paint, ColorStateList, colores del tema y URI FileProvider
-* `Función` API persistentes de calendario e IntentTask para Node.js y Bun, con tareas diarias, semanales, mensuales, anuales, únicas, de cuenta atrás y de difusión
-* `Corrección` URI FileProvider de aplicaciones generadas que usaban la autoridad de la plantilla en lugar de la del manifiesto real
 
 ##### Para más historial
 
