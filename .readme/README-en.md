@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.25
+
+###### 2026/10/22
+
+* `Feature` AI text generation, streaming, model catalog and persistent sessions for Node.js, Bun and Workers, with cancellation and Android authorization for packaged apps
+
 # v1.2.24
 
 ###### 2026/10/21
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/21
 
 * `Improvement` Runtime Kit: Flow advanced clicks, scrolling, text entry, list collection and real event waits for Node.js, Bun and Workers, with subscription readiness, snapshot validation and cancellation
-
-# v1.2.22
-
-###### 2026/10/21
-
-* `Improvement` Runtime Kit: Flow asynchronous chains and condition/stability waits for Node.js, Bun and Workers, with branch cancellation, step retries and host UI snapshots
 
 ##### For more release history
 

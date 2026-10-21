@@ -237,6 +237,12 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 
 ******
 
+# v1.2.25
+
+###### 2026/10/22
+
+* `Fonctionnalité` Génération de texte IA, flux, catalogue de modèles et sessions persistantes pour Node.js, Bun et Workers, avec annulation et autorisation Android des applications générées
+
 # v1.2.24
 
 ###### 2026/10/21
@@ -248,12 +254,6 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 ###### 2026/10/21
 
 * `Amélioration` Runtime Kit: Clics avancés, défilement, saisie, collecte de listes et attente des événements réels Flow pour Node.js, Bun et Workers, avec préparation des abonnements, validation des instantanés et annulation
-
-# v1.2.22
-
-###### 2026/10/21
-
-* `Amélioration` Runtime Kit: Chaînes asynchrones flow et attentes de condition/stabilité pour Node.js, Bun et Workers, avec annulation des branches, reprise des étapes et instantanés de l'interface hôte
 
 ##### Pour plus d'historique
 
