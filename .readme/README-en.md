@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.21
+
+###### 2026/10/21
+
+* `Improvement` Packaged runtime: Mail account connections, message operations, attachments and mailbox watches, with cancellation and Worker cleanup
+
 # v1.2.20
 
 ###### 2026/10/21
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/20
 
 * `Feature` Speech recognition and model management APIs for Node.js, Bun and Workers, with WAV/PCM, dictation and wake sessions, model installation/import, synthesis and cancellation cleanup
-
-# v1.2.18
-
-###### 2026/10/20
-
-* `Feature` Text-to-speech APIs for Node.js, Bun and Workers, with engine and voice queries, speech, silence, audio file synthesis and task events
 
 ##### For more release history
 

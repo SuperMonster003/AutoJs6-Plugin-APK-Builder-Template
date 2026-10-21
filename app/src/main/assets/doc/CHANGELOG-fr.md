@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.21
+
+###### 2026/10/21
+
+* `Amélioration` Runtime des applications générées: Connexions aux comptes mail, messages, pièces jointes et surveillance des boîtes, avec annulation et nettoyage des Workers
+
 # v1.2.20
 
 ###### 2026/10/21

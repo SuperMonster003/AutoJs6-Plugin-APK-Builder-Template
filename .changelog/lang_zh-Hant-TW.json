@@ -5,6 +5,12 @@
   "changelog_label_improvement": "優化",
   "changelog_label_dependency": "相依性",
   "$data": {
+    "v1.2.21": {
+      "released_date": "2026/10/21",
+      "improvement": [
+        "封裝執行環境: 郵件帳戶連線, 郵件操作, 附件與信箱監聽, 支援取消及 Worker 結束清理"
+      ]
+    },
     "v1.2.20": {
       "released_date": "2026/10/21",
       "improvement": [

@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.21
+
+###### 2026/10/21
+
+* `Improvement` Packaged runtime: Mail account connections, message operations, attachments and mailbox watches, with cancellation and Worker cleanup
+
 # v1.2.20
 
 ###### 2026/10/21

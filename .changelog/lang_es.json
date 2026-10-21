@@ -5,6 +5,12 @@
   "changelog_label_improvement": "Mejora",
   "changelog_label_dependency": "Dependencia",
   "$data": {
+    "v1.2.21": {
+      "released_date": "2026/10/21",
+      "improvement": [
+        "Runtime de aplicaciones generadas: Conexiones de correo, mensajes, adjuntos y vigilancia de buzones, con cancelación y limpieza de Workers"
+      ]
+    },
     "v1.2.20": {
       "released_date": "2026/10/21",
       "improvement": [
