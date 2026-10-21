@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.24
+
+###### 2026/10/21
+
+* `Amélioration` Runtime Kit: Flow within/scope pour Node.js, Bun et les Workers, avec racines de recherche héritées, navigation par boussole, projections typées et surcharges press/swipe/gesture/gestures
+
 # v1.2.23
 
 ###### 2026/10/21

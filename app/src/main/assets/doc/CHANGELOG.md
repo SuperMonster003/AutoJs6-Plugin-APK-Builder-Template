@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.24
+
+###### 2026/10/21
+
+* `优化` Runtime Kit: Node.js, Bun 与 Worker 的 Flow within/scope 范围继承, 罗盘导航和结果投影, 以及 press/swipe/gesture/gestures 手势重载
+
 # v1.2.23
 
 ###### 2026/10/21

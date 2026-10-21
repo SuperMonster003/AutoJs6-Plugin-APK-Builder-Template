@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.24
+
+###### 2026/10/21
+
+* `優化` Runtime Kit: Node.js, Bun 與 Worker 的 Flow within/scope 範圍繼承, 羅盤導航和結果投影, 以及 press/swipe/gesture/gestures 手勢重載
+
 # v1.2.23
 
 ###### 2026/10/21

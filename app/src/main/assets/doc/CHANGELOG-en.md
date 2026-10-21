@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.24
+
+###### 2026/10/21
+
+* `Improvement` Runtime Kit: Flow within/scope with inherited search roots, compass navigation and typed result projections, plus press/swipe/gesture/gestures overloads for Node.js, Bun and Workers
+
 # v1.2.23
 
 ###### 2026/10/21
