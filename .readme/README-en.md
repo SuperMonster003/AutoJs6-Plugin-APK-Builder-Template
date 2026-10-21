@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.22
+
+###### 2026/10/21
+
+* `Improvement` Runtime Kit: Flow asynchronous chains and condition/stability waits for Node.js, Bun and Workers, with branch cancellation, step retries and host UI snapshots
+
 # v1.2.21
 
 ###### 2026/10/21
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/21
 
 * `Improvement` Runtime Kit - Node.js/Bun/Worker: EPUB book reading, resource export, search and reader sessions with events
-
-# v1.2.19
-
-###### 2026/10/20
-
-* `Feature` Speech recognition and model management APIs for Node.js, Bun and Workers, with WAV/PCM, dictation and wake sessions, model installation/import, synthesis and cancellation cleanup
 
 ##### For more release history
 

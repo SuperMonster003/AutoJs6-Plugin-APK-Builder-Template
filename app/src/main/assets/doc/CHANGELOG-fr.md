@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.22
+
+###### 2026/10/21
+
+* `Amélioration` Runtime Kit: Chaînes asynchrones flow et attentes de condition/stabilité pour Node.js, Bun et Workers, avec annulation des branches, reprise des étapes et instantanés de l'interface hôte
+
 # v1.2.21
 
 ###### 2026/10/21
