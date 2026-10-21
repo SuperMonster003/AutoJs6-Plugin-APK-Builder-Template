@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.23
+
+###### 2026/10/21
+
+* `Amélioration` Runtime Kit: Clics avancés, défilement, saisie, collecte de listes et attente des événements réels Flow pour Node.js, Bun et Workers, avec préparation des abonnements, validation des instantanés et annulation
+
 # v1.2.22
 
 ###### 2026/10/21

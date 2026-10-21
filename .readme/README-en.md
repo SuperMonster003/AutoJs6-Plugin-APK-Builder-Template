@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.23
+
+###### 2026/10/21
+
+* `Improvement` Runtime Kit: Flow advanced clicks, scrolling, text entry, list collection and real event waits for Node.js, Bun and Workers, with subscription readiness, snapshot validation and cancellation
+
 # v1.2.22
 
 ###### 2026/10/21
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/21
 
 * `Improvement` Packaged runtime: Mail account connections, message operations, attachments and mailbox watches, with cancellation and Worker cleanup
-
-# v1.2.20
-
-###### 2026/10/21
-
-* `Improvement` Runtime Kit - Node.js/Bun/Worker: EPUB book reading, resource export, search and reader sessions with events
 
 ##### For more release history
 

@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.23
+
+###### 2026/10/21
+
+* `Improvement` Runtime Kit: Flow advanced clicks, scrolling, text entry, list collection and real event waits for Node.js, Bun and Workers, with subscription readiness, snapshot validation and cancellation
+
 # v1.2.22
 
 ###### 2026/10/21

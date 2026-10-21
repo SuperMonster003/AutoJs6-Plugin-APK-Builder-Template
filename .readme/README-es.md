@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.23
+
+###### 2026/10/21
+
+* `Mejora` Runtime Kit: Clics avanzados, desplazamiento, entrada, recopilación de listas y espera de eventos reales de Flow para Node.js, Bun y Workers, con suscripciones listas, validación de instantáneas y cancelación
+
 # v1.2.22
 
 ###### 2026/10/21
@@ -248,12 +254,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/10/21
 
 * `Mejora` Runtime de aplicaciones generadas: Conexiones de correo, mensajes, adjuntos y vigilancia de buzones, con cancelación y limpieza de Workers
-
-# v1.2.20
-
-###### 2026/10/21
-
-* `Mejora` Runtime Kit - Node.js/Bun/Worker: Lectura de EPUB, exportación de recursos, búsqueda y sesiones del lector con eventos
 
 ##### Para más historial
 
