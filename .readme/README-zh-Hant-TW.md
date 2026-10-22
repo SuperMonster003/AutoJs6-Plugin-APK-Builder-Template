@@ -237,6 +237,12 @@ ROADMAP.md 以可核查清單追蹤正式外掛託管建置, 發布候選, 分 A
 
 ******
 
+# v1.2.26
+
+###### 2026/10/22
+
+* `新增` Runtime Kit (AutoJs6 6.8.0 / 5850): Node.js/Bun/Worker 的 ai.agent 任務控制與事件, 註冊指令碼上下文和結果回傳, 以及封裝應用程式的獨立授權
+
 # v1.2.25
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md 以可核查清單追蹤正式外掛託管建置, 發布候選, 分 A
 ###### 2026/10/21
 
 * `優化` Runtime Kit: Node.js, Bun 與 Worker 的 Flow within/scope 範圍繼承, 羅盤導覽和結果投影, 以及 press/swipe/gesture/gestures 手勢多載
-
-# v1.2.23
-
-###### 2026/10/21
-
-* `優化` Runtime Kit: Node.js, Bun 及 Worker 的 Flow 進階點擊, 捲動, 輸入, 清單擷取與真實事件等待, 支援監聽就緒, 快照驗證和取消
 
 ##### 更多發行歷史可參閱
 

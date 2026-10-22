@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.26
+
+###### 2026/10/22
+
+* `Feature` Runtime Kit (AutoJs6 6.8.0 / 5850): ai.agent task controls, events and registered-script context/results for Node.js, Bun and Workers, with explicit authorization for packaged applications
+
 # v1.2.25
 
 ###### 2026/10/22

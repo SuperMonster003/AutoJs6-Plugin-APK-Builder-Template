@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.26
+
+###### 2026/10/22
+
+* `Feature` Runtime Kit (AutoJs6 6.8.0 / 5850): ai.agent task controls, events and registered-script context/results for Node.js, Bun and Workers, with explicit authorization for packaged applications
+
 # v1.2.25
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/21
 
 * `Improvement` Runtime Kit: Flow within/scope with inherited search roots, compass navigation and typed result projections, plus press/swipe/gesture/gestures overloads for Node.js, Bun and Workers
-
-# v1.2.23
-
-###### 2026/10/21
-
-* `Improvement` Runtime Kit: Flow advanced clicks, scrolling, text entry, list collection and real event waits for Node.js, Bun and Workers, with subscription readiness, snapshot validation and cancellation
 
 ##### For more release history
 

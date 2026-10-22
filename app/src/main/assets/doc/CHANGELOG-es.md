@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.26
+
+###### 2026/10/22
+
+* `Función` Runtime Kit (AutoJs6 6.8.0 / 5850): Control de tareas ai.agent, eventos y contexto/resultados de scripts registrados para Node.js, Bun y Workers, con autorización explícita para las aplicaciones empaquetadas
+
 # v1.2.25
 
 ###### 2026/10/22

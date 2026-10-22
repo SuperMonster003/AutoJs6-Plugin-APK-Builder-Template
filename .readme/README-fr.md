@@ -237,6 +237,12 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 
 ******
 
+# v1.2.26
+
+###### 2026/10/22
+
+* `Fonctionnalité` Runtime Kit (AutoJs6 6.8.0 / 5850): Contrôle des tâches ai.agent, événements et contexte/résultats des scripts enregistrés pour Node.js, Bun et Workers, avec autorisation explicite des applications empaquetées
+
 # v1.2.25
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 ###### 2026/10/21
 
 * `Amélioration` Runtime Kit: Flow within/scope pour Node.js, Bun et les Workers, avec racines de recherche héritées, navigation par boussole, projections typées et surcharges press/swipe/gesture/gestures
-
-# v1.2.23
-
-###### 2026/10/21
-
-* `Amélioration` Runtime Kit: Clics avancés, défilement, saisie, collecte de listes et attente des événements réels Flow pour Node.js, Bun et Workers, avec préparation des abonnements, validation des instantanés et annulation
 
 ##### Pour plus d'historique
 

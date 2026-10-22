@@ -237,6 +237,12 @@ ROADMAP.md 에서 정식 플러그인 관리 빌드, 후보, ABI 별 배포, 호
 
 ******
 
+# v1.2.26
+
+###### 2026/10/22
+
+* `기능` Runtime Kit (AutoJs6 6.8.0 / 5850): Node.js/Bun/Worker의 ai.agent 작업 제어와 이벤트, 등록된 스크립트의 컨텍스트와 결과, 패키징된 앱의 명시적 승인
+
 # v1.2.25
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md 에서 정식 플러그인 관리 빌드, 후보, ABI 별 배포, 호
 ###### 2026/10/21
 
 * `개선` Runtime Kit: Node.js, Bun 및 Worker의 Flow within/scope 검색 범위 상속, 나침반 탐색 및 결과 투영과 press/swipe/gesture/gestures 오버로드
-
-# v1.2.23
-
-###### 2026/10/21
-
-* `개선` Runtime Kit: Node.js, Bun 및 Worker의 Flow 고급 클릭, 스크롤, 입력, 목록 수집 및 실제 이벤트 대기, 구독 준비, 스냅샷 검증 및 취소 지원
 
 ##### 더 많은 릴리스 기록
 

@@ -237,6 +237,12 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 
 ******
 
+# v1.2.26
+
+###### 2026/10/22
+
+* `新增` Runtime Kit (AutoJs6 6.8.0 / 5850): Node.js/Bun/Worker 的 ai.agent 任务控制与事件, 注册脚本上下文和结果回传, 以及打包应用的独立授权
+
 # v1.2.25
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 ###### 2026/10/21
 
 * `优化` Runtime Kit: Node.js, Bun 与 Worker 的 Flow within/scope 范围继承, 罗盘导航和结果投影, 以及 press/swipe/gesture/gestures 手势重载
-
-# v1.2.23
-
-###### 2026/10/21
-
-* `优化` Runtime Kit: Node.js, Bun 及 Worker 的 Flow 高级点击, 滚动, 输入, 列表采集与真实事件等待, 支持监听就绪, 快照校验和取消
 
 ##### 更多发行历史可参阅
 
