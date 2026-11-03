@@ -141,10 +141,14 @@ Runtime Kit; 插件工作流再以 `source_run_id` + `expected_source_sha` 绑�
 3. 依次构建五个相同 Android 版本的替代 APK, 分别签名、校验证书指纹并以 CRC32 命名。
 4. 为五个 APK 生成机器可读的 Release evidence manifest, 固定文件名, 大小, SHA-256, CRC32, 签名证书摘要,
    插件/宿主版本, 兼容区间, 五个 Runtime Kit ID 与协议版本; evidence 同时保留为 Actions artifact。
-5. 将五个 APK 与 evidence manifest 一起上传到宿主 tag 同名 Release。
-6. 持久化: 重置到远程分支 → 重跑一次同步脚本 (同一输入, 结果确定) → 对五个资产执行
-   `update_compat_matrix.py add` 并合并为同一矩阵条目的 `artifacts` → 一并提交 `version.properties` 与
+5. 持久化: 重置到远程分支 → 重跑一次同步脚本 (同一输入, 结果确定), 并核对 `HOST_VERSION_NAME`,
+   `HOST_VERSION_BUILD`, `PLUGIN_VERSION_NAME`, `PLUGIN_RELEASE_SEQ` 与构建时一致 → 对五个资产执行
+   `update_compat_matrix.py add` 并合并为同一矩阵条目的 `artifacts` → 一并提交并推送 `version.properties` 与
    `compat-matrix.json`。
+6. 在第 5 步的提交上创建宿主 tag 同名 Release (tag 已指向其他提交时强制移到该提交), 上传五个 APK 与 evidence
+   manifest, 再删除该 Release 中其他 `autojs6-apk-builder-template-*` 资产。官方插件索引从 tag 读取
+   `version.properties` 推算 versionCode, 所以 tag 必须包含同步后的字段 (6.8.0 首次发布时 tag 早于同步提交,
+   索引按旧的 `HOST_VERSION_BUILD` 算出了错误的 versionCode)。
 
 工作流通过 `concurrency` 组串行执行, 避免并发发布竞争序号。
 
@@ -160,8 +164,8 @@ Runtime Kit; 插件工作流再以 `source_run_id` + `expected_source_sha` 绑�
 
 ## 已知边界
 
-- 对同一宿主 tag 重跑工作流会产生新的序号与矩阵条目 (视为一次新发布); 旧 CRC 命名的资产会残留在 Release 中,
-  与既有行为一致, 矩阵解析始终指向最新条目。
+- 对同一宿主 tag 重跑工作流会产生新的序号与矩阵条目 (视为一次新发布), tag 移到新的同步提交, Release 中旧的
+  插件资产被删除; 矩阵里较早条目的 `apkUrl` 因此失效, 矩阵解析始终指向最新条目。
 - 代码路径、校验器、发布输入与离线区间测试已经打通, 但权威矩阵当前仍为空或为 `min = max` 的精确条目。
   只有相邻补丁宿主经过真实打包产物验证后, 才能发布首个 `min < max` 条目; 在此之前 M4-2/M6-6 的发布验收保持未完成。
 

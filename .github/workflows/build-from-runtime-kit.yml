@@ -514,51 +514,10 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/autojs6-release-signing.jks"
 
-      - name: Publish plugin release
-        if: ${{ steps.vars.outputs.candidate_only != 'true' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          tag="${{ steps.vars.outputs.tag }}"
-          release_version="${tag#v}"
-          release_version="${release_version#V}"
-          release_date="$(TZ=Asia/Shanghai date '+%Y/%m/%d')"
-          release_title="$release_version @ $release_date"
-
-          plugin_version="$(sed -n 's/^PLUGIN_VERSION_NAME=//p' version.properties | head -n 1)"
-          plugin_build="$(sed -n 's/^PLUGIN_VERSION_BUILD=//p' version.properties | head -n 1)"
-          plugin_seq="$(sed -n 's/^PLUGIN_RELEASE_SEQ=//p' version.properties | head -n 1)"
-          host_version="$(sed -n 's/^HOST_VERSION_NAME=//p' version.properties | head -n 1)"
-          host_code="$(sed -n 's/^HOST_VERSION_BUILD=//p' version.properties | head -n 1)"
-          plugin_version_code="$((host_code * 100 + plugin_seq))"
-          release_notes="$(cat <<EOF
-          APK Builder Template v$plugin_version built from AutoJs6 Runtime Kit $tag.
-
-          - Plugin: $plugin_version (build $plugin_build, Android versionCode $plugin_version_code)
-          - Paired host: AutoJs6 $host_version (versionCode $host_code)
-          - Assets: universal + arm64-v8a + armeabi-v7a + x86_64 + x86
-          - Remote build: experimental and disabled by default
-          - Evidence: $(basename "$RELEASE_EVIDENCE_FILE")
-
-          The APK includes the 10-language changelog and usage documentation.
-          EOF
-          )"
-
-          if gh release view "$tag" >/dev/null 2>&1; then
-            gh release edit "$tag" --title "$release_title" --notes "$release_notes"
-          else
-            gh release create "$tag" --title "$release_title" --notes "$release_notes"
-          fi
-          shopt -s nullglob
-          apks=("$PLUGIN_APK_DIR"/*.apk)
-          for apk in "${apks[@]}"; do
-            legacy_asset_name="$(basename "$apk" | sed -E 's/-[0-9a-f]{8}\.apk$/.apk/')"
-            gh release delete-asset "$tag" "$legacy_asset_name" --yes >/dev/null 2>&1 || true
-          done
-          gh release upload "$tag" "${apks[@]}" "$RELEASE_EVIDENCE_FILE" --clobber
-
+      # The release tag must point at the commit that carries the released version.properties and
+      # compat matrix, because the official plugin index reads the plugin identity from the tag.
       - name: Persist released plugin version and compat matrix
+        id: persist
         if: ${{ steps.vars.outputs.candidate_only != 'true' }}
         env:
           RELEASE_TAG: ${{ steps.vars.outputs.tag }}
@@ -567,10 +526,24 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
 
+          identity_keys=(HOST_VERSION_NAME HOST_VERSION_BUILD PLUGIN_VERSION_NAME PLUGIN_RELEASE_SEQ)
+          read_identity() {
+            for key in "${identity_keys[@]}"; do
+              printf '%s=%s\n' "$key" "$(sed -n "s/^$key=//p" version.properties | head -n 1)"
+            done
+          }
+          built_identity="$(read_identity)"
+
           git fetch --no-tags origin \
             "+refs/heads/$TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH"
           git reset --hard "origin/$TARGET_BRANCH"
           python3 scripts/sync_version_from_runtime_kit.py "$UNIVERSAL_RUNTIME_KIT_DIR"
+          persisted_identity="$(read_identity)"
+          if [ "$persisted_identity" != "$built_identity" ]; then
+            echo "The default branch moved to a different plugin identity while the APKs were built." >&2
+            printf 'Built:\n%s\nPersisted:\n%s\n' "$built_identity" "$persisted_identity" >&2
+            exit 1
+          fi
 
           released_at="${RELEASED_AT:?Release evidence timestamp was not recorded}"
           while IFS=$'\t' read -r variant slug kit_dir; do
@@ -613,21 +586,90 @@ jobs:
           git add version.properties compat-matrix.json
           if git diff --cached --quiet; then
             echo "version.properties and compat-matrix.json already match release $RELEASE_TAG."
-            exit 0
+          else
+            git diff --cached --check
+            git diff --cached -- version.properties compat-matrix.json
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: sync plugin version and compat matrix for $RELEASE_TAG"
+            git push origin "HEAD:$TARGET_BRANCH"
           fi
-
-          git diff --cached --check
-          git diff --cached -- version.properties compat-matrix.json
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: sync plugin version and compat matrix for $RELEASE_TAG"
-          git push origin "HEAD:$TARGET_BRANCH"
+          echo "release_commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
           echo "Persisted VERSION_BUILD=$version_build"
           echo "Persisted VERSION_NAME=$version_name"
           echo "Persisted PLUGIN_VERSION_NAME=$plugin_version"
           echo "Persisted PLUGIN_VERSION_BUILD=$plugin_build"
           echo "Persisted PLUGIN_RELEASE_SEQ=$plugin_seq"
+
+      - name: Publish plugin release
+        if: ${{ steps.vars.outputs.candidate_only != 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_COMMIT: ${{ steps.persist.outputs.release_commit }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_COMMIT" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "The persisted release commit was not recorded." >&2
+            exit 1
+          }
+          tag="${{ steps.vars.outputs.tag }}"
+          release_version="${tag#v}"
+          release_version="${release_version#V}"
+          release_date="$(TZ=Asia/Shanghai date '+%Y/%m/%d')"
+          release_title="$release_version @ $release_date"
+
+          plugin_version="$(sed -n 's/^PLUGIN_VERSION_NAME=//p' version.properties | head -n 1)"
+          plugin_build="$(sed -n 's/^PLUGIN_VERSION_BUILD=//p' version.properties | head -n 1)"
+          plugin_seq="$(sed -n 's/^PLUGIN_RELEASE_SEQ=//p' version.properties | head -n 1)"
+          host_version="$(sed -n 's/^HOST_VERSION_NAME=//p' version.properties | head -n 1)"
+          host_code="$(sed -n 's/^HOST_VERSION_BUILD=//p' version.properties | head -n 1)"
+          plugin_version_code="$((host_code * 100 + plugin_seq))"
+          release_notes="$(cat <<EOF
+          APK Builder Template v$plugin_version built from AutoJs6 Runtime Kit $tag.
+
+          - Plugin: $plugin_version (build $plugin_build, Android versionCode $plugin_version_code)
+          - Paired host: AutoJs6 $host_version (versionCode $host_code)
+          - Assets: universal + arm64-v8a + armeabi-v7a + x86_64 + x86
+          - Remote build: experimental and disabled by default
+          - Evidence: $(basename "$RELEASE_EVIDENCE_FILE")
+
+          The APK includes the 10-language changelog and usage documentation.
+          EOF
+          )"
+
+          # A rerun for the same host tag replaces the release, so the tag follows the new commit.
+          tagged_commit="$(git ls-remote origin "refs/tags/$tag^{}" | cut -f1)"
+          if [ -z "$tagged_commit" ]; then
+            tagged_commit="$(git ls-remote origin "refs/tags/$tag" | cut -f1)"
+          fi
+          if [ -n "$tagged_commit" ] && [ "$tagged_commit" != "$RELEASE_COMMIT" ]; then
+            echo "Moving tag $tag from $tagged_commit to $RELEASE_COMMIT."
+            git tag -f "$tag" "$RELEASE_COMMIT"
+            git push --force origin "refs/tags/$tag"
+          fi
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --title "$release_title" --notes "$release_notes"
+          else
+            gh release create "$tag" --target "$RELEASE_COMMIT" --title "$release_title" --notes "$release_notes"
+          fi
+          shopt -s nullglob
+          apks=("$PLUGIN_APK_DIR"/*.apk)
+          gh release upload "$tag" "${apks[@]}" "$RELEASE_EVIDENCE_FILE" --clobber
+
+          # Earlier uploads under the same tag (other CRC32 or versionCode) would otherwise stay
+          # next to the new files and no longer match the tagged source.
+          uploaded_names="$(for file in "${apks[@]}" "$RELEASE_EVIDENCE_FILE"; do basename "$file"; done)"
+          while IFS= read -r asset_name; do
+            case "$asset_name" in
+              autojs6-apk-builder-template-*) ;;
+              *) continue ;;
+            esac
+            if ! grep -Fxq -- "$asset_name" <<< "$uploaded_names"; then
+              echo "Removing stale release asset $asset_name."
+              gh release delete-asset "$tag" "$asset_name" --yes
+            fi
+          done < <(gh release view "$tag" --json assets --jq '.assets[].name')
 
       - name: Record candidate-only result
         if: ${{ steps.vars.outputs.candidate_only == 'true' }}
