@@ -211,7 +211,7 @@
   - 验收: 五个资产齐全, `SIGNING_CERT_SHA256` 证书指纹校验通过, 逐个记录文件名, 大小, SHA-256, 签名证书摘要, 插件版本, 宿主范围, Runtime Kit ID 与协议版本。
   - 发布前接线: `scripts/create_release_evidence.py` 将上述字段绑定为机器可读 JSON, 同时保留为 Actions artifact 并随五个 APK 上传到同名 Release; 三类失败关闭回归覆盖五变体完整性, CRC32 文件名与版本/Runtime Kit 身份一致性。
   - 本地发布预演: 2026/09/01 从宿主 `71e684b8d` 生成 AutoJs6 `6.8.0 / 5277` 的五套 Runtime Kit, 在隔离工作树实际构建五个 `527701 / 1.0.0+autojs6-6.8.0` Release APK; Runtime Kit 集合校验, APK 资产校验, `aapt` 版本复核, CRC32 文件名和五资产 evidence JSON 生成均通过。该轮为未签名结构预演, 不代替本条所需的受信签名证据。
-  - 隔离签名候选: 宿主候选运行 [33492382374](https://github.com/SuperMonster003/AutoJs6-Private/actions/runs/33492382374) 从精确源 `71e684b8d` 产出五套 Runtime Kit; 插件运行 [33493666040](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33493666040) 以生产证书签名五个 APK, 并通过 `apksigner`, `aapt`, CRC32, 内嵌资产与 evidence 复核。两侧只保留 14 天 Actions artifact, 未创建 Release/tag, 未改 `version.properties` 或 `compat-matrix.json`。由于装机验收失败, 这些资产是**被拒绝的候选证据**, 不计作本条正式资产。
+  - 隔离签名候选: 宿主候选运行 33492382374 (AutoJs6-Private, 该仓库已于 2026-11-03 删除, 运行记录随之失效) 从精确源 `71e684b8d` 产出五套 Runtime Kit; 插件运行 [33493666040](https://github.com/SuperMonster003/AutoJs6-Plugin-APK-Builder-Template/actions/runs/33493666040) 以生产证书签名五个 APK, 并通过 `apksigner`, `aapt`, CRC32, 内嵌资产与 evidence 复核。两侧只保留 14 天 Actions artifact, 未创建 Release/tag, 未改 `version.properties` 或 `compat-matrix.json`。由于装机验收失败, 这些资产是**被拒绝的候选证据**, 不计作本条正式资产。
 - [ ] [P] **M7-5 首条兼容矩阵记录**
   - 内容: 由流水线把首个条目写入 `compat-matrix.json` (当前 `entries` 为空), 含五个 ABI `artifacts` 与顶层 `apk*` 投影。
   - 验收: `scripts/update_compat_matrix.py resolve --abi <各架构>` 对配对 hostVersionCode 均能确定性解析到该版本, 缺失架构正确回退 universal; 旧 tag 通道并存不受影响。
