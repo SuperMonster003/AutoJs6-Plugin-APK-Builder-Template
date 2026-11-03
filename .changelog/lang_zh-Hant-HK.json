@@ -5,6 +5,12 @@
   "changelog_label_improvement": "優化",
   "changelog_label_dependency": "依賴",
   "$data": {
+    "v1.2.27": {
+      "released_date": "2026/11/03",
+      "fix": [
+        "各 ABI 版本插件套件的清單 meta-data SUPPORTED_ABIS 均聲明為 universal 的問題, 現按內置 Runtime Kit 聲明實際支援的 ABI"
+      ]
+    },
     "v1.2.26": {
       "released_date": "2026/10/22",
       "feature": [

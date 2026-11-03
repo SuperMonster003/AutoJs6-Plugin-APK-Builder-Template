@@ -103,6 +103,24 @@ val runtimeKitVariantSlug = runtimeKitVariantName.map { variantName ->
     slug
 }
 
+@Suppress("UNCHECKED_CAST")
+fun readRuntimeKitSupportedAbis(candidate: File): List<String> {
+    val metadataFile = resolveRuntimeKitRoot(candidate).resolve("runtime-kit.json")
+    val metadata = metadataFile.takeIf { it.isFile }?.let { JsonSlurper().parse(it) as? Map<String, Any?> }
+    val declared = (metadata?.let { readMetadataPath(it, "template.supportedAbis") } as? List<*>)
+        ?.map { it?.toString()?.trim().orEmpty() }
+    if (declared != null) return declared
+    // Without a kit (source-only checks) or with a legacy kit, the variant is inrt-universal.
+    val rules = JsonSlurper().parse(runtimeKitValidationRules) as Map<String, Any?>
+    return ((rules["templateVariant"] as? Map<String, Any?>)?.get("allowedAbis") as? List<*>)
+        ?.map { it.toString() }
+        .orEmpty()
+}
+
+// The ABI split lives in the embedded template, so the manifest meta-data read by the host and
+// the official index must declare the kit's ABIs; nativeAlignment would write "universal" here.
+nativeAlignment.supportedAbis.set(providers.provider { readRuntimeKitSupportedAbis(runtimeKitSourceDir).toSet() })
+
 android {
     namespace = "org.autojs.plugin.apkbuilder.template.impl"
     compileSdk = versions.sdkVersionCompile

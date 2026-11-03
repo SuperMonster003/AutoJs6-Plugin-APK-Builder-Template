@@ -237,6 +237,12 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 
 ******
 
+# v1.2.27
+
+###### 2026/11/03
+
+* `修复` 各 ABI 版本插件包的清单 meta-data SUPPORTED_ABIS 均声明为 universal 的问题, 现按内置 Runtime Kit 声明实际支持的 ABI
+
 # v1.2.26
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md 以可核查清单跟踪正式插件托管构建, 发布候选, 分 A
 ###### 2026/10/22
 
 * `新增` Node.js, Bun 和 Worker 的 AI 文本生成, 流式结果, 模型目录与持久会话, 支持取消及 3-Stone AI 对打包应用的逐应用授权
-
-# v1.2.24
-
-###### 2026/10/21
-
-* `优化` Runtime Kit: Node.js, Bun 与 Worker 的 Flow within/scope 范围继承, 罗盘导航和结果投影, 以及 press/swipe/gesture/gestures 手势重载
 
 ##### 更多发行历史可参阅
 

@@ -5,6 +5,12 @@
   "changelog_label_improvement": "Улучшение",
   "changelog_label_dependency": "Зависимость",
   "$data": {
+    "v1.2.27": {
+      "released_date": "2026/11/03",
+      "fix": [
+        "Пакеты плагина для отдельных ABI объявляли universal в meta-data манифеста SUPPORTED_ABIS; теперь объявляются ABI, поддерживаемые встроенным Runtime Kit"
+      ]
+    },
     "v1.2.26": {
       "released_date": "2026/10/22",
       "feature": [

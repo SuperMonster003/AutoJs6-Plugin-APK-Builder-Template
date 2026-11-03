@@ -237,6 +237,12 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 
 ******
 
+# v1.2.27
+
+###### 2026/11/03
+
+* `Corrección` Cada paquete del plugin específico de una ABI declaraba universal en la meta-data de manifiesto SUPPORTED_ABIS; ahora declara las ABI compatibles con su Runtime Kit integrado
+
 # v1.2.26
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md sigue como lista verificable la compilación formal gestionada por el
 ###### 2026/10/22
 
 * `Función` Generación de texto con IA, transmisión, catálogo de modelos y sesiones persistentes para Node.js, Bun y Workers, con cancelación y consentimiento por aplicación en 3-Stone AI
-
-# v1.2.24
-
-###### 2026/10/21
-
-* `Mejora` Runtime Kit: Flow within/scope para Node.js, Bun y Workers, con raíces de búsqueda heredadas, navegación por brújula, proyecciones tipadas y sobrecargas press/swipe/gesture/gestures
 
 ##### Para más historial
 

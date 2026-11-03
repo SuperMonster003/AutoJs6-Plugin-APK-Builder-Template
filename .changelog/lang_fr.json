@@ -5,6 +5,12 @@
   "changelog_label_improvement": "Amélioration",
   "changelog_label_dependency": "Dépendance",
   "$data": {
+    "v1.2.27": {
+      "released_date": "2026/11/03",
+      "fix": [
+        "Chaque paquet de plugin propre à une ABI déclarait universal dans la meta-data de manifeste SUPPORTED_ABIS ; il déclare désormais les ABI prises en charge par son Runtime Kit intégré"
+      ]
+    },
     "v1.2.26": {
       "released_date": "2026/10/22",
       "feature": [

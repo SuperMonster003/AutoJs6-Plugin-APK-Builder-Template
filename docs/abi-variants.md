@@ -62,8 +62,13 @@ autojs6-apk-builder-template-v<plugin>-autojs6-v<host>-<abi-or-universal>-<crc32
 1. 下载所有 Runtime Kit ZIP, 分别执行内容校验, 再执行完整集合校验。
 2. 只以 universal Kit 推进一次插件构建号与宿主内发布序号。
 3. 依次用五个 Kit 构建插件; 五个 APK 共享同一 Android 版本, 分别签名、核对证书指纹并追加 CRC32 文件名。
-4. 将五个 APK 一起上传到宿主 tag 同名 Release。
-5. 对同一个 `pluginVersionCode` 重复执行矩阵 `add`; 脚本把五项合并到一个条目的 `artifacts` 数组中。
+4. 对同一个 `pluginVersionCode` 重复执行矩阵 `add`; 脚本把五项合并到一个条目的 `artifacts` 数组中, 与同步后的
+   `version.properties` 一起提交。
+5. 在该提交上创建宿主 tag 同名 Release, 上传五个 APK, 并移除同一 Release 中其他插件资产。
+
+每个 APK 的清单 meta-data `org.autojs.plugin.contract.SUPPORTED_ABIS` 取自所用 Kit 的 `template.supportedAbis`
+(universal 为四种 ABI, 单 ABI 变体为对应的一种)。插件自身不含原生库, nativeAlignment 默认会写入 `universal`,
+宿主插件中心与官方插件索引都读取这个值, 所以构建脚本显式设置 `nativeAlignment.supportedAbis`。
 
 `compat-matrix.json` 保持 schemaVersion 1。每个 artifact 记录 `variant`, `supportedAbis`, `apkName`, `apkUrl`,
 `apkSha256` 与 `apkSizeBytes`; 条目顶层的旧 `apk*` 字段继续投影 universal 资产, 因此旧矩阵消费者无需立即升级。

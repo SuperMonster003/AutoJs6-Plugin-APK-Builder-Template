@@ -237,6 +237,12 @@ ROADMAP.md では正式なプラグイン管理ビルド, 候補, ABI 別配布,
 
 ******
 
+# v1.2.27
+
+###### 2026/11/03
+
+* `修正` ABI 別のプラグインパッケージがマニフェストの meta-data SUPPORTED_ABIS ですべて universal を宣言していた問題, 内蔵の Runtime Kit が対応する ABI を宣言するよう変更
+
 # v1.2.26
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md では正式なプラグイン管理ビルド, 候補, ABI 別配布,
 ###### 2026/10/22
 
 * `機能` Node.js, Bun と Worker の AI テキスト生成, ストリーミング, モデル一覧と永続セッション, キャンセルと 3-Stone AI によるパッケージアプリごとの許可に対応
-
-# v1.2.24
-
-###### 2026/10/21
-
-* `改善` Runtime Kit: Node.js, Bun と Worker の Flow within/scope による検索範囲の継承, コンパス移動と結果の射影, および press/swipe/gesture/gestures のオーバーロード
 
 ##### さらに詳しいリリース履歴
 

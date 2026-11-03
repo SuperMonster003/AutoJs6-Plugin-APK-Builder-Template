@@ -237,6 +237,12 @@ ROADMAP.md 에서 정식 플러그인 관리 빌드, 후보, ABI 별 배포, 호
 
 ******
 
+# v1.2.27
+
+###### 2026/11/03
+
+* `수정` ABI별 플러그인 패키지가 매니페스트 meta-data SUPPORTED_ABIS에 모두 universal을 선언하던 문제, 이제 내장 Runtime Kit가 지원하는 ABI를 선언
+
 # v1.2.26
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md 에서 정식 플러그인 관리 빌드, 후보, ABI 별 배포, 호
 ###### 2026/10/22
 
 * `기능` Node.js, Bun 및 Worker의 AI 텍스트 생성, 스트리밍, 모델 목록 및 영구 세션, 취소와 3-Stone AI의 패키지 앱별 접근 승인 지원
-
-# v1.2.24
-
-###### 2026/10/21
-
-* `개선` Runtime Kit: Node.js, Bun 및 Worker의 Flow within/scope 검색 범위 상속, 나침반 탐색 및 결과 투영과 press/swipe/gesture/gestures 오버로드
 
 ##### 더 많은 릴리스 기록
 

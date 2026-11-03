@@ -237,6 +237,12 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 
 ******
 
+# v1.2.27
+
+###### 2026/11/03
+
+* `Correctif` Chaque paquet de plugin propre à une ABI déclarait universal dans la meta-data de manifeste SUPPORTED_ABIS ; il déclare désormais les ABI prises en charge par son Runtime Kit intégré
+
 # v1.2.26
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md suit sous forme de liste vérifiable le build formel géré par le pl
 ###### 2026/10/22
 
 * `Fonctionnalité` Génération de texte IA, flux, catalogue de modèles et sessions persistantes pour Node.js, Bun et Workers, avec annulation et consentement par application dans 3-Stone AI
-
-# v1.2.24
-
-###### 2026/10/21
-
-* `Amélioration` Runtime Kit: Flow within/scope pour Node.js, Bun et les Workers, avec racines de recherche héritées, navigation par boussole, projections typées et surcharges press/swipe/gesture/gestures
 
 ##### Pour plus d'historique
 

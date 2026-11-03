@@ -5,6 +5,12 @@
   "changelog_label_improvement": "تحسين",
   "changelog_label_dependency": "تبعية",
   "$data": {
+    "v1.2.27": {
+      "released_date": "2026/11/03",
+      "fix": [
+        "كانت حزم الإضافة الخاصة بكل ABI تعلن universal في بيانات البيان الوصفية SUPPORTED_ABIS; أصبحت تعلن الآن واجهات ABI التي يدعمها Runtime Kit المضمن"
+      ]
+    },
     "v1.2.26": {
       "released_date": "2026/10/22",
       "feature": [

@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.27
+
+###### 2026/11/03
+
+* `修復` 各 ABI 版本插件套件的清單 meta-data SUPPORTED_ABIS 均聲明為 universal 的問題, 現按內置 Runtime Kit 聲明實際支援的 ABI
+
 # v1.2.26
 
 ###### 2026/10/22

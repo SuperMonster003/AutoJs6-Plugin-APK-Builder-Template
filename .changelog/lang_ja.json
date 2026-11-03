@@ -5,6 +5,12 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v1.2.27": {
+      "released_date": "2026/11/03",
+      "fix": [
+        "ABI 別のプラグインパッケージがマニフェストの meta-data SUPPORTED_ABIS ですべて universal を宣言していた問題, 内蔵の Runtime Kit が対応する ABI を宣言するよう変更"
+      ]
+    },
     "v1.2.26": {
       "released_date": "2026/10/22",
       "feature": [

@@ -237,6 +237,12 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 
 ******
 
+# v1.2.27
+
+###### 2026/11/03
+
+* `Fix` Each ABI-specific plugin package declared universal in its SUPPORTED_ABIS manifest meta-data; it now declares the ABIs supported by its embedded Runtime Kit
+
 # v1.2.26
 
 ###### 2026/10/22
@@ -248,12 +254,6 @@ ROADMAP.md tracks the formal plugin-managed build path, release candidates, per-
 ###### 2026/10/22
 
 * `Feature` AI text generation, streaming, model catalog and persistent sessions for Node.js, Bun and Workers, with cancellation and per-app consent in 3-Stone AI for packaged apps
-
-# v1.2.24
-
-###### 2026/10/21
-
-* `Improvement` Runtime Kit: Flow within/scope with inherited search roots, compass navigation and typed result projections, plus press/swipe/gesture/gestures overloads for Node.js, Bun and Workers
 
 ##### For more release history
 

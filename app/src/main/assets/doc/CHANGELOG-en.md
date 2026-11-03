@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.27
+
+###### 2026/11/03
+
+* `Fix` Each ABI-specific plugin package declared universal in its SUPPORTED_ABIS manifest meta-data; it now declares the ABIs supported by its embedded Runtime Kit
+
 # v1.2.26
 
 ###### 2026/10/22

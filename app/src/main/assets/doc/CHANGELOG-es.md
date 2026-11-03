@@ -4,6 +4,12 @@
 
 ******
 
+# v1.2.27
+
+###### 2026/11/03
+
+* `Corrección` Cada paquete del plugin específico de una ABI declaraba universal en la meta-data de manifiesto SUPPORTED_ABIS; ahora declara las ABI compatibles con su Runtime Kit integrado
+
 # v1.2.26
 
 ###### 2026/10/22
