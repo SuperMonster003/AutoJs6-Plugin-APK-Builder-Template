@@ -49,7 +49,7 @@
   "h4_reference_local_build": "البناء المحلي",
   "p_local_build_runtime_kit": "أنشئ Runtime Kit من مستودع AutoJs6 الرئيسي أولا",
   "p_local_build_with_runtime_kit": "ثم ابن هذا المستودع مع تحديد دليل Runtime Kit الناتج",
-  "p_local_build_with_unpacked_kit": "يمكنك أيضا فك ضغط `autojs6-runtime-kit-*.zip` منشور إلى `runtime-kit/` ثم البناء مباشرة",
+  "p_local_build_with_unpacked_kit": "يمكنك أيضا تنزيل `autojs6-runtime-kit-*.zip` من [AutoJs6-Runtime-Kits Releases]({{ runtime_kits_repo_url }}/releases) وفك ضغطه إلى `runtime-kit/` ثم البناء مباشرة",
   "h4_reference_release_flow": "مسار الإصدار",
   "p_release_flow_intro": "مسار إصدار الإنتاج المتوقع هو",
   "h4_reference_signing": "التوقيع",

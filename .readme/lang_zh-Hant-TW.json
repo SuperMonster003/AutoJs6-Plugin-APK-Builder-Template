@@ -49,7 +49,7 @@
   "h4_reference_local_build": "本機建置",
   "p_local_build_runtime_kit": "先在 AutoJs6 主儲存庫產生 Runtime Kit",
   "p_local_build_with_runtime_kit": "再在本儲存庫指定 Runtime Kit 目錄建置外掛",
-  "p_local_build_with_unpacked_kit": "也可以將發布的 `autojs6-runtime-kit-*.zip` 解壓縮到 `runtime-kit/`, 然後直接建置",
+  "p_local_build_with_unpacked_kit": "也可以從 [AutoJs6-Runtime-Kits Releases]({{ runtime_kits_repo_url }}/releases) 下載 `autojs6-runtime-kit-*.zip`, 解壓縮到 `runtime-kit/`, 然後直接建置",
   "h4_reference_release_flow": "發布流程",
   "p_release_flow_intro": "正式發布流程如下",
   "h4_reference_signing": "簽章",

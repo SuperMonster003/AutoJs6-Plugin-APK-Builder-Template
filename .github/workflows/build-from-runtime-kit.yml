@@ -13,6 +13,10 @@ on:
         description: AutoJs6 source repository
         required: false
         default: SuperMonster003/AutoJs6
+      runtime_kit_repo:
+        description: Repository whose Release with the same tag stores the Runtime Kit archives
+        required: false
+        default: SuperMonster003/AutoJs6-Runtime-Kits
       source_run_id:
         description: AutoJs6 Actions run ID containing the Runtime Kit candidate artifact
         required: false
@@ -31,6 +35,10 @@ on:
 
 permissions:
   contents: write
+
+env:
+  # AutoJs6 Releases carry only the host APKs. Runtime Kit archives live in the same-tag Release of this repository.
+  DEFAULT_RUNTIME_KIT_REPO: SuperMonster003/AutoJs6-Runtime-Kits
 
 # Releases are serialized: PLUGIN_RELEASE_SEQ / compat-matrix.json advance per run
 # and must not race between concurrent workflow runs.
@@ -60,12 +68,14 @@ jobs:
         env:
           DISPATCH_TAG: ${{ github.event.client_payload.tag }}
           DISPATCH_SOURCE_REPO: ${{ github.event.client_payload.source_repo }}
+          DISPATCH_RUNTIME_KIT_REPO: ${{ github.event.client_payload.runtime_kit_repo }}
           DISPATCH_SOURCE_RUN_ID: ${{ github.event.client_payload.source_run_id }}
           DISPATCH_EXPECTED_SOURCE_SHA: ${{ github.event.client_payload.expected_source_sha }}
           DISPATCH_SOURCE_ARTIFACT: ${{ github.event.client_payload.source_artifact }}
           DISPATCH_CANDIDATE_ONLY: ${{ github.event.client_payload.candidate_only }}
           INPUT_TAG: ${{ inputs.tag }}
           INPUT_SOURCE_REPO: ${{ inputs.source_repo }}
+          INPUT_RUNTIME_KIT_REPO: ${{ inputs.runtime_kit_repo }}
           INPUT_SOURCE_RUN_ID: ${{ inputs.source_run_id }}
           INPUT_EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
           INPUT_SOURCE_ARTIFACT: ${{ inputs.source_artifact }}
@@ -75,6 +85,8 @@ jobs:
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
             tag="$DISPATCH_TAG"
             source_repo="$DISPATCH_SOURCE_REPO"
+            # Hosts released before the move dispatch no runtime_kit_repo.
+            runtime_kit_repo="${DISPATCH_RUNTIME_KIT_REPO:-$DEFAULT_RUNTIME_KIT_REPO}"
             source_run_id="$DISPATCH_SOURCE_RUN_ID"
             expected_source_sha="$DISPATCH_EXPECTED_SOURCE_SHA"
             source_artifact="${DISPATCH_SOURCE_ARTIFACT:-autojs6-runtime-kit}"
@@ -82,6 +94,7 @@ jobs:
           else
             tag="$INPUT_TAG"
             source_repo="$INPUT_SOURCE_REPO"
+            runtime_kit_repo="${INPUT_RUNTIME_KIT_REPO:-$DEFAULT_RUNTIME_KIT_REPO}"
             source_run_id="$INPUT_SOURCE_RUN_ID"
             expected_source_sha="$INPUT_EXPECTED_SOURCE_SHA"
             source_artifact="${INPUT_SOURCE_ARTIFACT:-autojs6-runtime-kit}"
@@ -94,6 +107,10 @@ jobs:
           esac
           [[ "$source_repo" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || {
             echo "Invalid source repository identity." >&2
+            exit 1
+          }
+          [[ "$runtime_kit_repo" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || {
+            echo "Invalid Runtime Kit repository identity." >&2
             exit 1
           }
           [[ "$source_artifact" =~ ^[A-Za-z0-9_.-]+$ ]] || {
@@ -112,6 +129,7 @@ jobs:
           {
             echo "tag=$tag"
             echo "source_repo=$source_repo"
+            echo "runtime_kit_repo=$runtime_kit_repo"
             echo "source_run_id=$source_run_id"
             echo "expected_source_sha=$expected_source_sha"
             echo "source_artifact=$source_artifact"
@@ -150,7 +168,7 @@ jobs:
               exit 1
             }
             test -z "$SOURCE_RUN_ID" || {
-              echo "Formal publication must download Runtime Kits from a GitHub Release." >&2
+              echo "Formal publication must download Runtime Kits from the Runtime Kit repository Release." >&2
               exit 1
             }
             test -z "$EXPECTED_SOURCE_SHA" || {
@@ -162,45 +180,12 @@ jobs:
       - name: Download Runtime Kit
         env:
           GH_TOKEN: ${{ secrets.AUTOJS6_MAIN_REPO_TOKEN || github.token }}
+          RUNTIME_KIT_REPO: ${{ steps.vars.outputs.runtime_kit_repo }}
           SOURCE_ARTIFACT: ${{ steps.vars.outputs.source_artifact }}
           SOURCE_REPO: ${{ steps.vars.outputs.source_repo }}
           SOURCE_RUN_ID: ${{ steps.vars.outputs.source_run_id }}
           SOURCE_TAG: ${{ steps.vars.outputs.tag }}
-        run: |
-          set -euo pipefail
-          shopt -s nullglob
-
-          archive_dir="$RUNNER_TEMP/autojs6-runtime-kit-download"
-          runtime_kits_dir="$RUNNER_TEMP/autojs6-runtime-kits"
-          rm -rf "$archive_dir" "$runtime_kits_dir"
-          mkdir -p "$archive_dir" "$runtime_kits_dir"
-
-          if [ -n "$SOURCE_RUN_ID" ]; then
-            gh run download "$SOURCE_RUN_ID" \
-              --repo "$SOURCE_REPO" \
-              --name "$SOURCE_ARTIFACT" \
-              --dir "$archive_dir"
-          else
-            gh release download "$SOURCE_TAG" \
-              --repo "$SOURCE_REPO" \
-              --pattern "autojs6-runtime-kit-*.zip" \
-              --dir "$archive_dir"
-          fi
-
-          archives=("$archive_dir"/autojs6-runtime-kit-*.zip)
-          if [ "${#archives[@]}" -eq 0 ]; then
-            echo "No Runtime Kit archives were downloaded." >&2
-            exit 1
-          fi
-
-          for archive in "${archives[@]}"; do
-            archive_name="$(basename "${archive%.zip}")"
-            target_dir="$runtime_kits_dir/$archive_name"
-            mkdir -p "$target_dir"
-            unzip -q "$archive" -d "$target_dir"
-          done
-          rm -rf "$archive_dir"
-          echo "RUNTIME_KITS_DIR=$runtime_kits_dir" >> "$GITHUB_ENV"
+        run: bash .github/scripts/download-runtime-kits.sh
 
       - name: Verify Runtime Kit variant set
         env:
@@ -452,6 +437,7 @@ jobs:
       - name: Create release evidence manifest
         env:
           CANDIDATE_ONLY: ${{ steps.vars.outputs.candidate_only }}
+          RUNTIME_KIT_REPO: ${{ steps.vars.outputs.runtime_kit_repo }}
           SIGNING_CERT_SHA256: ${{ secrets.SIGNING_CERT_SHA256 }}
           SOURCE_REPO: ${{ steps.vars.outputs.source_repo }}
           SOURCE_RUN_ID: ${{ steps.vars.outputs.source_run_id }}
@@ -485,6 +471,8 @@ jobs:
               --candidate-only
               --source-workflow-run-url "https://github.com/$SOURCE_REPO/actions/runs/$SOURCE_RUN_ID"
             )
+          else
+            evidence_args+=(--runtime-kit-repository "$RUNTIME_KIT_REPO")
           fi
           python3 scripts/create_release_evidence.py "${evidence_args[@]}"
 

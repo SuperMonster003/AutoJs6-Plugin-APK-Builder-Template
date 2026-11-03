@@ -24,6 +24,7 @@ from update_compat_matrix import (
 SCHEMA_VERSION = 1
 SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
 CRC32_SUFFIX_PATTERN = re.compile(r"-([0-9a-f]{8})\.apk$")
+REPOSITORY_PATTERN = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
 
 
 def normalize_sha256(value: str) -> str:
@@ -120,6 +121,7 @@ def build_release_evidence(
     candidate_only: bool = False,
     workflow_run_url: str = "",
     source_workflow_run_url: str = "",
+    runtime_kit_repository: str = "",
 ) -> dict:
     manifest = json.loads(runtime_kits_manifest.read_text("utf-8"))
     if int(manifest.get("schemaVersion") or 0) != SCHEMA_VERSION:
@@ -164,6 +166,16 @@ def build_release_evidence(
         )
     if candidate_only and (not normalized_workflow_run_url or not normalized_source_workflow_run_url):
         raise SystemExit("Candidate evidence requires plugin and source Actions run URLs")
+    runtime_kit_repository = runtime_kit_repository.strip()
+    if runtime_kit_repository and REPOSITORY_PATTERN.fullmatch(runtime_kit_repository) is None:
+        raise SystemExit("runtime_kit_repository must be an owner/name repository identity")
+    if candidate_only and runtime_kit_repository:
+        raise SystemExit("Candidate evidence reads Runtime Kits from Actions, not from a Runtime Kit repository")
+    runtime_kit_release_url = (
+        f"https://github.com/{runtime_kit_repository}/releases/tag/{source_tag}"
+        if runtime_kit_repository
+        else None
+    )
 
     baseline_identity = None
     runtime_kits = []
@@ -260,6 +272,7 @@ def build_release_evidence(
             "tag": source_tag,
             "gitSha": baseline_identity["hostGitSha"],
             "channel": "actions-artifact" if candidate_only else "github-release",
+            "runtimeKitReleaseUrl": runtime_kit_release_url,
             "workflowRunUrl": normalized_source_workflow_run_url or None,
         },
         "plugin": {
@@ -308,6 +321,7 @@ def main() -> None:
     parser.add_argument("--candidate-only", action="store_true")
     parser.add_argument("--workflow-run-url", default="")
     parser.add_argument("--source-workflow-run-url", default="")
+    parser.add_argument("--runtime-kit-repository", default="")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -324,6 +338,7 @@ def main() -> None:
         candidate_only=args.candidate_only,
         workflow_run_url=args.workflow_run_url,
         source_workflow_run_url=args.source_workflow_run_url,
+        runtime_kit_repository=args.runtime_kit_repository,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", "utf-8")

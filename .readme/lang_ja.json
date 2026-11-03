@@ -49,7 +49,7 @@
   "h4_reference_local_build": "ローカルビルド",
   "p_local_build_runtime_kit": "まず AutoJs6 メインリポジトリで Runtime Kit を生成します",
   "p_local_build_with_runtime_kit": "次に生成済み Runtime Kit ディレクトリを指定してこのリポジトリをビルドします",
-  "p_local_build_with_unpacked_kit": "公開済みの `autojs6-runtime-kit-*.zip` を `runtime-kit/` に展開して直接ビルドすることもできます",
+  "p_local_build_with_unpacked_kit": "[AutoJs6-Runtime-Kits Releases]({{ runtime_kits_repo_url }}/releases) から `autojs6-runtime-kit-*.zip` をダウンロードし, `runtime-kit/` に展開して直接ビルドすることもできます",
   "h4_reference_release_flow": "リリースフロー",
   "p_release_flow_intro": "想定される本番リリースフローは次のとおりです",
   "h4_reference_signing": "署名",

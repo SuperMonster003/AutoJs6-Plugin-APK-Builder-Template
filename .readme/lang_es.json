@@ -49,7 +49,7 @@
   "h4_reference_local_build": "Compilación Local",
   "p_local_build_runtime_kit": "Primero genera un Runtime Kit desde el repositorio principal de AutoJs6",
   "p_local_build_with_runtime_kit": "Luego compila este repositorio con el directorio Runtime Kit generado",
-  "p_local_build_with_unpacked_kit": "También puedes extraer un `autojs6-runtime-kit-*.zip` publicado en `runtime-kit/` y compilar directamente",
+  "p_local_build_with_unpacked_kit": "También puedes descargar un `autojs6-runtime-kit-*.zip` de [AutoJs6-Runtime-Kits Releases]({{ runtime_kits_repo_url }}/releases), extraerlo en `runtime-kit/` y compilar directamente",
   "h4_reference_release_flow": "Flujo De Publicación",
   "p_release_flow_intro": "El flujo de publicación de producción esperado es",
   "h4_reference_signing": "Firma",

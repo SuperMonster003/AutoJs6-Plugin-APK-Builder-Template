@@ -135,7 +135,8 @@ Runtime Kit; 插件工作流再以 `source_run_id` + `expected_source_sha` 绑�
 同时绑定两端 Actions run URL 的 candidate evidence。候选模式不会创建 Release, 不会写入 `compat-matrix.json`, 也不会
 持久化同步后的版本字段; evidence 中 Release/APK URL 为 `null`, 分发通道明确为 `actions-artifact`。
 
-1. 下载 universal + 四个单 ABI Runtime Kit; 分别校验内容, 再校验五变体集合齐全且宿主 / API 契约一致。
+1. 从 `SuperMonster003/AutoJs6-Runtime-Kits` 的宿主同名 Release 下载 universal + 四个单 ABI Runtime Kit
+   (`runtime_kit_repo`, 见下文 "Runtime Kit 存放位置"); 分别校验内容, 再校验五变体集合齐全且宿主 / API 契约一致.
 2. 只以 universal Kit 运行一次 `sync_version_from_runtime_kit.py`: 同步 `HOST_*` 配对字段, 准备下一提交的
    `VERSION_BUILD` / `PLUGIN_VERSION_BUILD`, 推进 `PLUGIN_RELEASE_SEQ` (不触碰插件 SemVer)。
 3. 依次构建五个相同 Android 版本的替代 APK, 分别签名、校验证书指纹并以 CRC32 命名。
@@ -151,6 +152,21 @@ Runtime Kit; 插件工作流再以 `source_run_id` + `expected_source_sha` 绑�
    索引按旧的 `HOST_VERSION_BUILD` 算出了错误的 versionCode)。
 
 工作流通过 `concurrency` 组串行执行, 避免并发发布竞争序号。
+
+### Runtime Kit 存放位置 (2026-11-03 起)
+
+- 宿主 `release-runtime-kit.yml` 把五个 `autojs6-runtime-kit-*.zip` 上传到专用仓库
+  `SuperMonster003/AutoJs6-Runtime-Kits` 的宿主同名 Release, 宿主自己的 Release 只放宿主 APK
+  (此前 zip 与宿主 APK 并列, 用户常误下载). dispatch 的 `client_payload` 包含 `tag`, `source_repo`
+  (宿主仓库) 与 `runtime_kit_repo`; 缺少 `runtime_kit_repo` 时 (6.8.0 及更早 tag 上的宿主工作流) 按专用仓库处理.
+- 不能改放进任何 `AutoJs6-Plugin-*` 仓库: 官方插件索引生成器会把该仓库最新的 Release (含预发行) 当成插件版本.
+- 正式模式只从 `runtime_kit_repo` 的 Release 下载, 候选模式仍从宿主 Actions artifact 下载;
+  两条路径共用 `.github/scripts/download-runtime-kits.sh`. evidence 的 `source.repository` 仍是宿主仓库,
+  `source.runtimeKitReleaseUrl` 记录 Kit 的实际下载位置 (候选模式为 `null`).
+- 重跑正式发布前, 可先手动运行 `check-runtime-kit-source.yml` (只下载并校验 Kit 集合, 不构建, 不签名, 不发布).
+  宿主 v6.8.0 的 Kit 已从宿主 Release 迁到专用仓库 (SHA-256 一致) 并从宿主 Release 删除;
+  不要重跑宿主 v6.8.0 的 tag 工作流 (该 tag 上的旧工作流仍会向宿主 Release 上传 zip),
+  需要重发时直接手动运行 `build-from-runtime-kit.yml`.
 
 ## 迁移与兼容性影响
 

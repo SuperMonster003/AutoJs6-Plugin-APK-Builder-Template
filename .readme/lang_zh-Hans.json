@@ -49,7 +49,7 @@
   "h4_reference_local_build": "本地构建",
   "p_local_build_runtime_kit": "先在 AutoJs6 主仓库生成 Runtime Kit",
   "p_local_build_with_runtime_kit": "再在本仓库指定 Runtime Kit 目录构建插件",
-  "p_local_build_with_unpacked_kit": "也可以把发布的 `autojs6-runtime-kit-*.zip` 解压到 `runtime-kit/`, 然后直接构建",
+  "p_local_build_with_unpacked_kit": "也可以从 [AutoJs6-Runtime-Kits Releases]({{ runtime_kits_repo_url }}/releases) 下载 `autojs6-runtime-kit-*.zip`, 解压到 `runtime-kit/`, 然后直接构建",
   "h4_reference_release_flow": "发布流程",
   "p_release_flow_intro": "生产发布流程如下",
   "h4_reference_signing": "签名",

@@ -59,7 +59,8 @@ autojs6-apk-builder-template-v<plugin>-autojs6-v<host>-<abi-or-universal>-<crc32
 
 `.github/workflows/build-from-runtime-kit.yml` 对一组 Runtime Kit 执行以下原子流程:
 
-1. 下载所有 Runtime Kit ZIP, 分别执行内容校验, 再执行完整集合校验。
+1. 从 `SuperMonster003/AutoJs6-Runtime-Kits` 的宿主同名 Release 下载所有 Runtime Kit ZIP (宿主 Release 不再附带,
+   见 `docs/versioning.md`), 分别执行内容校验, 再执行完整集合校验.
 2. 只以 universal Kit 推进一次插件构建号与宿主内发布序号。
 3. 依次用五个 Kit 构建插件; 五个 APK 共享同一 Android 版本, 分别签名、核对证书指纹并追加 CRC32 文件名。
 4. 对同一个 `pluginVersionCode` 重复执行矩阵 `add`; 脚本把五项合并到一个条目的 `artifacts` 数组中, 与同步后的

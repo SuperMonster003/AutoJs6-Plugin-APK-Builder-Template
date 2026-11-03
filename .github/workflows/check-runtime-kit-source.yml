@@ -1,0 +1,69 @@
+name: Check Runtime Kit Source
+
+# Downloads and verifies the Runtime Kit set that a formal build-from-runtime-kit.yml run would use,
+# without building, signing or publishing anything. Run it before rerunning a formal release.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: AutoJs6 release tag, for example v6.8.0
+        required: true
+      runtime_kit_repo:
+        description: Repository whose Release with the same tag stores the Runtime Kit archives
+        required: false
+        default: SuperMonster003/AutoJs6-Runtime-Kits
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout plugin repository
+        uses: actions/checkout@v7
+
+      - name: Validate inputs
+        env:
+          RUNTIME_KIT_REPO: ${{ inputs.runtime_kit_repo }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          case "$TAG" in
+            v[0-9A-Za-z._-]*) ;;
+            *) echo "Invalid source tag label: $TAG" >&2; exit 1 ;;
+          esac
+          [[ "$RUNTIME_KIT_REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || {
+            echo "Invalid Runtime Kit repository identity." >&2
+            exit 1
+          }
+
+      - name: Download Runtime Kit
+        env:
+          GH_TOKEN: ${{ secrets.AUTOJS6_MAIN_REPO_TOKEN || github.token }}
+          RUNTIME_KIT_REPO: ${{ inputs.runtime_kit_repo }}
+          SOURCE_TAG: ${{ inputs.tag }}
+        run: bash .github/scripts/download-runtime-kits.sh
+
+      - name: Verify Runtime Kit variant set
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          kit_dirs=("$RUNTIME_KITS_DIR"/*)
+          for kit_dir in "${kit_dirs[@]}"; do
+            python3 scripts/verify_runtime_kit.py "$kit_dir"
+          done
+          manifest="$RUNNER_TEMP/autojs6-runtime-kit-variants.json"
+          python3 scripts/verify_runtime_kit_set.py "$RUNTIME_KITS_DIR" --output "$manifest"
+          python3 - "$manifest" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          import sys
+
+          manifest = json.load(open(sys.argv[1], encoding="utf-8"))
+          host = manifest.get("host") or {}
+          print("## Runtime Kit source")
+          print()
+          print(f"- Host: {host.get('versionName')} ({host.get('versionCode')}) at `{host.get('gitSha')}`")
+          print(f"- Variants: {', '.join(item['variant'] for item in manifest['variants'])}")
+          PY

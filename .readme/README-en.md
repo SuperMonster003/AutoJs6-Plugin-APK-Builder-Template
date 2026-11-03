@@ -178,7 +178,7 @@ Then build this repository with the generated Runtime Kit directory:
   -Pautojs.apkBuilder.templatePlugin.runtimeKitDir=<runtime-kit-dir>
 ```
 
-You can also unpack a released `autojs6-runtime-kit-*.zip` to `runtime-kit/` and build directly:
+You can also download a `autojs6-runtime-kit-*.zip` from [AutoJs6-Runtime-Kits Releases](https://github.com/SuperMonster003/AutoJs6-Runtime-Kits/releases), unpack it to `runtime-kit/` and build directly:
 
 ```powershell
 .\gradlew.bat --console=plain :app:assembleRelease
@@ -191,7 +191,7 @@ The expected production release flow is:
 ```text
 AutoJs6 tag
 -> main repository generates autojs6-runtime-kit-*.zip
--> main repository uploads the Runtime Kit to its GitHub Release
+-> main repository uploads the Runtime Kit to the same tag Release of SuperMonster003/AutoJs6-Runtime-Kits
 -> main repository dispatches SuperMonster003/AutoJs6-Plugin-APK-Builder-Template
 -> this repository downloads and verifies the Runtime Kit
 -> this repository builds the plugin APK

@@ -178,7 +178,7 @@ Template:   org.autojs.autojs6.inrt
   -Pautojs.apkBuilder.templatePlugin.runtimeKitDir=<runtime-kit-dir>
 ```
 
-يمكنك أيضا فك ضغط `autojs6-runtime-kit-*.zip` منشور إلى `runtime-kit/` ثم البناء مباشرة:
+يمكنك أيضا تنزيل `autojs6-runtime-kit-*.zip` من [AutoJs6-Runtime-Kits Releases](https://github.com/SuperMonster003/AutoJs6-Runtime-Kits/releases) وفك ضغطه إلى `runtime-kit/` ثم البناء مباشرة:
 
 ```powershell
 .\gradlew.bat --console=plain :app:assembleRelease
@@ -191,7 +191,7 @@ Template:   org.autojs.autojs6.inrt
 ```text
 AutoJs6 tag
 -> main repository generates autojs6-runtime-kit-*.zip
--> main repository uploads the Runtime Kit to its GitHub Release
+-> main repository uploads the Runtime Kit to the same tag Release of SuperMonster003/AutoJs6-Runtime-Kits
 -> main repository dispatches SuperMonster003/AutoJs6-Plugin-APK-Builder-Template
 -> this repository downloads and verifies the Runtime Kit
 -> this repository builds the plugin APK

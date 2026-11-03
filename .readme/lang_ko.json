@@ -49,7 +49,7 @@
   "h4_reference_local_build": "로컬 빌드",
   "p_local_build_runtime_kit": "먼저 AutoJs6 메인 저장소에서 Runtime Kit 를 생성합니다",
   "p_local_build_with_runtime_kit": "그런 다음 생성된 Runtime Kit 디렉터리를 지정하여 이 저장소를 빌드합니다",
-  "p_local_build_with_unpacked_kit": "릴리스된 `autojs6-runtime-kit-*.zip` 을 `runtime-kit/` 에 풀고 바로 빌드할 수도 있습니다",
+  "p_local_build_with_unpacked_kit": "[AutoJs6-Runtime-Kits Releases]({{ runtime_kits_repo_url }}/releases) 에서 `autojs6-runtime-kit-*.zip` 을 내려받아 `runtime-kit/` 에 풀고 바로 빌드할 수도 있습니다",
   "h4_reference_release_flow": "릴리스 흐름",
   "p_release_flow_intro": "예상되는 프로덕션 릴리스 흐름은 다음과 같습니다",
   "h4_reference_signing": "서명",

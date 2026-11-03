@@ -49,7 +49,7 @@
   "h4_reference_local_build": "Локальная Сборка",
   "p_local_build_runtime_kit": "Сначала создайте Runtime Kit в основном репозитории AutoJs6",
   "p_local_build_with_runtime_kit": "Затем соберите этот репозиторий с указанием созданного каталога Runtime Kit",
-  "p_local_build_with_unpacked_kit": "Также можно распаковать опубликованный `autojs6-runtime-kit-*.zip` в `runtime-kit/` и собрать напрямую",
+  "p_local_build_with_unpacked_kit": "Также можно скачать `autojs6-runtime-kit-*.zip` из [AutoJs6-Runtime-Kits Releases]({{ runtime_kits_repo_url }}/releases), распаковать его в `runtime-kit/` и собрать напрямую",
   "h4_reference_release_flow": "Процесс Выпуска",
   "p_release_flow_intro": "Ожидаемый производственный процесс выпуска",
   "h4_reference_signing": "Подписание",

@@ -23,9 +23,11 @@ move a tag, update `compat-matrix.json`, or advance the tracked plugin release s
 ## Production CI Checks
 
 1. Run the AutoJs6 main repository `release-runtime-kit.yml` workflow with the production tag and `candidate_only=false`.
-2. Confirm the main repository Release contains exactly one Runtime Kit ZIP for each of `universal`, `arm64-v8a`,
-   `armeabi-v7a`, `x86_64`, and `x86`.
-3. Confirm `repository_dispatch` triggers this repository's `build-from-runtime-kit.yml`.
+2. Confirm the `SuperMonster003/AutoJs6-Runtime-Kits` Release with the production tag contains exactly one Runtime Kit
+   ZIP for each of `universal`, `arm64-v8a`, `armeabi-v7a`, `x86_64`, and `x86`, and that the main repository Release
+   contains no Runtime Kit ZIP.
+3. Confirm `repository_dispatch` (payload `tag`, `source_repo`, `runtime_kit_repo`) triggers this repository's
+   `build-from-runtime-kit.yml`.
 4. Confirm this repository Release contains five APKs named
    `autojs6-apk-builder-template-v<plugin>-autojs6-v<host>-<variant>-<crc32>.apk`, one per variant above. Confirm all five
    report the same packageName, signing certificate, versionName, and versionCode.
